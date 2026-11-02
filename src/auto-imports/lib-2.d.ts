@@ -37,6 +37,7 @@ declare global {
   const documentTextColors: typeof import('../lib/textColors').documentTextColors
   const downloadWebdavBackup: typeof import('../lib/webdavSync').downloadWebdavBackup
   const effectiveSingleTabMode: typeof import('../lib/tabMode').effectiveSingleTabMode
+  const encodeUnsupportedMarkdownForEditor: typeof import('../lib/markdown-raw-guard').encodeUnsupportedMarkdownForEditor
   const extractFrontmatter: typeof import('../lib/markdown-raw-guard').extractFrontmatter
   const findContainingLocalFolderNotebook: typeof import('../lib/openAssociatedMarkdown').findContainingLocalFolderNotebook
   const formatDualShortcut: typeof import('../lib/onboardingContent').formatDualShortcut

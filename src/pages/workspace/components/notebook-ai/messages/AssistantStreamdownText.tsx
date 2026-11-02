@@ -11,7 +11,9 @@ import { CanvasLoadingCard, SvgArtifactCard } from "../SvgArtifactCard";
 import { StreamingText } from "../beautiful-ui/StreamingText";
 import { MdInput, MdTable, MdThead, MdTr, MdTh, MdTd } from "./MarkdownTable";
 import { MdPre } from "./MarkdownCode";
+import { AssistantNoteCitationLink } from "./NoteCitationLink";
 const MD_COMPONENTS = {
+  a: AssistantNoteCitationLink,
   input: MdInput,
   table: MdTable,
   thead: MdThead,

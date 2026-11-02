@@ -3,6 +3,7 @@ import { Quote } from "@/components/ui/icons";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
 import { usePages } from "@/stores/usePages";
+import { locationForQuotedText } from "@/lib/notebook-ai/noteCitation";
 import { navigateNotebookAiReference } from "@/lib/notebook-ai/navigateReference";
 import type { AiSelectionQuoteAttrs } from "./selectionQuoteData";
 import "./selection-quote.css";
@@ -44,7 +45,7 @@ export function SelectionQuotePreview({ quote, onClose }: {
         <Button variant="outline" className="justify-self-start" disabled={!sourceExists}
           onClick={() => {
             if (!quote || !sourceExists) return;
-            navigateNotebookAiReference(quote.pageId, onOpenPage);
+            navigateNotebookAiReference(quote.pageId, onOpenPage, locationForQuotedText(usePages.getState().pages[quote.pageId], quote.text));
             onClose();
           }}>
           {sourceExists ? t("openSourceNote") : t("sourceNoteUnavailable")}

@@ -2,6 +2,7 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
+    "src/pages/workspace/components/ai-cards/ChecklistCard.tsx#messages:1": { "insert": {  } };
     "src/pages/workspace/components/ai-cards/ComparisonCard.tsx#messages:1": { "recommended": {  } };
     "src/pages/workspace/components/ai-cards/CountdownCard.tsx#messages:1": { "arrived": {  }; "days": {  }; "hours": {  }; "invalid": {  }; "minutes": {  }; "seconds": {  } };
     "src/pages/workspace/components/ai-cards/DefinitionCard.tsx#messages:1": { "copied": {  }; "copy": {  }; "examples": {  } };
@@ -25,6 +26,7 @@ declare module "../types" {
     "src/pages/workspace/components/command/splitPaletteActions.ts#localMessages:1": { "closePane": {  }; "maximizePane": {  }; "splitDown": {  }; "splitRight": {  }; "syncScroll": {  } };
     "src/pages/workspace/components/command/useCommandSearch.ts#localMessages:1": { "searchFailedTryDifferentKeywords": {  }; "untitled": {  } };
     "src/pages/workspace/components/command/useCommandSearchScope.ts#localMessages:1": { "couldnTReadTheSearchFolderClose": {  } };
+    "src/pages/workspace/components/command/useVersionedCommandSearchScope.ts#localMessages:1": { "catalogReadFailed": {  } };
     "src/pages/workspace/components/editor-host/EditorHostBridge.tsx#localMessages:1": { "noteNotFound": {  }; "thisNoteIsInTrash": {  } };
     "src/pages/workspace/components/editor-host/editorPageLinks.ts#localMessages:1": { "couldnTCreateThePageYourOriginal": {  }; "pageCreatedOpenItFromTheSidebar": {  }; "theFolderHasChangedChooseALocation": {  }; "thisNoteIsnTEditableNoPage": {  }; "thisNotebookDoesnTSupportCreatingLocal": {  } };
     "src/pages/workspace/components/editor-split/PaneSplitMenu.tsx#localMessages:1": { "openDown": {  }; "openRight": {  } };
@@ -120,8 +122,5 @@ declare module "../types" {
     "src/pages/workspace/components/page/titlebar/DesktopWindowNavigation.tsx#localMessages:1": { "back": {  }; "forward": {  }; "hideSidebar": {  }; "showSidebar": {  } };
     "src/pages/workspace/components/page/titlebar/PageFileTitle.tsx#localMessages:1": { "copyFilePath": { "name": string | number }; "copyPathFailed": {  }; "copyPathHint": {  }; "desktopUnavailable": {  }; "fileManager": {  }; "finder": {  }; "pathCopied": {  }; "revealFailed": { "app": string | number }; "revealHint": { "app": string | number } };
     "src/pages/workspace/components/page/titlebar/TitleBarAiToggle.tsx#localMessages:1": { "closeAi": {  }; "openAi": {  } };
-    "src/pages/workspace/components/page/titlebar/WindowAlwaysOnTopButton.tsx#localMessages:1": { "pinWindow": {  }; "unpinWindow": {  } };
-    "src/pages/workspace/components/search-sheet/SearchSheet.tsx#localMessages:1": { "allNotebooks": {  }; "askAi": {  }; "clearSearch": {  }; "currentNotebook": {  }; "enableAiAnswers": {  }; "hide": {  }; "loadMoreResults": {  }; "newLine": {  }; "noMatchingNotes": {  }; "noteCount": { "count": string | number }; "notes": {  }; "open": {  }; "recentlyOpened": {  }; "searchAllNotebooks": {  }; "searchCurrentNotebook": {  }; "searchNotes": {  }; "searchNotesOrAskAi": {  }; "searchResults": {  }; "searching": {  }; "select": {  }; "someNotebooksCouldnTBeRead": {  }; "splitOpen": {  }; "switchScope": {  }; "switchScopeHint": { "name": string | number }; "tryAgain": {  } };
-    "src/pages/workspace/components/search-sheet/SearchSheetAnswer.tsx#localMessages:1": { "backToResults": {  }; "continueInAiPanel": {  }; "jumpToLatest": {  }; "sources": {  } };
   }
 }

@@ -153,7 +153,7 @@ export function ToolProgressCard({
             <ExecutionTrace parts={parts} steps={steps} execution={execution}
               running={isRunning} label={traceLabel} thinkingLine={thinkingLine} outputChars={(answerText?.length ?? 0) + (thinkingText?.length ?? 0)} statusLabel={stepStatusLabel} />
           ) : null}
-          <ExecutionSources parts={parts} execution={execution} />
+          <ExecutionSources parts={parts} execution={execution} answerText={answerText} />
           {children ? (
             <div
               className={cn(

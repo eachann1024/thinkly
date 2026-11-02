@@ -1,3 +1,4 @@
+import { readNoteLocation } from "./noteCitationLocation";
 import type { NotebookAiExecutionSource } from "./types";
 
 export function readExecutionSource(type: string, value: unknown, toolCallId?: string): NotebookAiExecutionSource | undefined {
@@ -7,7 +8,7 @@ export function readExecutionSource(type: string, value: unknown, toolCallId?: s
   if (type === "tool-readPage") {
     if (typeof output.pageId !== "string" || !output.pageId.trim()) return;
     const id = output.pageId.trim();
-    return { id, title: typeof output.title === "string" && output.title.trim() ? output.title.trim() : id, kind: "note", toolCallId };
+    return { id, title: typeof output.title === "string" && output.title.trim() ? output.title.trim() : id, kind: "note", location: readNoteLocation(output.location), toolCallId };
   }
   if (type !== "tool-readWebPage" || typeof output.url !== "string") return;
   try {

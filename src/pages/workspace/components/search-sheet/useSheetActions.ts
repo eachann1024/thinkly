@@ -8,6 +8,8 @@ import { usePages } from "@/stores/usePages";
 import type { Page } from "@/types";
 import { visibleSources, type SheetAnswer } from "./sheetAnswerState";
 import type { SheetAskScope } from "./useSheetAnswer";
+import type { NoteSource } from "./retrieveNotes";
+import { navigateNotebookAiReference } from "@/lib/notebook-ai/navigateReference";
 import { openSheetConversation, saveSheetConversation } from "./saveSheetConversation";
 
 type SheetActionsInput = {
@@ -25,7 +27,7 @@ type SheetActionsInput = {
   composingRef: MutableRefObject<boolean>;
   returnFocusRef: MutableRefObject<HTMLElement | null>;
   skipRestoreRef: MutableRefObject<boolean>;
-  onOpenResult?: (page: { id: string; localFilePath?: string }) => void;
+  onOpenResult?: (page: { id: string; localFilePath?: string; location?: NoteSource["location"] }) => void;
   onCommand?: (command: SearchWindowCommand) => void | Promise<boolean | void>;
 };
 
@@ -45,7 +47,7 @@ export function useSheetActions(input: SheetActionsInput) {
       void onCommand({
         type: "archive-ai", token: tokenFor(answer.requestId), notebookId: aiNotebookId,
         question: answer.question, text: answer.text,
-        sources: visibleSources(answer).map(({ index, source }) => ({ index, id: source.id, title: source.title })),
+        sources: visibleSources(answer).map(({ index, source }) => ({ index, id: source.id, title: source.title, location: source.location })),
       });
       return;
     }
@@ -70,7 +72,7 @@ export function useSheetActions(input: SheetActionsInput) {
     skipRestoreRef.current = true;
     if (onCommand) {
       const token = tokenFor(answer.requestId);
-      const sources = visibleSources(answer).map(({ index, source }) => ({ index, id: source.id, title: source.title }));
+      const sources = visibleSources(answer).map(({ index, source }) => ({ index, id: source.id, title: source.title, location: source.location }));
       if (answer.status !== "done") reasked.current = answer.requestId;
       void onCommand(answer.status === "done"
         ? { type: "continue-ai", token, notebookId: aiNotebookId, question: answer.question, text: answer.text, sources, ...(followUp ? { followUp } : {}) }
@@ -84,14 +86,18 @@ export function useSheetActions(input: SheetActionsInput) {
       openSheetConversation(aiNotebookId, saved.id);
     } else askNotebookAi({ notebookId: aiNotebookId, text: followUp ?? answer.question });
   } : undefined;
-  const openSource = (id: string) => {
+  const openSource = (source: Pick<NoteSource, "id" | "location">) => {
     returnFocusRef.current = null;
+    const { id, location } = source;
     if (onOpenResult) {
       const page = usePages.getState().pages[id];
-      onOpenResult({ id, ...(page?.localFilePath ? { localFilePath: page.localFilePath } : {}) });
+      onOpenResult({ id, location, ...(page?.localFilePath ? { localFilePath: page.localFilePath } : {}) });
       return;
     }
-    useSearchSession.getState().targetPage(id, true);
+    navigateNotebookAiReference(id, pageId => {
+      useSearchSession.getState().setQuery("");
+      useSearchSession.getState().targetPage(pageId, true);
+    }, location);
   };
   const openResult = useCallback((page: SearchResultPage) => {
     const latest = useSearchSession.getState();

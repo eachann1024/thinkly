@@ -63,7 +63,7 @@
 .search-sheet-answer-md { padding-left:1.625rem; font-size:.875rem; line-height:1.625; color:var(--goose-text-primary); }
 .search-sheet-answer-sources { display:flex; flex-wrap:wrap; align-items:center; gap:.375rem; padding-left:1rem; }
 .search-sheet-answer-sources .search-sheet-label { width:100%; height:1.5rem; }
-.search-sheet .search-sheet-source { display:inline-flex; align-items:center; gap:.375rem; max-width:16rem; height:1.75rem; min-height:0; padding:0 .625rem; border:1px solid hsl(var(--border)); border-radius:var(--goose-control-radius); font-size:.8125rem; color:var(--goose-text-primary); }
+.search-sheet .search-sheet-source { display:inline-flex; align-items:center; gap:.375rem; max-width:16rem; height:1.75rem; min-height:0; padding:0 .625rem; border:1px solid hsl(var(--border)); border-radius:var(--goose-control-radius); font-size:.875rem; color:var(--goose-text-primary); }
 .search-sheet .search-sheet-source:hover { background:var(--goose-interactive-hover); }
 .search-sheet-source svg { flex:none; color:var(--goose-text-secondary); }
 .search-sheet-source-index { flex:none; font-size:.75rem; color:var(--goose-text-secondary); }

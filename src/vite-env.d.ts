@@ -147,13 +147,13 @@ declare global {
     getWindowContext: () => Promise<{ windowId: string; kind: "workspace" | "quicknote" | "search" }>
     hideSearchWindow: () => Promise<void>
     searchWindowReady: () => Promise<void>
-    openSearchResult: (payload: { pageId: string; query: string; localFilePath?: string }) => Promise<boolean>
+    openSearchResult: (payload: import("./lib/electron/searchWindow").OpenSearchResultPayload) => Promise<boolean>
     searchWindowCommand: (command: SearchWindowCommand) => Promise<boolean>
     pullWorkspaceAISettings: () => Promise<SearchAISettingsSnapshot | null>
     publishWorkspaceAISettings: (settings: SearchAISettingsSnapshot | null) => void
     onWorkspaceAISettings: (cb: (settings: SearchAISettingsSnapshot) => void) => () => void
     onSearchWindowShown: (cb: () => void) => () => void
-    onOpenSearchResult: (cb: (payload: { pageId: string; query: string; localFilePath?: string }) => void) => () => void
+    onOpenSearchResult: (cb: (payload: import("./lib/electron/searchWindow").OpenSearchResultPayload) => void) => () => void
     onSearchWindowCommand: (cb: (command: SearchWindowCommand) => void) => () => void
     createWindow: (opts: {
       mode: "blank" | "currentTab"

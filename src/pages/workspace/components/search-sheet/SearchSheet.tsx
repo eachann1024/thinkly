@@ -116,7 +116,7 @@ import "./search-sheet.css";
 type SearchSheetProps = {
   aiNotebookId: string | null;
   variant?: "sheet" | "window";
-  onOpenResult?: (page: { id: string; localFilePath?: string }) => void;
+  onOpenResult?: (page: { id: string; localFilePath?: string; location?: import("./retrieveNotes").NoteSource["location"] }) => void;
   onCommand?: (command: SearchWindowCommand) => void;
   onClose?: () => void;
   folderSource?: SearchFolderSource;

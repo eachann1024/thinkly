@@ -117,11 +117,12 @@ export function SearchWindowApp() {
     void getGooseDesktop()?.hideSearchWindow?.();
   }, []);
 
-  const openResult = useCallback((page: { id: string; localFilePath?: string }) => {
+  const openResult = useCallback((page: { id: string; localFilePath?: string; location?: import("@/lib/notebook-ai/noteCitationLocation").NoteBlockLocation }) => {
     const { query } = useSearchSession.getState();
     void getGooseDesktop()?.openSearchResult?.({
       pageId: page.id,
-      query,
+      query: page.location ? "" : query,
+      location: page.location,
       ...(page.localFilePath ? { localFilePath: page.localFilePath } : {}),
     });
   }, []);
