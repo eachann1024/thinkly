@@ -18,7 +18,13 @@ ja:
 const uiText = createTranslator(localMessages);
 import { ListRow } from "@/components/ui/list-row";
 import { OutlineArt, StateArtBackdrop } from "@/components/ui/dot-matrix";
-import { useCallback, useState, type CSSProperties } from "react";
+import {
+  memo,
+  useCallback,
+  useMemo,
+  useState,
+  type CSSProperties,
+} from "react";
 import { cn } from "@/lib/utils";
 import { MainTreeRowShell } from "../sidebar/main-tree/MainTreeRowShell";
 import {
@@ -29,6 +35,8 @@ import { useSidebarItemHeight } from "../sidebar/hooks/useSidebarItemHeight";
 import type { HeadingItem } from "./useHeadings";
 import { OutlineHeadingMarker } from "./OutlineHeadingMarker";
 import "./outline.css";
+
+const EMPTY_ACTIVE_PATH: readonly string[] = [];
 
 interface OutlinePanelProps {
   headings: HeadingItem[];
@@ -49,6 +57,20 @@ export function OutlinePanel({
 }: OutlinePanelProps) {
   useLocale();
   const itemHeight = useSidebarItemHeight();
+  const headingPaths = useMemo(() => {
+    const paths = new Map<string, readonly string[]>();
+    const visit = (items: HeadingItem[], ancestors: readonly string[]) => {
+      for (const heading of items) {
+        const path = [...ancestors, heading.id];
+        paths.set(heading.id, path);
+        visit(heading.children, path);
+      }
+    };
+    visit(headings, EMPTY_ACTIVE_PATH);
+    return paths;
+  }, [headings]);
+  const activePath =
+    (activeId && headingPaths.get(activeId)) || EMPTY_ACTIVE_PATH;
   const [locallyCollapsedIds, setLocallyCollapsedIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -65,7 +87,9 @@ export function OutlinePanel({
   if (headings.length === 0) {
     return (
       <section className="outline-panel" aria-label={uiText("documentOutline")}>
-        <div className="sidebar-search-heading"><strong>{uiText("documentOutline")}</strong></div>
+        <div className="sidebar-search-heading">
+          <strong>{uiText("documentOutline")}</strong>
+        </div>
         <div className="outline-empty" role="status">
           {showBackdrop ? <StateArtBackdrop kind="outline" /> : null}
           <OutlineArt className="outline-empty-art" />
@@ -78,7 +102,9 @@ export function OutlinePanel({
 
   return (
     <section className="outline-panel" aria-label={uiText("documentOutline")}>
-      <div className="sidebar-search-heading"><strong>{uiText("documentOutline")}</strong></div>
+      <div className="sidebar-search-heading">
+        <strong>{uiText("documentOutline")}</strong>
+      </div>
       <div className="outline-body">
         <nav>
           {headings.map((heading) => (
@@ -86,7 +112,9 @@ export function OutlinePanel({
               key={heading.id}
               heading={heading}
               depth={0}
-              activeId={activeId}
+              activePath={
+                activePath.includes(heading.id) ? activePath : EMPTY_ACTIVE_PATH
+              }
               itemHeight={itemHeight}
               locallyCollapsedIds={locallyCollapsedIds}
               onHeadingClick={onHeadingClick}
@@ -99,10 +127,10 @@ export function OutlinePanel({
   );
 }
 
-function OutlineTreeNode({
+const OutlineTreeNode = memo(function OutlineTreeBranch({
   heading,
   depth,
-  activeId,
+  activePath,
   itemHeight,
   locallyCollapsedIds,
   onHeadingClick,
@@ -110,55 +138,24 @@ function OutlineTreeNode({
 }: {
   heading: HeadingItem;
   depth: number;
-  activeId: string | null;
+  activePath: readonly string[];
   itemHeight: number;
   locallyCollapsedIds: Set<string>;
   onHeadingClick: (blockId: string) => void;
   onToggleLocalOutline: (blockId: string) => void;
 }) {
-  useLocale();
-  const isActive = activeId === heading.id;
-  const [hovered, setHovered] = useState(false);
-  const canToggleOutline = heading.children.length > 0;
   const isOutlineCollapsed = locallyCollapsedIds.has(heading.id);
-  const toggleOutline = () => onToggleLocalOutline(heading.id);
-
   return (
     <div>
-      <MainTreeRowShell
-        active={isActive}
-        hovered={!isActive && hovered}
-        className="outline-heading-row text-foreground"
-        style={
-          {
-            paddingLeft: depth * MAIN_TREE_INDENT + MAIN_TREE_ROW_PADDING_LEFT,
-            "--main-tree-row-height": `${itemHeight}px`,
-          } as CSSProperties
-        }
-        onPointerEnter={() => setHovered(true)}
-        onPointerLeave={() => setHovered(false)}
-      >
-        <OutlineHeadingMarker
-          level={heading.level}
-          expandable={canToggleOutline}
-          expanded={!isOutlineCollapsed}
-          onToggle={toggleOutline}
-        />
-        <ListRow
-          data-goose-row-hover="managed"
-          type="button"
-          onClick={() => onHeadingClick(heading.id)}
-          aria-current={isActive ? "location" : undefined}
-          aria-label={
-            uiText("heading", {level: heading.level, text: heading.text})
-          }
-          className={cn(
-            "outline-heading relative z-10 min-w-0 flex-1 truncate text-left leading-snug",
-          )}
-        >
-          <span className="block truncate">{heading.text}</span>
-        </ListRow>
-      </MainTreeRowShell>
+      <OutlineHeadingRow
+        heading={heading}
+        depth={depth}
+        isActive={activePath.at(-1) === heading.id}
+        itemHeight={itemHeight}
+        isOutlineCollapsed={isOutlineCollapsed}
+        onHeadingClick={onHeadingClick}
+        onToggleLocalOutline={onToggleLocalOutline}
+      />
       {heading.children.length > 0 && !isOutlineCollapsed ? (
         <div>
           {heading.children.map((child) => (
@@ -166,7 +163,9 @@ function OutlineTreeNode({
               key={child.id}
               heading={child}
               depth={depth + 1}
-              activeId={activeId}
+              activePath={
+                activePath.includes(child.id) ? activePath : EMPTY_ACTIVE_PATH
+              }
               itemHeight={itemHeight}
               locallyCollapsedIds={locallyCollapsedIds}
               onHeadingClick={onHeadingClick}
@@ -177,4 +176,62 @@ function OutlineTreeNode({
       ) : null}
     </div>
   );
-}
+});
+
+const OutlineHeadingRow = memo(function OutlineHeadingRow({
+  heading,
+  depth,
+  isActive,
+  itemHeight,
+  isOutlineCollapsed,
+  onHeadingClick,
+  onToggleLocalOutline,
+}: {
+  heading: HeadingItem;
+  depth: number;
+  isActive: boolean;
+  itemHeight: number;
+  isOutlineCollapsed: boolean;
+  onHeadingClick: (blockId: string) => void;
+  onToggleLocalOutline: (blockId: string) => void;
+}) {
+  useLocale();
+  const [hovered, setHovered] = useState(false);
+  return (
+    <MainTreeRowShell
+      active={isActive}
+      hovered={!isActive && hovered}
+      className="outline-heading-row text-foreground"
+      style={
+        {
+          paddingLeft: depth * MAIN_TREE_INDENT + MAIN_TREE_ROW_PADDING_LEFT,
+          "--main-tree-row-height": `${itemHeight}px`,
+        } as CSSProperties
+      }
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
+    >
+      <OutlineHeadingMarker
+        level={heading.level}
+        expandable={heading.children.length > 0}
+        expanded={!isOutlineCollapsed}
+        onToggle={() => onToggleLocalOutline(heading.id)}
+      />
+      <ListRow
+        data-goose-row-hover="managed"
+        type="button"
+        onClick={() => onHeadingClick(heading.id)}
+        aria-current={isActive ? "location" : undefined}
+        aria-label={uiText("heading", {
+          level: heading.level,
+          text: heading.text,
+        })}
+        className={cn(
+          "outline-heading relative z-10 min-w-0 flex-1 truncate text-left leading-snug",
+        )}
+      >
+        <span className="block truncate">{heading.text}</span>
+      </ListRow>
+    </MainTreeRowShell>
+  );
+});
