@@ -37,7 +37,6 @@ export function getBlockNoteSlashMenuItems(
   const compact = Boolean(options?.compact) || __GOOSE_EDITOR_COMPACT__;
 
   items.push(
-    { get title() { return t("text"); }, aliases: ["text", "paragraph", "wenben"], onItemClick: () => insertOrUpdate({ type: "paragraph" }) },
     {
       get title() { return t("heading1"); },
       get description() { return t("largeHeading"); },
