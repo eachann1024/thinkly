@@ -16,14 +16,14 @@ export function GitDetails({
   const [open, setOpen] = useState(false);
   const contentId = useId();
   return (
-    <div className={className}>
+    <div className={`goose-settings-option-row !p-0 ${className}`}>
       <Button
         type="button"
         variant="ghost"
         contentStyle="preserve"
         className={
-          "group relative flex w-full items-center justify-between gap-3 border-0 text-left text-inherit goose-settings-option-row" +
-          (description ? " goose-settings-option-row--stack" : "")
+          "group relative flex min-h-[var(--goose-control-height)] w-full items-center justify-between gap-3 rounded-[inherit] border-0 px-[12px] text-left text-inherit" +
+          (description ? " py-[10px]" : "")
         }
         aria-expanded={open}
         aria-controls={contentId}
@@ -45,7 +45,7 @@ export function GitDetails({
           }
         />
       </Button>
-      <div id={contentId} hidden={!open}>
+      <div id={contentId} className="px-[12px] pb-3 pt-2" hidden={!open}>
         {children}
       </div>
     </div>

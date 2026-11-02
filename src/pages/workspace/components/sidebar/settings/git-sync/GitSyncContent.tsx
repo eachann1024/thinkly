@@ -222,7 +222,7 @@ export function GitSyncContent({
               )}
               {reportedFailure && !conflicts.length && reportedFailure !== shortSyncError(reportedFailure) && (
                 <GitDetails className="text-sm text-muted-foreground" title={uiText("errorDetails_71f6")}>
-                  <p className="mt-2 whitespace-pre-wrap break-words">{reportedFailure}</p>
+                  <p className="whitespace-pre-wrap break-words">{reportedFailure}</p>
                 </GitDetails>
               )}
               {conflicts.length > 0 && (
@@ -276,7 +276,7 @@ export function GitSyncContent({
             <div role="alert" className="space-y-2 text-sm">
               <p className="text-danger">{shortSyncError(error)}</p>
               <GitDetails className="text-sm text-muted-foreground" title={uiText("errorDetails_71f6")}>
-                <p className="mt-2 whitespace-pre-wrap break-words">{error}</p>
+                <p className="whitespace-pre-wrap break-words">{error}</p>
               </GitDetails>
             </div>
           )}
