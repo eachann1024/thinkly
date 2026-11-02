@@ -48,7 +48,7 @@ export function useSelectedImage(
         : img;
 
       selectedElements.current = { image: img, anchor: anchorElement };
-      setSelectedImage({
+      const next: SelectedImageState = {
         blockId,
         src:
           (block?.props as { url?: string } | undefined)?.url ||
@@ -57,7 +57,9 @@ export function useSelectedImage(
         index: imageIndex,
         rect: anchorElement.getBoundingClientRect(),
         alignment: getImageAlignmentFromBlock(block),
-      });
+      };
+      selectedImageRef.current = next;
+      setSelectedImage(next);
     },
     [editor, editorContainerRef],
   );
