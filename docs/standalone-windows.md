@@ -1,8 +1,8 @@
 # Standalone windows
 
-Shared Electron windows for features that used to be in-app dialogs. Image export is not one of these windows. Do not register it and do not edit `src/lib/imageExport` or its UI from this work.
+Shared Electron windows for features that used to be in-app dialogs.
 
-Read this file, then the modules it names. The HTML mockups under `designs/image-export-view/project/` are the layout source for a later pass. They are not imported by the app.
+Read this file, then the modules it names. The HTML mockups under `designs/image-export-view/project/` are the layout source for the image export window. They are not imported by the app.
 
 ## Kinds
 
@@ -18,6 +18,7 @@ Registered in `electron/main/windows/auxiliary/kinds.ts`. One OS window per kind
 | `notebook-edit` | 560×680 | fixed | no | yes |
 | `confirm` | 460×400 | 460×240 | no | yes |
 | `selection-quote` | 480×420 | 360×280 | yes | yes |
+| `image-export` | 1280×800 | 900×600 | yes | no |
 
 `confirm` is the shared confirm used by settings reset and settings data confirms. The opener may pass `size` to change the height. Width stays at least 460. Other kinds ignore a size that would go under the minimum. The maximum accepted size is 4000.
 
@@ -41,6 +42,7 @@ Replace the placeholder file. Keep the export name. Do not edit the registry.
 | `notebook-edit` | `src/windows/views/NotebookEditWindow.tsx` | `NotebookEditWindow` |
 | `confirm` | `src/windows/views/ConfirmWindow.tsx` | `ConfirmWindow` |
 | `selection-quote` | `src/windows/views/SelectionQuoteWindow.tsx` | `SelectionQuoteWindow` |
+| `image-export` | `src/windows/views/ImageExportWindow.tsx` | `ImageExportWindow` |
 
 Render `StandaloneWindowShell` as the root of the view. Put user-facing copy in `i18nYaml` for zh-Hans, en, and ja. The title strings in `kinds.ts` are the OS title before the page loads. Pass the same words to the shell so a language change updates the Window menu.
 

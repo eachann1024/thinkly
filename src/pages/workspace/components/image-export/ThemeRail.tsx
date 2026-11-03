@@ -26,13 +26,11 @@ import {
   resolveCardTheme,
   type CardThemeId,
 } from "@/lib/imageExport";
-import { notebookThemeContextFromPage } from "@/lib/imageExport/themeContext";
-import { useSettings } from "@/stores/useSettings";
+import type { NotebookCardThemeContext } from "@/lib/imageExport";
 import {
-  activeImageExportThemeId,
-  useImageExportView,
-} from "@/stores/useImageExportView";
-import type { Page } from "@/types";
+  sessionActiveTheme,
+  useImageExportSession,
+} from "@/windows/views/image-export/imageExportSession";
 
 const GROUPS = [
   { id: "original", label: () => uiText("asIs") },
@@ -46,19 +44,18 @@ function groupOf(id: CardThemeId): (typeof GROUPS)[number]["id"] {
 }
 
 function pickTheme(id: CardThemeId) {
-  const { scope } = useImageExportView.getState();
-  if (scope === "page") useSettings.getState().setImageExportThemeId(id);
-  else useImageExportView.getState().setSelectionTheme(id);
-  useImageExportView.setState({ ratio: null, height: null });
+  const session = useImageExportSession.getState();
+  if (session.scope === "page") session.setThemeId(id);
+  else session.setSelectionTheme(id);
 }
 
-export function ThemeRail({ page }: { page: Page }) {
+export function ThemeRail({ themeContext }: { themeContext: NotebookCardThemeContext }) {
   useLocale();
-  const pageTheme = useSettings((s) => s.imageExportThemeId);
-  const scope = useImageExportView((s) => s.scope);
-  const selectionTheme = useImageExportView((s) => s.selectionTheme);
-  const active = activeImageExportThemeId(scope, selectionTheme, pageTheme);
-  const ctx = notebookThemeContextFromPage(page);
+  const scope = useImageExportSession((s) => s.scope);
+  const selectionTheme = useImageExportSession((s) => s.selectionTheme);
+  const themeId = useImageExportSession((s) => s.themeId);
+  const active = sessionActiveTheme({ scope, selectionTheme, themeId });
+  const ctx = themeContext;
 
   return (
     <nav
@@ -98,10 +95,11 @@ export function ThemeRail({ page }: { page: Page }) {
                     }}
                   >
                     <span
-                      className="h-3.5 w-5 rounded-t-sm"
+                      className="box-border h-3.5 w-5 rounded-t-[2px]"
                       style={{
                         background: resolved.cardBg,
                         borderTop: `2px solid ${resolved.accent}`,
+                        boxShadow: `inset 0 0 0 1px ${resolved.mode === "dark" ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.08)"}`,
                       }}
                     />
                   </span>

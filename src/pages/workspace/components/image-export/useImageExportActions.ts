@@ -31,13 +31,12 @@ import { editorPlatform } from "@/lib/editor-platform/resolve";
 import { ImageExportLoadError } from "@/lib/imageExport/capture/captureElement";
 import { renderImageExportBlob } from "@/lib/imageExport/renderBlob";
 import { getPlatformKind } from "@/lib/utils";
-import { usePages } from "@/stores/usePages";
-import { useSettings } from "@/stores/useSettings";
+import type { Page } from "@/types";
 import {
-  activeImageExportThemeId,
-  type ImageExportAction,
-  useImageExportView,
-} from "@/stores/useImageExportView";
+  sessionActiveTheme,
+  useImageExportSession,
+  type ImageExportRun,
+} from "@/windows/views/image-export/imageExportSession";
 
 function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -48,31 +47,24 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
-async function perform(action: ImageExportAction) {
-  const state = useImageExportView.getState();
-  if (state.busy || !state.active) return;
-  const empty = state.scope === "selection" && state.blocks.length === 0;
-  if (empty || state.ratio === 0) return;
-  const { scope, blocks, width, selectionTheme, active } = state;
-  const page = usePages.getState().pages[active];
-  if (!page) return;
-  const settings = useSettings.getState();
-  const themeId = activeImageExportThemeId(
-    scope,
-    selectionTheme,
-    settings.imageExportThemeId,
-  );
-  useImageExportView.getState().setBusy(true);
+async function perform(action: Parameters<ImageExportRun>[0], page: Page) {
+  const state = useImageExportSession.getState();
+  if (state.busy || !state.source) return;
+  const blocks = state.scope === "selection" ? state.source.selection : state.source.pageContent;
+  if ((state.scope === "selection" && blocks.length === 0) || state.ratio === 0) return;
+  const generation = state.source.pageId;
+  useImageExportSession.getState().setBusy(true);
   try {
     const { blob, filename } = await renderImageExportBlob({
       page,
-      blocks: scope === "selection" ? blocks : page.content,
-      themeId,
-      watermarkConfig: settings.imageExportWatermark,
-      mode: scope,
-      contentWidth: width,
+      blocks,
+      themeId: sessionActiveTheme(state),
+      watermarkConfig: state.watermark,
+      mode: state.scope,
+      contentWidth: state.width,
+      title: state.source.title,
     });
-    if (useImageExportView.getState().active !== active) return;
+    if (useImageExportSession.getState().source?.pageId !== generation) return;
     if (action === "copy") {
       await editorPlatform.clipboard.copyImage(await blobToDataUrl(blob));
       toast.success(uiText("copied"));
@@ -90,7 +82,7 @@ async function perform(action: ImageExportAction) {
       },
     });
   } catch (error) {
-    if (useImageExportView.getState().active !== active) return;
+    if (useImageExportSession.getState().source?.pageId !== generation) return;
     console.error("[imageExport] export failed:", error);
     toast.error(
       error instanceof ImageExportLoadError
@@ -98,17 +90,17 @@ async function perform(action: ImageExportAction) {
         : uiText("exportFailed"),
     );
   } finally {
-    if (useImageExportView.getState().active === active) {
-      useImageExportView.getState().setBusy(false);
+    if (useImageExportSession.getState().source?.pageId === generation) {
+      useImageExportSession.getState().setBusy(false);
     }
   }
 }
 
-export function useImageExportActions(pageId: string) {
+export function useImageExportActions(page: Page) {
   useLayoutEffect(() => {
-    useImageExportView.getState().setRun((action) => {
-      void perform(action);
+    useImageExportSession.getState().setRun((action) => {
+      void perform(action, page);
     });
-    return () => useImageExportView.getState().setRun(null);
-  }, [pageId]);
+    return () => useImageExportSession.getState().setRun(null);
+  }, [page]);
 }

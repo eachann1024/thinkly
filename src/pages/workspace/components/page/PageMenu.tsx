@@ -48,7 +48,6 @@ import { Popover, PopoverTrigger, PopoverContent, PopoverAction } from "@/compon
 import { FontSelector } from "@/pages/workspace/components/shared/FontSelector";
 import "./page-menu.css";
 import { useHistoryView } from "@/stores/useHistoryView";
-import { useImageExportView } from "@/stores/useImageExportView";
 import { openImageExport } from "../image-export/openImageExport";
 import { deletePageWithUndo } from "@/lib/page-delete-actions";
 import { getPlatformKind } from "@/lib/utils";
@@ -232,7 +231,6 @@ export function PageMenu() {
                   flushEditorContent(true);
                 } catch {
                 }
-                useImageExportView.getState().exit();
                 setTimeout(() => {
                   useHistoryView.getState().enter(pid);
                 }, 80);

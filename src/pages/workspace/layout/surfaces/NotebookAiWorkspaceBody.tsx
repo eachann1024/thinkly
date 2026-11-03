@@ -10,8 +10,6 @@ import {
   HistoryToolbar,
   HistoryReader,
 } from "../../components/history/HistoryView";
-import { ImageExportToolbar } from "../../components/image-export/ImageExportChrome";
-import { ImageExportView } from "../../components/image-export/ImageExportView";
 import {
   permanentlyDeletePageWithCleanup,
   restorePageWithToast,
@@ -40,7 +38,6 @@ function NotebookAiWorkspaceBody({
   activePageId,
   page,
   inHistoryMode,
-  inImageExportMode = false,
   isLocalFolderPage,
   isLocked: _isLocked,
   isTrashed: _isTrashed,
@@ -64,7 +61,6 @@ function NotebookAiWorkspaceBody({
   activePageId: string | null | undefined;
   page: ReturnType<typeof usePages.getState>["pages"][string] | undefined;
   inHistoryMode: boolean;
-  inImageExportMode?: boolean;
   isLocalFolderPage: boolean;
   isLocked: boolean;
   isTrashed: boolean;
@@ -80,7 +76,7 @@ function NotebookAiWorkspaceBody({
   const hideFolderHome =
     isElectronChrome && Boolean(page?.isFolder) && isLocalFolderPage;
 
-  const showEditor = !isWelcomeTab && !inHistoryMode && !inImageExportMode && Boolean(
+  const showEditor = !isWelcomeTab && !inHistoryMode && Boolean(
     activePageId && page && !hideFolderHome && !(page.isFolder && isLocalFolderPage),
   );
 
@@ -120,11 +116,6 @@ function NotebookAiWorkspaceBody({
                 </NotebookAiHostScope>
               ) : null}
             </div>
-          </>
-        ) : activePageId && page && inImageExportMode ? (
-          <>
-            {!isElectronChrome && <ImageExportToolbar page={page} />}
-            <ImageExportView page={page} />
           </>
         ) : activePageId && page && inHistoryMode ? (
           <>

@@ -15,4 +15,5 @@ export const AUXILIARY_VIEWS: Record<AuxiliaryKind, LazyExoticComponent<Componen
   "notebook-edit": view(() => import("./views/NotebookEditWindow").then((m) => ({ default: m.NotebookEditWindow }))),
   confirm: view(() => import("./views/ConfirmWindow").then((m) => ({ default: m.ConfirmWindow }))),
   "selection-quote": view(() => import("./views/SelectionQuoteWindow").then((m) => ({ default: m.SelectionQuoteWindow }))),
+  "image-export": view(() => import("./views/ImageExportWindow").then((m) => ({ default: m.ImageExportWindow }))),
 };

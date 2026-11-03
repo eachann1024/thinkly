@@ -15,6 +15,7 @@ zh-Hans:
   notebook-edit: "编辑笔记本"
   confirm: "确认"
   selection-quote: "选区引用"
+  image-export: "生成图片"
 en:
   pending: "This window has no content yet."
   reflection: "Reflection"
@@ -25,6 +26,7 @@ en:
   notebook-edit: "Edit notebook"
   confirm: "Confirm"
   selection-quote: "Selection quote"
+  image-export: "Generate image"
 ja:
   pending: "このウィンドウにはまだ内容がありません。"
   reflection: "振り返り"
@@ -35,6 +37,7 @@ ja:
   notebook-edit: "ノートブックを編集"
   confirm: "確認"
   selection-quote: "選択範囲の引用"
+  image-export: "画像を生成"
 `);
 
 export function PlaceholderWindow({ kind }: { kind: AuxiliaryKind }) {

@@ -58,7 +58,6 @@ export function renderWorkspaceShell(
     showFullscreenAi,
     singleTabMode,
     inHistoryMode,
-    inImageExportMode,
     page,
     isLocalFolderPage,
     aiAvailableForNotebook,
@@ -91,7 +90,6 @@ export function renderWorkspaceShell(
             page={settingsOpen ? undefined : page}
             isWelcomeTab={isWelcomeTab}
             inHistoryMode={!settingsOpen && inHistoryMode}
-            inImageExportMode={!settingsOpen && inImageExportMode}
             settingsOpen={settingsOpen}
             onCloseSettings={closeSettings}
             sidebarCollapsedOverride={effectiveSidebarCollapsed}

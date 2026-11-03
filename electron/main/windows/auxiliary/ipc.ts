@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import {
   AUXILIARY_CHANNELS,
   type AuxiliaryAISetupConfig,
+  type AuxiliaryImageExportSettings,
   type AuxiliaryMainCommand,
   type AuxiliaryRelayMessage,
   type AuxiliarySnapshotResponse,
@@ -105,6 +106,14 @@ export function registerAuxiliaryIpc(): void {
       const config = jsonValue(relay.config);
       if (!config || typeof config !== "object" || Array.isArray(config)) return false;
       return sendCommand({ type: "apply-ai-setup", config: config as AuxiliaryAISetupConfig });
+    }
+    if (relay.type === "apply-image-export-settings") {
+      const settings = jsonValue(relay.settings);
+      if (!settings || typeof settings !== "object" || Array.isArray(settings)) return false;
+      return sendCommand({
+        type: "apply-image-export-settings",
+        settings: settings as AuxiliaryImageExportSettings,
+      });
     }
     return false;
   });

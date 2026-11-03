@@ -44,32 +44,40 @@ import { buildImageExportPreviewHtml } from "@/lib/imageExport/livePreview";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { exportSafePixelRatio } from "@/lib/imageExport/capture/pixelRatio";
 import { takeBlocksForPreview } from "@/lib/imageExport/previewBudget";
-import { notebookThemeContextFromPage } from "@/lib/imageExport/themeContext";
+import type { NotebookCardThemeContext } from "@/lib/imageExport";
 import { cn } from "@/lib/utils";
-import { useSettings } from "@/stores/useSettings";
+import { closeAuxiliary } from "@/windows/AuxiliaryWindowContext";
 import {
-  activeImageExportThemeId,
-  useImageExportView,
-} from "@/stores/useImageExportView";
+  sessionActiveTheme,
+  sessionBlocks,
+  useImageExportSession,
+} from "@/windows/views/image-export/imageExportSession";
 import type { Page } from "@/types";
 import { describeExportClarity } from "./clarityCopy";
+import { usePreparedPreviewBlocks } from "./usePreparedPreviewBlocks";
 
-export function PreviewStage({ page }: { page: Page }) {
+export function PreviewStage({
+  page,
+  themeContext,
+}: {
+  page: Page;
+  themeContext: NotebookCardThemeContext;
+}) {
   useLocale();
-  const watermark = useSettings((s) => s.imageExportWatermark);
-  const pageTheme = useSettings((s) => s.imageExportThemeId);
-  const scope = useImageExportView((s) => s.scope);
-  const blocks = useImageExportView((s) => s.blocks);
-  const selectionTheme = useImageExportView((s) => s.selectionTheme);
-  const width = useImageExportView((s) => s.width);
-  const ratio = useImageExportView((s) => s.ratio);
-  const height = useImageExportView((s) => s.height);
+  const watermark = useImageExportSession((s) => s.watermark);
+  const pageTheme = useImageExportSession((s) => s.themeId);
+  const scope = useImageExportSession((s) => s.scope);
+  const blocks = useImageExportSession(sessionBlocks);
+  const selectionTheme = useImageExportSession((s) => s.selectionTheme);
+  const width = useImageExportSession((s) => s.width);
+  const ratio = useImageExportSession((s) => s.ratio);
+  const height = useImageExportSession((s) => s.height);
   const canvasRef = useRef<HTMLElement>(null);
   const [canvasWidth, setCanvasWidth] = useState(0);
   const [zoom, setZoom] = useState<number | null>(null);
   const [previewHeight, setPreviewHeight] = useState(0);
   const empty = scope === "selection" && blocks.length === 0;
-  const themeId = activeImageExportThemeId(scope, selectionTheme, pageTheme);
+  const themeId = sessionActiveTheme({ scope, selectionTheme, themeId: pageTheme });
   const full = useMemo(
     () =>
       scope === "selection"
@@ -92,20 +100,24 @@ export function PreviewStage({ page }: { page: Page }) {
       current.clipped && current.shown > 0
         ? Math.round((next * current.total) / current.shown)
         : next;
-    useImageExportView.getState().setMeasure(fullHeight, exportSafePixelRatio(current.width, fullHeight));
+    useImageExportSession.getState().setMeasure(fullHeight, exportSafePixelRatio(current.width, fullHeight));
   }, []);
+  const theme = useMemo(
+    () => (empty ? null : resolveCardTheme(themeId, themeContext)),
+    [empty, themeId, themeContext],
+  );
+  const renderedBlocks = usePreparedPreviewBlocks(previewBlocks, theme, page.localFilePath);
   const html = useMemo(() => {
-    if (empty) return "";
-    const theme = resolveCardTheme(themeId, notebookThemeContextFromPage(page));
+    if (!theme) return "";
     return buildImageExportPreviewHtml({
       title: getPageTitle(page),
-      blocks: previewBlocks,
+      blocks: renderedBlocks,
       theme,
       mode: scope,
       watermarkConfig: watermark,
       contentWidth: width,
     });
-  }, [empty, themeId, page, previewBlocks, scope, watermark, width]);
+  }, [theme, page, renderedBlocks, scope, watermark, width]);
   useLayoutEffect(() => {
     const node = canvasRef.current;
     if (!node) return;
@@ -114,7 +126,7 @@ export function PreviewStage({ page }: { page: Page }) {
     setCanvasWidth(node.clientWidth);
     return () => observer.disconnect();
   }, []);
-  const fit = canvasWidth > 64 ? Math.min(1, (canvasWidth - 64) / width) : 1;
+  const fit = canvasWidth > 80 ? Math.min(1, (canvasWidth - 80) / width) : 1;
   const scale = zoom ?? fit;
   const clarity = describeExportClarity({ empty, width, height, ratio, scope });
   const excerpt =
@@ -139,23 +151,26 @@ export function PreviewStage({ page }: { page: Page }) {
           </span>
         </div>
       ) : null}
-      <div className={cn("flex min-h-full justify-center px-8 pb-16 pt-10", empty && "items-center")}>
+      <div className={cn("flex min-h-full items-start justify-center px-8 pb-[72px] pt-10", empty && "items-center")}>
         {empty ? (
           <div className="flex w-[300px] flex-col items-center gap-2.5 rounded-[10px] border border-dashed border-border bg-[var(--goose-menu-surface)] px-6 py-7 text-center">
             <Image className="size-[22px] text-[var(--goose-text-secondary)]" />
             <span className="text-sm font-medium">{uiText("emptyTitle")}</span>
             <span className="text-xs leading-[18px] text-[var(--goose-text-secondary)]">{uiText("emptyBody")}</span>
             <div className="mt-1 flex gap-2">
-              <Button type="button" variant="secondary" size="sm" onClick={() => useImageExportView.getState().exit()}>
+              <Button type="button" variant="secondary" size="sm" onClick={() => void closeAuxiliary()}>
                 {uiText("back")}
               </Button>
-              <Button type="button" size="sm" onClick={() => useImageExportView.getState().setScope("page")}>
+              <Button type="button" size="sm" onClick={() => useImageExportSession.getState().setScope("page")}>
                 {uiText("wholePage")}
               </Button>
             </div>
           </div>
         ) : (
-          <div style={{ width: Math.round(width * scale), height: previewHeight > 0 ? Math.round(previewHeight * scale) : undefined }}>
+          <div
+            className="shrink-0 overflow-hidden shadow-md"
+            style={{ width: Math.round(width * scale), height: previewHeight > 0 ? Math.round(previewHeight * scale) : undefined }}
+          >
             <PreviewFrame
               html={html}
               title={getPageTitle(page)}
