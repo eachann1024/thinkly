@@ -14,42 +14,44 @@ function Dot({ dot }: { dot: OrbitDot }) {
 
 function OrbitFieldView({ field }: { field: OrbitField }) {
   return (
-    <div className="ai-orbit-anchor">
+    <>
       {field.rings.map((ring) => (
-        <div key={ring.delay} className="ai-orbit-ring" style={{ animationDelay: `${ring.delay}s` }}>
-          {ring.dots.map((dot) => (
-            <Dot key={`${dot.x}:${dot.y}`} dot={dot} />
-          ))}
-        </div>
-      ))}
-      {field.orbits.map((orbit) => (
         <div
-          key={orbit.duration}
-          className="ai-orbit-path"
-          style={{ ["--ai-orbit-dur" as string]: `${orbit.duration}s` }}
-        >
-          {orbit.dots.map((dot, index) => (
-            <span
-              key={index}
-              className="ai-orbit-comet-wrap"
-              style={{ left: dot.x, top: dot.y, width: orbit.size, height: orbit.size, opacity: dot.opacity }}
-            >
-              <span className="ai-orbit-comet" style={{ animationDelay: `${dot.delay}s` }} />
-            </span>
-          ))}
-        </div>
+          key={ring.delay}
+          className="ai-orbit-ring"
+          style={{ animationDelay: `${ring.delay}s`, maskImage: ring.mask, WebkitMaskImage: ring.mask }}
+        />
       ))}
-      <div className="ai-orbit-star">
-        {field.star.map((dot) => (
-          <Dot key={`${dot.x}:${dot.y}`} dot={dot} />
+      <div className="ai-orbit-anchor">
+        {field.orbits.map((orbit) => (
+          <div
+            key={orbit.duration}
+            className="ai-orbit-path"
+            style={{ ["--ai-orbit-dur" as string]: `${orbit.duration}s` }}
+          >
+            {orbit.dots.map((dot, index) => (
+              <span
+                key={index}
+                className="ai-orbit-comet-wrap"
+                style={{ left: dot.x, top: dot.y, width: orbit.size, height: orbit.size, opacity: dot.opacity }}
+              >
+                <span className="ai-orbit-comet" style={{ animationDelay: `${dot.delay}s` }} />
+              </span>
+            ))}
+          </div>
         ))}
-        <div className="ai-orbit-core">
-          {field.core.map((dot) => (
+        <div className="ai-orbit-star">
+          {field.star.map((dot) => (
             <Dot key={`${dot.x}:${dot.y}`} dot={dot} />
           ))}
+          <div className="ai-orbit-core">
+            {field.core.map((dot) => (
+              <Dot key={`${dot.x}:${dot.y}`} dot={dot} />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -59,7 +59,7 @@
 }
 
 .notebook-ai-empty-state {
- --ai-orbit-y: clamp(120px, 34%, 280px);
+ --ai-orbit-y: max(116px, calc(50% - 52px));
  position: relative;
  flex: 1 1 auto;
  align-self: stretch;
@@ -75,7 +75,7 @@
 .notebook-ai-empty-title {
  position: absolute;
  left: 50%;
- top: min(calc(var(--ai-orbit-y) + 152px), calc(100% - 108px));
+ top: min(calc(var(--ai-orbit-y) + 120px), calc(100% - 108px));
  z-index: 1;
  width: max-content;
  max-width: calc(100% - 32px);

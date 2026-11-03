@@ -16,7 +16,6 @@
 }
 
 .ai-orbit-anchor,
-.ai-orbit-ring,
 .ai-orbit-path,
 .ai-orbit-star,
 .ai-orbit-core {
@@ -70,7 +69,18 @@
   background: color-mix(in srgb, var(--goose-accent-solid) 72%, var(--goose-text-primary));
 }
 
+/* Spans [2y - H, H] so its center is the anchor; the dot pattern and ring masks both center on it. */
 .ai-orbit-ring {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(2 * var(--ai-orbit-y, 34%) - 100%);
+  bottom: 0;
+  background-image: radial-gradient(circle, var(--goose-text-disabled) 0.9px, transparent 1.15px);
+  background-size: 20px 20px;
+  background-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
   animation: ai-orbit-wave 6s ease-in-out infinite;
   will-change: opacity;
 }
