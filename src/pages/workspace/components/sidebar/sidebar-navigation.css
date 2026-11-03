@@ -18,7 +18,8 @@
   margin-inline: 0;
 }
 .sidebar-page-list > .sidebar-tree-scroll {
-  padding-inline: 1rem;
+  /* scrollbar-gutter: stable reserves 8px on the right; subtract it so both sides match */
+  padding-inline: 1rem calc(1rem - 8px);
   scrollbar-width: auto;
   scrollbar-color: auto;
   --sidebar-scrollbar-thumb: color-mix(in srgb, var(--goose-text-secondary) 54%, transparent);
