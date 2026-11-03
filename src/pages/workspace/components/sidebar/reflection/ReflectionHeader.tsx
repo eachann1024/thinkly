@@ -28,15 +28,16 @@ const uiText = createTranslator(localMessages);
 
 interface Props {
   scope: ReflectionScope;
+  rangeLabel: string;
   busy: boolean;
   onScopeChange: (scope: ReflectionScope) => void;
   onRefresh: () => void;
 }
 
-export function ReflectionHeader({ scope, busy, onScopeChange, onRefresh }: Props) {
+export function ReflectionHeader({ scope, rangeLabel, busy, onScopeChange, onRefresh }: Props) {
   useLocale();
   return (
-    <>
+    <div className="flex shrink-0 flex-wrap items-center gap-5 border-b border-border px-6 py-3 max-[650px]:gap-2 max-[650px]:px-4 max-[650px]:py-3">
       <div role="group" aria-label={uiText("range")} className="flex rounded-lg bg-muted p-0.5">
         {REFLECTION_SCOPES.map((value) => {
           const selected = value === scope;
@@ -46,8 +47,10 @@ export function ReflectionHeader({ scope, busy, onScopeChange, onRefresh }: Prop
               type="button"
               aria-pressed={selected}
               onClick={() => onScopeChange(value)}
-              className={`h-[26px] rounded-md px-3 text-xs font-medium ${
-                selected ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground"
+              className={`h-9 rounded-md border px-3.5 text-[13px] font-medium ${
+                selected
+                  ? "border-[var(--goose-accent-solid)] bg-card text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {uiText(`scope${value}` as "scope7d")}
@@ -55,10 +58,14 @@ export function ReflectionHeader({ scope, busy, onScopeChange, onRefresh }: Prop
           );
         })}
       </div>
+      <span className="goose-tabular whitespace-nowrap text-xs text-muted-foreground max-[400px]:order-last max-[400px]:w-full">
+        {rangeLabel}
+      </span>
       <IconButton
         type="button"
         size="sm"
         tone="muted"
+        className="ml-auto"
         busy={busy}
         disabled={busy}
         aria-label={uiText("refresh")}
@@ -67,6 +74,6 @@ export function ReflectionHeader({ scope, busy, onScopeChange, onRefresh }: Prop
       >
         <GooseIcons.RefreshCw aria-hidden="true" className={busy ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
       </IconButton>
-    </>
+    </div>
   );
 }

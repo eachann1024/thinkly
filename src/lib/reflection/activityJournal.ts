@@ -127,7 +127,11 @@ export function recordPageActivity(before: Page, after: Page, activityId?: strin
   }
 }
 
-export function readPageActivity(since: number, pages: Record<string, Page>): EditEvent[] {
+export function readPageActivity(
+  since: number,
+  pages: Record<string, Page>,
+  options?: { strict?: boolean },
+): EditEvent[] {
   if (typeof window === "undefined") return [];
   flushPageActivity();
   try {
@@ -142,6 +146,7 @@ export function readPageActivity(since: number, pages: Record<string, Page>): Ed
     }).sort((a, b) => a.at - b.at || a.pageId.localeCompare(b.pageId));
   } catch (error) {
     console.error("[reflection] Could not read edit activity", error);
+    if (options?.strict) throw error;
     return [];
   }
 }

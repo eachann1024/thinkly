@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocale } from "@/i18n";
 import { createTranslator, i18nYaml } from "@/i18n";
-import { getFormatLocale } from "@/i18n/runtime";
+import { formatScopeSpan } from "@/lib/reflection/relativeDay";
 import { scopeRange } from "@/lib/reflection/scopeRange";
 import { previousWeek } from "@/lib/reflection/weekRange";
 import { ReflectionBody } from "@/pages/workspace/components/sidebar/reflection/ReflectionBody";
@@ -25,52 +25,50 @@ export function ReflectionWindow() {
   useLocale();
   const { resizable } = useAuxiliaryWindow();
   const model = useReflectionWindowModel();
-  const range = model.data?.range ?? scopeRange(model.scope);
-  const locale = getFormatLocale();
-  const date = new Intl.DateTimeFormat(locale, { year: "numeric", month: "numeric", day: "numeric" });
-  const context = `${date.format(range.start)} – ${date.format(range.end - 1)}`;
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const range = model.data?.range ?? scopeRange(model.scope, now);
+  const rangeLabel = formatScopeSpan(range.start, range.end - 1);
 
   useEffect(() => {
     void requestMainSnapshot("reflection-seen", 2, { weekKey: previousWeek().key });
   }, []);
 
-  const { generating, refreshSnapshots } = model;
-  useEffect(() => {
-    if (!generating) return;
-    const timer = window.setInterval(refreshSnapshots, 2_000);
-    return () => window.clearInterval(timer);
-  }, [generating, refreshSnapshots]);
-
   return (
     <StandaloneWindowShell
       title={text("title")}
-      context={context}
       maximizable={resizable}
-      actions={(
-        <>
-          <ReflectionScheduleTag range={range} enabled={model.consented && model.aiReady} />
-          <ReflectionHeader
-            scope={model.scope}
-            busy={model.loading || model.generating}
-            onScopeChange={model.setScope}
-            onRefresh={model.refresh}
-          />
-        </>
-      )}
+      actions={<ReflectionScheduleTag range={range} enabled={model.consented && model.aiReady} />}
     >
-      <ReflectionBody
-        scope={model.scope}
-        data={model.data}
-        pages={model.pages}
-        state={model.state}
-        report={model.report}
-        failureMessage={model.failureMessage}
-        onEnable={model.enable}
-        onOpenSettings={() => void openSettingsInMain("ai")}
-        onRetry={model.refresh}
-        onScopeChange={model.setScope}
-        onOpenNote={(pageId) => void openPageInMain(pageId)}
-      />
+      <div className="flex h-full min-h-0 flex-col">
+        <ReflectionHeader
+          scope={model.scope}
+          rangeLabel={rangeLabel}
+          busy={model.recordStatus === "loading" || model.generating}
+          onScopeChange={model.setScope}
+          onRefresh={model.refresh}
+        />
+        <div className="flex min-h-0 flex-1 flex-col overflow-auto">
+          <ReflectionBody
+            scope={model.scope}
+            data={model.data}
+            recordStatus={model.recordStatus}
+            rangeLabel={rangeLabel}
+            pages={model.pages}
+            state={model.state}
+            report={model.report}
+            failureMessage={model.failureMessage}
+            onEnable={model.enable}
+            onOpenSettings={() => void openSettingsInMain("ai")}
+            onRetry={model.refresh}
+            onScopeChange={model.setScope}
+            onOpenNote={(pageId) => void openPageInMain(pageId)}
+          />
+        </div>
+      </div>
     </StandaloneWindowShell>
   );
 }
