@@ -1,0 +1,94 @@
+.notebook-ai-send-button:not([data-ready="true"]) {
+ background: transparent;
+ color: var(--goose-text-disabled);
+ cursor: default;
+}
+
+.notebook-ai-send-button[data-ready="true"] {
+ cursor: pointer;
+}
+
+.notebook-ai-composer-shell .bui-composer-send {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ box-sizing: border-box;
+ width: var(--ai-composer-action-size);
+ height: var(--ai-composer-action-size);
+ padding: 0;
+ border: 0;
+ border-radius: var(--goose-control-radius);
+ background: transparent;
+ color: var(--goose-text-disabled);
+ opacity: 1;
+}
+
+.notebook-ai-composer-shell .notebook-ai-send-button[data-ready="true"],
+.notebook-ai-composer-shell .bui-composer-send.goose-interactive-primary {
+ background: var(--goose-text-primary);
+ color: var(--goose-editor-surface, hsl(var(--goose-editor-bg)));
+}
+
+.notebook-ai-composer-shell .notebook-ai-send-button[data-ready="true"]:hover,
+.notebook-ai-composer-shell .bui-composer-send.goose-interactive-primary:hover {
+ background: color-mix(in srgb, var(--goose-text-primary) 88%, var(--goose-editor-surface, hsl(var(--goose-editor-bg))));
+ color: var(--goose-editor-surface, hsl(var(--goose-editor-bg)));
+}
+
+.notebook-ai-composer-shell .notebook-ai-send-button:disabled {
+ background: transparent;
+ color: var(--goose-text-disabled);
+ cursor: default;
+}
+
+.notebook-ai-composer-shell [data-goose-control="icon-button"] {
+ box-sizing: border-box;
+ width: var(--ai-composer-action-size);
+ height: var(--ai-composer-action-size);
+ border-radius: var(--goose-control-radius);
+}
+
+.notebook-ai-composer-shell [data-goose-control="icon-button"]:disabled {
+ background: transparent;
+ color: var(--goose-text-disabled);
+}
+
+.notebook-ai-composer-shell [data-goose-control="icon-button"] > svg {
+ width: 16px;
+ height: 16px;
+}
+
+.notebook-ai-stop-square {
+ width: 10px;
+ height: 10px;
+ border-radius: 2px;
+ background: currentColor;
+}
+
+.notebook-ai-model-menu {
+ width: min(16rem, calc(100vw - 24px));
+ padding: var(--goose-menu-surface-inset);
+ max-height: min(360px, var(--goose-popover-available-height, calc(100dvh - 24px)));
+ overscroll-behavior: contain;
+ scrollbar-width: thin;
+}
+
+.notebook-ai-composer-shell .notebook-ai-model-trigger {
+ height: var(--ai-composer-action-size);
+ min-width: 0;
+ max-width: 100%;
+ gap: 2px;
+ padding-inline: 4px;
+ border: 0;
+ background: transparent;
+ font-family: var(--font-mono);
+ font-size: var(--goose-type-caption);
+ font-weight: var(--font-weight-medium);
+ line-height: var(--goose-leading-caption);
+ color: var(--goose-text-secondary);
+}
+
+.notebook-ai-composer-shell .notebook-ai-model-trigger svg {
+ width: 12px;
+ height: 12px;
+}
