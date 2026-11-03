@@ -35,6 +35,10 @@ export function useQuickNoteDraftState() {
 
   const setActiveSlot = useQuickNote((s) => s.setActiveSlot);
 
+  useEffect(() => window.gooseDesktop?.onQuicknoteSlot?.((slot) => {
+    if (slot === 1 || slot === 2 || slot === 3 || slot === 4 || slot === 5) setActiveSlot(slot);
+  }), [setActiveSlot]);
+
   const setDraftContent = useQuickNote((s) => s.setDraftContent);
 
   const undoDraft = useQuickNote((s) => s.undoDraft);

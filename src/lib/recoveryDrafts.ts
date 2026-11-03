@@ -1,28 +1,12 @@
 import type { RecoveryJournalEntry } from "@/lib/storage/recoveryJournal";
-
-export const OPEN_RECOVERY_DRAFTS_EVENT = "thinkly:open-recovery-drafts";
-export const RECOVERY_LIST_PAGE_SIZE = 50;
-
-export function recoveryDraftsPage(entries: RecoveryJournalEntry[], page: number) {
-  const lastPage = Math.max(0, Math.ceil(entries.length / RECOVERY_LIST_PAGE_SIZE) - 1);
-  const currentPage = Math.max(0, Math.min(Number.isFinite(page) ? Math.floor(page) : 0, lastPage));
-  return entries.slice(currentPage * RECOVERY_LIST_PAGE_SIZE, (currentPage + 1) * RECOVERY_LIST_PAGE_SIZE);
-}
+import { getGooseDesktop } from "@/lib/electron/runtime";
 
 export function openRecoveryDrafts(): void {
-  window.dispatchEvent(new Event(OPEN_RECOVERY_DRAFTS_EVENT));
-}
-
-export function recoveryDraftIsCurrent(
-  displayed: RecoveryJournalEntry,
-  current: RecoveryJournalEntry | null,
-): boolean {
-  return Boolean(
-    current &&
-      current.source === displayed.source &&
-      current.id === displayed.id &&
-      current.revision === displayed.revision,
-  );
+  const open = getGooseDesktop()?.auxiliary?.open;
+  if (!open) return;
+  void open({ kind: "recovery-drafts" }).catch((error: unknown) => {
+    console.error("[recovery-drafts] window failed to open", error);
+  });
 }
 
 export function buildRecoveryDraftExport(entry: RecoveryJournalEntry): {

@@ -20,20 +20,33 @@ export function hasMainSnapshot(key: string): boolean {
   return providers.has(key);
 }
 
-export async function requestMainSnapshot<T>(key: string, attempts = 4): Promise<T | null> {
+export async function requestMainSnapshotResult<T>(
+  key: string,
+  attempts = 4,
+  detail?: unknown,
+): Promise<AuxiliarySnapshotResponse & { value?: T }> {
   const request = window.gooseDesktop?.auxiliary?.requestSnapshot;
-  if (!request) return null;
+  if (!request) return { ok: false };
+  let response: AuxiliarySnapshotResponse = { ok: false };
   for (let attempt = 0; attempt < attempts; attempt += 1) {
-    let response: AuxiliarySnapshotResponse;
     try {
-      response = await request(key);
+      response = await request(key, detail);
     } catch {
       response = { ok: false };
     }
-    if (response.ok) return (response.value ?? null) as T;
+    if (response.ok) return response as AuxiliarySnapshotResponse & { value?: T };
     if (attempt + 1 < attempts) await new Promise((resolve) => window.setTimeout(resolve, 250));
   }
-  return null;
+  return response;
+}
+
+export async function requestMainSnapshot<T>(
+  key: string,
+  attempts = 4,
+  detail?: unknown,
+): Promise<T | null> {
+  const response = await requestMainSnapshotResult<T>(key, attempts, detail);
+  return response.ok ? ((response.value ?? null) as T) : null;
 }
 
 export function useMainSnapshot<T>(key: string): { data: T | null; ready: boolean; refresh: () => void } {

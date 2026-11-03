@@ -17,12 +17,13 @@ import { IconButton } from "@/components/ui/icon-button";
 import { useAppUpdate } from "@/hooks/useAppUpdate";
 import { cn } from "@/lib/utils";
 import { hasNewAppUpdate } from "@/lib/appUpdateAvailability";
+import { openAppUpdateWindow } from "@/lib/appUpdateWindow";
 import { SidebarRailIcon } from "@/pages/workspace/components/sidebar/SidebarRailIcon";
 import { updateStatusLabel } from "./updatePresentation";
 
 export function AppUpdateButton({ className }: { className?: string }) {
   useLocale();
-  const { currentVersion, state, open, setOpen, installing, installError } = useAppUpdate();
+  const { currentVersion, state, installing, installError } = useAppUpdate();
   const busy = installing || state.status === "checking" || state.status === "downloading";
   const ready = state.status === "ready";
   const tooltip = updateStatusLabel(state, installing, installError) || uiText("update");
@@ -33,18 +34,15 @@ export function AppUpdateButton({ className }: { className?: string }) {
         <IconButton
           type="button"
           size="xs"
-          active={open}
           className={className}
           aria-label={busy || ready ? uiText("updateStatus", {status: tooltip}) : uiText("update")}
           title={tooltip}
-          aria-haspopup="dialog"
-          aria-expanded={open}
           busy={busy}
-          onClick={() => setOpen(true)}
+          onClick={openAppUpdateWindow}
         >
           <span className="relative inline-flex shrink-0">
             <span className={cn("inline-flex", busy && "motion-safe:animate-spin")}>
-              <SidebarRailIcon name="update" selected={open && !busy} />
+              <SidebarRailIcon name="update" selected={false} />
             </span>
             {ready && <span aria-hidden="true" className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-primary ring-2 ring-background" />}
           </span>

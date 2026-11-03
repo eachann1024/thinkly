@@ -143,6 +143,20 @@ export async function toggleWindow(win: BrowserWindow | null): Promise<void> {
   raiseWindow(win);
 }
 
+export async function showQuicknoteWindow(): Promise<void> {
+  let win = getQuicknoteWindow();
+  const parked = captureParkedWorkspaces();
+  if (!win || win.isDestroyed()) {
+    win = createQuicknoteWindow();
+    await waitReadyToShow(win);
+    if (win.isDestroyed()) {
+      forgetParkedWorkspaces(parked);
+      return;
+    }
+  }
+  raiseFloatingWindow(win, parked);
+}
+
 export async function toggleQuicknoteWindow(): Promise<void> {
   let win = getQuicknoteWindow();
   if (win && !win.isDestroyed() && win.isVisible()) {

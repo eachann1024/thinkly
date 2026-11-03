@@ -24,12 +24,13 @@ import * as GooseIcons from "@/components/ui/icons";
 import { updateStatusLabel } from "@/components/app-update/updatePresentation";
 import { useAppUpdate } from "@/hooks/useAppUpdate";
 import { shouldShowAppUpdateSettings, hasNewAppUpdate } from "@/lib/appUpdateAvailability";
+import { openAppUpdateWindow } from "@/lib/appUpdateWindow";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { SettingsSectionCard } from "./SettingsSectionCard";
 
 export function SettingsAppUpdate() {
   useLocale();
-  const { currentVersion, state, installing, installError, checking, checkForUpdates, setOpen } = useAppUpdate();
+  const { currentVersion, state, installing, installError, checking, checkForUpdates } = useAppUpdate();
   const statusLabel = updateStatusLabel(state, installing, installError);
   const hasUpdate = hasNewAppUpdate(currentVersion, state);
   const canCheckManually = Boolean(getGooseDesktop()?.checkForUpdate);
@@ -43,7 +44,7 @@ export function SettingsAppUpdate() {
             <span className="min-w-0">{uiText("currentVersion", { version: currentVersion })}</span>
           </div>
           {hasUpdate ? (
-            <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>{uiText("updateVersion", { version: state.version ?? "" })}</Button>
+            <Button type="button" variant="outline" size="sm" onClick={openAppUpdateWindow}>{uiText("updateVersion", { version: state.version ?? "" })}</Button>
           ) : (
             <Button type="button" variant="outline" size="sm" disabled={!canCheckManually || checking} busy={checking} onClick={() => void checkForUpdates()}>
               {uiText("checkForUpdates")}

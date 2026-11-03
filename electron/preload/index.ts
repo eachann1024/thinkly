@@ -154,6 +154,12 @@ const gooseDesktop = {
   revealSavedNote: (filePath: string) =>
     invoke("desktop:revealSavedNote", filePath) as Promise<boolean>,
   toggleQuicknote: () => invoke("desktop:toggleQuicknote") as Promise<void>,
+  showQuicknote: (slot: number) => invoke("desktop:showQuicknote", slot) as Promise<boolean>,
+  onQuicknoteSlot: (cb: (slot: number) => void) => {
+    const listener = (_event: unknown, slot: number) => cb(slot);
+    ipcRenderer.on("desktop:quicknote-slot", listener);
+    return () => ipcRenderer.removeListener("desktop:quicknote-slot", listener);
+  },
   closeQuicknote: () => invoke("desktop:closeQuicknote") as Promise<void>,
   registerHotkeys: (k: { wake: string; quicknote: string; search: string }) =>
     invoke("desktop:registerHotkeys", k) as Promise<{

@@ -6,9 +6,11 @@ import {
   closeWorkspaceWindow,
   createWorkspaceWindow,
   getMainWindow,
+  getQuicknoteWindow,
   lookupWindowContext,
   setMainWindowTitleBarHeight,
   showOrCreateMainWindow,
+  showQuicknoteWindow,
   toggleQuicknoteWindow,
   toggleWindow,
   type CreateWorkspaceWindowOpts,
@@ -168,6 +170,20 @@ export function registerWindowsIpc(): void {
 
   ipcMain.handle("desktop:toggleQuicknote", async () => {
     await toggleQuicknoteWindow();
+  });
+
+  ipcMain.handle("desktop:showQuicknote", async (_event, slot: unknown) => {
+    const parsed = Number(slot);
+    const next = parsed === 2 || parsed === 3 || parsed === 4 || parsed === 5 ? parsed : 1;
+    await showQuicknoteWindow();
+    const win = getQuicknoteWindow();
+    if (!win || win.isDestroyed()) return false;
+    const send = () => {
+      if (!win.isDestroyed()) win.webContents.send("desktop:quicknote-slot", next);
+    };
+    if (win.webContents.isLoading()) win.webContents.once("did-finish-load", send);
+    else send();
+    return true;
   });
 
   ipcMain.handle("desktop:closeQuicknote", async () => {
