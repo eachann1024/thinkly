@@ -76,7 +76,7 @@ export function ReflectionBody({
   }
   const showTopics = state === "ready" && Boolean(report?.topics.length);
   return (
-    <div className="mx-auto box-border grid max-w-[1120px] grid-cols-1 gap-10 px-8 py-7 min-[860px]:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="mx-auto box-border grid w-full max-w-[1120px] grid-cols-1 gap-10 px-8 py-7 min-[860px]:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-8">
         <section aria-label={uiText("report")} className="flex flex-col gap-3.5">
           <ReflectionNarrative
