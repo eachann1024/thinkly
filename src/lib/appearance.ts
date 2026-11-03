@@ -7,6 +7,7 @@ import {
   type UIFontSize,
 } from "@/stores/settings/types";
 import { titleBarHeightPx } from "@/lib/electron/titlebarLayout";
+import { consumeStartupSettlingHold } from "@/lib/startupSettlingHold";
 
 export function computeUiFontSize(uiFontSize: UIFontSize): number {
   return UI_FONT_SIZE_BASE * normalizeUIFontSize(uiFontSize) / 100;
@@ -89,6 +90,11 @@ export function clearStartupSettling(): void {
 }
 
 export function releaseStartupSettlingAfterPaint(): void {
+  if (consumeStartupSettlingHold()) return;
+  clearStartupSettlingAfterPaint();
+}
+
+function clearStartupSettlingAfterPaint(): void {
   if (typeof requestAnimationFrame === "undefined") {
     clearStartupSettling();
     return;
