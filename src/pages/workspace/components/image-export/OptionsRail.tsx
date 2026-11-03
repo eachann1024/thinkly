@@ -66,17 +66,9 @@ import type { WatermarkConfig } from "@/lib/imageExport";
 import { cn } from "@/lib/utils";
 import {
   sessionActiveTheme,
-  sessionBlocks,
   useImageExportSession,
 } from "@/windows/views/image-export/imageExportSession";
-import { describeExportClarity, type ClarityTone } from "./clarityCopy";
 import { SegmentedTrack } from "./SegmentedTrack";
-
-const TONE: Record<ClarityTone, string> = {
-  normal: "text-[var(--goose-text-secondary)]",
-  warning: "text-[var(--goose-text-warning)]",
-  danger: "text-[var(--goose-color-danger)]",
-};
 
 function patchWatermark(partial: Partial<WatermarkConfig>) {
   useImageExportSession.getState().setWatermark(partial);
@@ -89,14 +81,9 @@ export function OptionsRail({ themeContext }: { themeContext: NotebookCardThemeC
   const selectionTheme = useImageExportSession((s) => s.selectionTheme);
   const pageTheme = useImageExportSession((s) => s.themeId);
   const width = useImageExportSession((s) => s.width);
-  const ratio = useImageExportSession((s) => s.ratio);
-  const height = useImageExportSession((s) => s.height);
-  const blocks = useImageExportSession(sessionBlocks);
   const themeId = sessionActiveTheme({ scope, selectionTheme, themeId: pageTheme });
   const theme = resolveCardTheme(themeId, themeContext);
   const kenya = !theme.watermarkVisible;
-  const empty = scope === "selection" && blocks.length === 0;
-  const clarity = describeExportClarity({ empty, width, height, ratio, scope });
   const footerOff = kenya || !watermark.showWatermark;
   const brandOn = watermark.showBrand && !footerOff;
 
@@ -116,22 +103,6 @@ export function OptionsRail({ themeContext }: { themeContext: NotebookCardThemeC
           }))}
           onChange={(next) => useImageExportSession.getState().setWidth(next)}
         />
-        <div className="flex flex-col gap-1 rounded-lg border border-border bg-[var(--goose-sidebar-surface)] p-2.5">
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[13px] font-medium tabular-nums">{clarity.dims}</span>
-            <span className={cn("text-xs tabular-nums", TONE[clarity.tone])}>{clarity.ratioLabel}</span>
-          </div>
-          <p className={cn("text-xs leading-[18px]", TONE[clarity.tone])}>{clarity.note}</p>
-          {clarity.suggestSelection ? (
-            <button
-              type="button"
-              className="self-start text-xs text-foreground"
-              onClick={() => useImageExportSession.getState().setScope("selection")}
-            >
-              {uiText("exportSelection")}
-            </button>
-          ) : null}
-        </div>
       </section>
       <section className="flex flex-col">
         <div className="mb-1 text-xs font-medium text-[var(--goose-text-secondary)]">{uiText("content")}</div>
@@ -213,7 +184,6 @@ function OptionRow({
     >
       <span>{label}</span>
       <Switch
-        controlSize="compact"
         aria-label={label}
         checked={checked}
         disabled={disabled}
