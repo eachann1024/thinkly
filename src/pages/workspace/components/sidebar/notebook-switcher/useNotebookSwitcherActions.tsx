@@ -23,6 +23,9 @@ import { activateWorkspace } from "@/lib/settings-navigation";
 import { activateNotebook } from "@/lib/notebookNavigation";
 import { getGooseDesktop } from "@/lib/electron/runtime";
 import { renameLocalNotebookFolder } from "@/lib/rename-notebook-folder";
+import { useNotebooks } from "@/stores/useNotebooks";
+import { usePages } from "@/stores/usePages";
+import { readNotebookEditValues } from "@/windows/views/notebookEditPayload";
 import type { useNotebookSwitcherState } from "./useNotebookSwitcherState";
 
 export function useNotebookSwitcherActions(
@@ -37,11 +40,9 @@ export function useNotebookSwitcherActions(
     reorderNotebooks,
     setIsOpen,
     isDraggingRef,
-    editDialog,
-    setEditDialog,
+    savingRef,
     notebookList,
   } = input;
-  const savingRef = useRef(false);
 
   const handleOpenLocalFolder = async () => {
     const desktop = getGooseDesktop();
@@ -71,57 +72,54 @@ export function useNotebookSwitcherActions(
 
   const handleEdit = (id: string) => {
     const notebook = notebooks[id];
-    if (!notebook) return;
-
-    setEditDialog({
-      open: true,
-      id,
-      name: notebook.name,
-      confirmName: notebook.name,
-      icon:
-        notebook.icon ||
-        (notebook.source === "local-folder" ? "FolderOpen" : "BookOpen"),
-      excludeFromGlobalSearch: Boolean(notebook.excludeFromGlobalSearch),
-      openDeleteConfirm: false,
-      isLocalFolder: notebook.source === "local-folder",
-    });
+    const open = window.gooseDesktop?.auxiliary?.open;
+    if (!notebook || !open || savingRef.current) return;
     setIsOpen(false);
-  };
-
-  const handleSaveEdit = () => {
-    if (!editDialog.id || savingRef.current) return;
-    const name = editDialog.name.trim();
-    if (!name) {
-      toast.error(uiText("enterANotebookName_648e"));
-      return;
-    }
-    const notebook = notebooks[editDialog.id];
-    const updates = {
-      name,
-      icon: editDialog.icon,
-      excludeFromGlobalSearch: editDialog.excludeFromGlobalSearch,
-    };
-    const close = () => setEditDialog({ ...editDialog, open: false });
-    if (notebook?.source === "local-folder" && notebook.localPath && name !== notebook.name) {
-      savingRef.current = true;
-      void renameLocalNotebookFolder(editDialog.id, name, updates)
-        .then(close)
-        .catch((error: unknown) => {
-          toast.error(error instanceof Error ? error.message : uiText("renameFailed_37ba"));
-        })
-        .finally(() => {
-          savingRef.current = false;
-        });
-      return;
-    }
-    updateNotebook(editDialog.id, updates);
-    close();
-  };
-
-  const handleDelete = () => {
-    if (!editDialog.id) return;
-    deleteNotebook(editDialog.id);
-    setEditDialog({ ...editDialog, open: false });
+    const pageCount = Object.values(usePages.getState().pages).filter(
+      (page) => page.workspaceId === id && !page.trashedAt && !page.isFolder,
+    ).length;
+    void open({
+      kind: "notebook-edit",
+      payload: {
+        id,
+        name: notebook.name,
+        icon: notebook.icon || (notebook.source === "local-folder" ? "FolderOpen" : "BookOpen"),
+        excludeFromGlobalSearch: Boolean(notebook.excludeFromGlobalSearch),
+        isLocalFolder: notebook.source === "local-folder",
+        pageCount,
+      },
+    }).then((response) => {
+      if (response.status !== "confirmed") return;
+      const values = readNotebookEditValues(response.values);
+      const current = useNotebooks.getState().notebooks[id];
+      if (!values || !current || savingRef.current) return;
+      if (values.action !== "save") {
+        deleteNotebook(id);
+        return;
+      }
+      const name = values.name.trim();
+      if (!name) {
+        toast.error(uiText("enterANotebookName_648e"));
+        return;
+      }
+      const updates = {
+        name,
+        icon: values.icon,
+        excludeFromGlobalSearch: values.excludeFromGlobalSearch,
+      };
+      if (current.source === "local-folder" && current.localPath && name !== current.name) {
+        savingRef.current = true;
+        void renameLocalNotebookFolder(id, name, updates)
+          .catch((error: unknown) => {
+            toast.error(error instanceof Error ? error.message : uiText("renameFailed_37ba"));
+          })
+          .finally(() => {
+            savingRef.current = false;
+          });
+        return;
+      }
+      updateNotebook(id, updates);
+    }).catch(() => undefined);
   };
 
   const handleDragStart = () => {
@@ -149,8 +147,6 @@ export function useNotebookSwitcherActions(
     ...input,
     handleOpenLocalFolder,
     handleEdit,
-    handleSaveEdit,
-    handleDelete,
     handleDragStart,
     handleDragEnd,
     handleDragCancel,

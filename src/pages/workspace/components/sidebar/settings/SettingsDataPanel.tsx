@@ -6,20 +6,14 @@ zh-Hans:
   dataManagement_2d71: "数据管理"
   gettingStarted_9a32: "新手引导"
   restartSetupGuide_8ab0: "重新开始引导"
-  cancel_625f: "取消"
-  confirm_38cf: "确定"
 en:
   dataManagement_2d71: "Data management"
   gettingStarted_9a32: "Getting started"
   restartSetupGuide_8ab0: "Restart setup guide"
-  cancel_625f: "Cancel"
-  confirm_38cf: "Confirm"
 ja:
   dataManagement_2d71: "データ管理"
   gettingStarted_9a32: "はじめに"
   restartSetupGuide_8ab0: "ガイドを最初からやり直す"
-  cancel_625f: "キャンセル"
-  confirm_38cf: "OK"
 `;
 const uiText = createTranslator(localMessages);
 import { renderWebdavRemoteBackups } from "./data-panel/renderWebdavRemoteBackups";
@@ -42,9 +36,6 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
   const {
     active,
     onRestartGuide,
-    confirmConfig,
-    cancelConfirmation,
-    confirmRemoteAction,
   } = context;
 
   return (
@@ -71,38 +62,6 @@ export function SettingsDataPanel(props: SettingsDataPanelProps) {
           {renderWebdavRemoteBackups(context)}
         </div>
       </div>
-
-      <DialogShell
-        open={active && Boolean(confirmConfig)}
-        onOpenChange={(open) => {
-          if (!open) {
-            cancelConfirmation();
-          }
-        }}
-        title={confirmConfig?.title}
-      >
-        <div className="px-6 pb-6 pt-4 space-y-4">
-          <p className="text-sm text-muted-foreground break-all">
-            {confirmConfig?.description}
-          </p>
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              className="rounded-[var(--goose-control-radius)]"
-              onClick={() => {
-                cancelConfirmation();
-              }}
-            >
-              {uiText("cancel_625f")}</Button>
-            <Button
-              variant="destructive"
-              className="rounded-[var(--goose-control-radius)]"
-              onClick={() => void confirmRemoteAction()}
-            >
-              {uiText("confirm_38cf")}</Button>
-          </div>
-        </div>
-      </DialogShell>
     </div>
   );
 }

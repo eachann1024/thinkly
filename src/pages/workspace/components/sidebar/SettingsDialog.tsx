@@ -1,6 +1,5 @@
 import { useLocale } from "@/i18n";
 import { useEffect } from "react";
-import { renderSettingsResetDialog } from "./settings-dialog/renderSettingsResetDialog";
 import { renderSettingsScaffold } from "./settings-dialog/renderSettingsScaffold";
 import { type SettingsDialogProps } from "./settings-dialog/shared";
 import { useSettingsDialogState } from "./settings-dialog/useSettingsDialogState";
@@ -24,11 +23,5 @@ export function SettingsDialog(props: SettingsDialogProps) {
 
   if (!open && !hasOpened) return null;
 
-  return (
-    <>
-      {renderSettingsScaffold(context, gitAvailability)}
-
-      {renderSettingsResetDialog(context)}
-    </>
-  );
+  return renderSettingsScaffold(context, gitAvailability);
 }

@@ -2,27 +2,28 @@ import { useLocale } from "@/i18n";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/messages/UserMessage.tsx#messages:1">`
 zh-Hans:
+  image: "图片"
   detailLocalSkill: "本地 Skill：/{{value1}}"
   detailSelectionFrom: "选区引用，来自{{value1}}"
   detailOpen: "打开：{{value1}}"
 en:
+  image: "Image"
   detailLocalSkill: "Local skill: /{{value1}}"
   detailSelectionFrom: "Selection from {{value1}}"
   detailOpen: "Open: {{value1}}"
 ja:
+  image: "画像"
   detailLocalSkill: "ローカルスキル：/{{value1}}"
   detailSelectionFrom: "{{value1}}からの選択範囲の引用"
   detailOpen: "開く：{{value1}}"
 `;
 const t = createTranslator(messages);
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { SelectionQuotePreview } from "@/components/editor/ai/composer/SelectionQuotePreview";
-import type { AiSelectionQuoteAttrs } from "@/components/editor/ai/composer/selectionQuote";
+import { openSelectionQuote } from "@/windows/open/openSelectionQuote";
 import { MessagePrimitive, AttachmentPrimitive } from "@assistant-ui/react";
 import { Image as ImageIcon } from "@/components/ui/icons";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
-import type { PreviewContent } from "@/lib/preview/previewAction";
+import { openFullscreenPreview } from "@/lib/preview/fullscreenPreviewWindow";
 import { buildUserMessageSegments } from "@/lib/notebook-ai/userMessageSegments";
 import { formatSelectionQuotePromptLabel } from "@/components/editor/ai/composer/selectionQuote";
 import { useEditorPageContext } from "@/components/editor/platform/hostContext";
@@ -33,14 +34,13 @@ import { getUserDisplayText, getUserImageParts } from "./messagePresentation";
 import { MessageActionBar } from "./MessageActionBar";
 export function UserMessage({
   msg,
-  setPreviewContent,
+  noteTitle,
 }: {
   msg: NotebookAiMessage;
-  setPreviewContent: (content: PreviewContent) => void;
+  noteTitle?: string;
 }) {
   useLocale();
   const { onOpenPage } = useEditorPageContext();
-  const [quotePreview, setQuotePreview] = useState<AiSelectionQuoteAttrs | null>(null);
   const text = getUserDisplayText(msg);
   const hasLiveImages = getUserImageParts(msg).length > 0;
   const persistedImages = msg.metadata?.imageAttachments ?? [];
@@ -70,13 +70,13 @@ export function UserMessage({
                       src={imagePart.image}
                       alt={attachment.name}
                       className="h-20 w-20 cursor-zoom-in rounded-[8px] object-cover"
-                      onClick={() =>
-                        setPreviewContent({
+                      onClick={() => {
+                        void openFullscreenPreview({
                           kind: "image",
                           data: imagePart.image,
                           fileName: attachment.name,
-                        })
-                      }
+                        }, attachment.name || t("image"), noteTitle);
+                      }}
                     />
                   ) : null}
                   <span className="sr-only">
@@ -136,7 +136,7 @@ export function UserMessage({
                       className="ai-composer-chip inline-flex max-w-full min-w-0 items-center align-middle mx-1 truncate rounded-[6px] px-1.5 text-[11px] font-medium leading-none"
                       title={segment.quote.text}
                       aria-label={t("detailSelectionFrom", { value1: segment.quote.pageTitle })}
-                      onClick={() => setQuotePreview(segment.quote)}
+                      onClick={() => openSelectionQuote(segment.quote)}
                     >
                       {formatSelectionQuotePromptLabel(segment.quote)}
                     </Button>
@@ -170,7 +170,6 @@ export function UserMessage({
           ) : null}
         </div>
         <MessageActionBar />
-        <SelectionQuotePreview quote={quotePreview} onClose={() => setQuotePreview(null)} />
       </div>
     </MessagePrimitive.Root>
   );

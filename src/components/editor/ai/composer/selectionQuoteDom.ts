@@ -1,3 +1,4 @@
+import "./selection-quote.css";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/components/editor/ai/composer/selectionQuoteDom.ts#messages:1">`
 zh-Hans:

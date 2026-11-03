@@ -136,8 +136,6 @@ export function useAiComposerController(
   }, [readLocalSkills]);
 
   const {
-    imagePreviewContent,
-    setImagePreviewContent,
     hideImagePreview,
     cancelImagePreviewHide,
     releaseAllImages,
@@ -161,8 +159,6 @@ export function useAiComposerController(
 
   const references = useComposerReferences(state);
   const images = {
-    imagePreviewContent,
-    setImagePreviewContent,
     hideImagePreview,
     cancelImagePreviewHide,
     releaseAllImages,
@@ -204,7 +200,7 @@ export function useAiComposerController(
     handleMentionKeyDown,
     handleCommandKeyDown,
   );
-  const { handleClickNative, handleBlurNative, handlePasteNative, quotePreview, setQuotePreview } =
+  const { handleClickNative, handleBlurNative, handlePasteNative } =
     useComposerInteractions(
       props,
       state,
@@ -261,9 +257,5 @@ export function useAiComposerController(
     command,
     commandItems,
     insertCommand,
-    imagePreviewContent,
-    setImagePreviewContent,
-    quotePreview,
-    setQuotePreview,
   };
 }

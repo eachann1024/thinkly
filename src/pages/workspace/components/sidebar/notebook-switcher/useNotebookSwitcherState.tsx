@@ -46,6 +46,8 @@ export function useNotebookSwitcherState({
 
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const savingRef = useRef(false);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { delay: 200, tolerance: 8 },
@@ -60,17 +62,6 @@ export function useNotebookSwitcherState({
     window.addEventListener("blur", close);
     return () => window.removeEventListener("blur", close);
   }, [isOpen]);
-
-  const [editDialog, setEditDialog] = useState({
-    open: false,
-    id: "",
-    name: "",
-    confirmName: "",
-    icon: "",
-    excludeFromGlobalSearch: false,
-    openDeleteConfirm: false,
-    isLocalFolder: false,
-  });
 
   const activeNotebook = activeNotebookId ? notebooks[activeNotebookId] : null;
 
@@ -100,8 +91,7 @@ export function useNotebookSwitcherState({
     isDraggingRef,
     menuRef,
     sensors,
-    editDialog,
-    setEditDialog,
+    savingRef,
     activeNotebook,
     isRail,
     isHeader,

@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
-import type { PreviewContent } from "@/lib/preview/previewAction";
+import { useCallback, useEffect } from "react";
 import type { AiImageAttachmentAttrs } from "./referenceLookup";
 import { calculateImageSha256 } from "./imageDedup";
 import { createImageChipElement, createImageId } from "./composerImageChip";
@@ -55,9 +54,6 @@ export function useComposerImages(options: ComposerImagesOptions) {
     maxImageCount,
     onImageRejected,
   } = options;
-
-  const [imagePreviewContent, setImagePreviewContent] =
-    useState<PreviewContent | null>(null);
 
   const countImageTokens = useCallback((): number => {
     const el = editorRef.current;
@@ -250,8 +246,6 @@ export function useComposerImages(options: ComposerImagesOptions) {
   }, []);
 
   return {
-    imagePreviewContent,
-    setImagePreviewContent,
     hideImagePreview,
     cancelImagePreviewHide,
     releaseAllImages,
