@@ -8,11 +8,8 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { ImageExportThemeSelector } from "@/components/ui/image-export-theme-selector";
-import type { CardThemeId, WatermarkConfig } from "@/lib/imageExport";
-import { exportSelectionToImage } from "@/lib/imageExport";
 import { type BlockNoteContent } from "@/components/editor/utils/blocknote-content";
-import { getPageTitle } from "@/components/editor/utils/page-title";
+import { openImageExport } from "@/pages/workspace/components/image-export/openImageExport";
 import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/editorContentMode";
 import { resolveCopyBlockSelection } from "@/components/editor/extensions/copyCurrentBlockExtension";
 import { getEditorSelectionPlainText } from "@/components/editor/utils/clipboard";
@@ -104,10 +101,8 @@ export function EditorContextMenu({
   useLocale();
   const [selectedBlocks, setSelectedBlocks] = useState<BlockNoteContent>([]);
   const [canCopy, setCanCopy] = useState(false);
-  const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
   const [tableSequence, setTableSequence] = useState<{ id: string; enabled: boolean } | null>(null);
   const contextBlockIdRef = useRef<string | null>(null);
-  const selectedBlocksRef = useRef<BlockNoteContent>([]);
   const selectedTextRef = useRef("");
   const { handleContextPaste, handleCopySelection, handleCutSelection, rememberContextSelection } =
     useEditorContextClipboard(editor, editable, selectedTextRef);
@@ -134,18 +129,7 @@ export function EditorContextMenu({
     if (showSelectionImageExport) {
       const blocks = getEditorSelectedBlocksForExport(editor);
       setSelectedBlocks(blocks);
-      selectedBlocksRef.current = blocks;
     }
-  };
-
-  const handleSelectionThemeConfirm = (
-    themeId: CardThemeId,
-    watermarkConfig: WatermarkConfig,
-  ) => {
-    const blocks = selectedBlocksRef.current;
-    if (!Array.isArray(blocks) || blocks.length === 0) return;
-    const title = page ? getPageTitle(page) : t("selectedContent");
-    exportSelectionToImage(blocks, title, themeId, watermarkConfig, page);
   };
 
   return (
@@ -249,11 +233,11 @@ export function EditorContextMenu({
               {tableSequence.enabled && <GooseIcons.Check className="ml-auto" />}
             </ContextMenuItem>
           )}
-          {showSelectionImageExport && selectedBlocks.length > 0 && (
+          {showSelectionImageExport && selectedBlocks.length > 0 && page?.id && (
             <ContextMenuItem
               onSelect={() => {
-                selectedBlocksRef.current = selectedBlocks;
-                setThemeSelectorOpen(true);
+                if (!page?.id) return;
+                openImageExport(page.id, selectedBlocks);
               }}
             >
               <GooseIcons.Image className="size-4" />
@@ -263,16 +247,6 @@ export function EditorContextMenu({
         </ContextMenuContent>
       </ContextMenu>
 
-      {showSelectionImageExport && (
-        <ImageExportThemeSelector
-          open={themeSelectorOpen}
-          onOpenChange={setThemeSelectorOpen}
-          onConfirm={handleSelectionThemeConfirm}
-          mode="selection"
-          page={page}
-          blocks={selectedBlocks}
-        />
-      )}
     </>
   );
 }

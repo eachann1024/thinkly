@@ -59,7 +59,6 @@ declare global {
   const FLOATING_MENU_SHIFT_PX: typeof import('../components/ui/floating-menu-motion').FLOATING_MENU_SHIFT_PX
   const Field: typeof import('../components/ui/field').Field
   const IconButton: typeof import('../components/ui/icon-button').IconButton
-  const ImageExportThemeSelector: typeof import('../components/ui/image-export-theme-selector').ImageExportThemeSelector
   const Input: typeof import('../components/ui/input').Input
   const Kbd: typeof import('../components/ui/kbd').Kbd
   const Label: typeof import('../components/ui/label').Label

@@ -57,9 +57,8 @@ import { TitleBarAiToggle } from "./titlebar/TitleBarAiToggle";
 import { actionButtonClass, DesktopWindowNavigation } from "./titlebar/DesktopWindowNavigation";
 import { PageFileTitle } from "./titlebar/PageFileTitle";
 import { HistoryElectronChrome } from "../history/history-view/HistoryToolbar";
+import { ImageExportElectronChrome } from "../image-export/ImageExportChrome";
 import { SettingsCloseButton } from "../sidebar/settings/SettingsCloseButton";
-
-
 
 export function DesktopTitleBar({
   page,
@@ -69,6 +68,7 @@ export function DesktopTitleBar({
   onToggleSidebar,
   isWelcomeTab,
   inHistoryMode,
+  inImageExportMode = false,
   onOpenSearch,
   onBeforeActivateTab,
   onRestore,
@@ -97,7 +97,7 @@ export function DesktopTitleBar({
   const aiFullscreenOpen =
     folderActionsAvailable && Boolean(aiPanelOpen) && isFullscreenAiLayout(aiLayoutMode);
   const aiSidePanelOpen = folderActionsAvailable && Boolean(aiPanelOpen) && !aiFullscreenOpen;
-  const showTabRail = folderActionsAvailable && !settingsOpen && !inHistoryMode && !aiFullscreenOpen;
+  const showTabRail = folderActionsAvailable && !settingsOpen && !inHistoryMode && !inImageExportMode && !aiFullscreenOpen;
   useIncomingWorkspaceTabs(!showTabRail);
 
   const isFramelessElectron =
@@ -134,7 +134,7 @@ export function DesktopTitleBar({
       toggleSidebarShortcutLabel={toggleSidebarShortcutLabel} />
   );
 
-  if (inHistoryMode) {
+  if (inHistoryMode || inImageExportMode) {
     return (
       <div
         className={cn(
@@ -145,14 +145,25 @@ export function DesktopTitleBar({
         onPointerDown={onTitleBarPointerDown}
         onDoubleClick={onTitleBarDoubleClick}
       >
-        <HistoryElectronChrome
-          page={page}
-          onBeforeActivateTab={onBeforeActivateTab}
-          onToggleSidebar={onToggleSidebar}
-          toggleSidebarCollapsed={toggleSidebarCollapsed}
-          sidebarCollapsed={sidebarCollapsed}
-          toggleSidebarShortcutLabel={toggleSidebarShortcutLabel}
-        />
+        {inHistoryMode ? (
+          <HistoryElectronChrome
+            page={page}
+            onBeforeActivateTab={onBeforeActivateTab}
+            onToggleSidebar={onToggleSidebar}
+            toggleSidebarCollapsed={toggleSidebarCollapsed}
+            sidebarCollapsed={sidebarCollapsed}
+            toggleSidebarShortcutLabel={toggleSidebarShortcutLabel}
+          />
+        ) : (
+          <ImageExportElectronChrome
+            page={page}
+            onBeforeActivateTab={onBeforeActivateTab}
+            onToggleSidebar={onToggleSidebar}
+            toggleSidebarCollapsed={toggleSidebarCollapsed}
+            sidebarCollapsed={sidebarCollapsed}
+            toggleSidebarShortcutLabel={toggleSidebarShortcutLabel}
+          />
+        )}
         {isFramelessElectron ? <WinWindowControls /> : null}
       </div>
     );

@@ -16,8 +16,9 @@ import type { Page } from "@/types";
 import { type BlockNoteContent } from "@/components/editor/utils/blocknote-content";
 import { extractTitleFromContent } from "@/components/editor/utils/content-text-extractor";
 import { getPageTitle } from "@/components/editor/utils/page-title";
-import type { CardThemeId, NotebookCardThemeContext } from "./themes";
+import type { CardThemeId } from "./themes";
 import { resolveCardTheme } from "./themes";
+import { notebookThemeContextFromPage } from "./themeContext";
 import type { WatermarkConfig } from "./watermark";
 import { normalizeWatermarkConfig } from "./watermark";
 import {
@@ -59,27 +60,6 @@ function buildFileName(
   ];
   if (suffix) parts.splice(1, 0, suffix);
   return `${parts.join("_")}.png`;
-}
-
-function notebookThemeContextFromPage(
-  page?: Pick<Page, "fontFamily"> | null,
-): NotebookCardThemeContext {
-  const isDark =
-    typeof document !== "undefined" &&
-    document.documentElement.classList.contains("dark");
-  const editorFontSize =
-    typeof document === "undefined"
-      ? undefined
-      : Number.parseFloat(
-          getComputedStyle(document.documentElement).getPropertyValue(
-            "--editor-font-size",
-          ),
-        );
-  return {
-    fontFamily: page?.fontFamily ?? "default",
-    editorFontSize: Number.isFinite(editorFontSize) ? editorFontSize : undefined,
-    resolvedTheme: isDark ? "dark" : "light",
-  };
 }
 
 export async function exportPageToImage(
