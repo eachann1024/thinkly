@@ -4,24 +4,31 @@
   --page-layout-top: 24px;
   --page-paragraph-gap: 4px;
   --page-title-gap: 14px;
-  --page-handle-room: calc(80px * var(--editor-scale, 1) + 16px);
+  /* Overlaid block handle lives in this padding; it is not a layout column. */
+  --handle-gutter: calc(56px * var(--editor-scale, 1));
 }
 [data-page-layout] .page-layout-body {
   container: page-layout / inline-size;
 }
 [data-page-layout="full"] {
   --page-layout-width: none;
-  --page-layout-gutter: 48px;
+}
+[data-page-layout] .page-scroll-container {
+  overflow-x: clip;
 }
 [data-page-layout] .page-layout-document {
   width: 100%;
   max-width: var(--page-layout-width);
   min-height: 100%;
+  box-sizing: border-box;
   margin-inline: auto;
-  padding: var(--page-layout-top) var(--page-layout-gutter) 100px;
+  padding: var(--page-layout-top) var(--handle-gutter) 100px;
 }
 [data-page-layout="standard"] .page-layout-document {
-  padding-inline: clamp(24px, calc((100% - 720px) / 2), var(--page-layout-gutter));
+  padding-inline: max(
+    var(--handle-gutter),
+    clamp(24px, calc((100% - 720px) / 2), var(--page-layout-gutter))
+  );
 }
 [data-page-layout] .page-layout-document > .workspace-editor-surface { padding-block: 0; }
 [data-page-layout] .workspace-editor-surface .bn-editor [data-content-type="paragraph"] {
@@ -81,9 +88,6 @@
 }
 @container page-layout (max-width: 400px) {
   [data-page-layout="full"] .page-layout-document { padding-inline: 24px; }
-}
-[data-page-layout] .page-layout-document.page-layout-document {
-  padding-left: max(var(--page-handle-room), clamp(24px, calc((100% - 720px) / 2), var(--page-layout-gutter)));
 }
 
 [data-page-layout][data-font-family="default"] { --goose-document-font: var(--font-default); }

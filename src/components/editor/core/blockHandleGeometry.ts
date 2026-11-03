@@ -1,7 +1,10 @@
 type Bounds = { left: number; right: number; top: number; bottom: number };
 
+/** Left inset so the handle stays inside the editor column's padding, not over the sidebar. */
+const HANDLE_COLUMN_INSET = 8;
+
 export function blockHandleLeft(preferredRight: number, width: number, viewport: Pick<Bounds, "left" | "right">): number {
-  return Math.max(viewport.left + 4, Math.min(preferredRight - width, viewport.right - width - 4));
+  return Math.max(viewport.left + HANDLE_COLUMN_INSET, Math.min(preferredRight - width, viewport.right - width - 4));
 }
 
 export function isPointerInToolbarCorridor(block: Bounds, toolbar: Bounds, x: number, y: number): boolean {

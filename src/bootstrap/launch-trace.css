@@ -143,8 +143,12 @@
   max-width: var(--page-layout-width, 912px);
   box-sizing: border-box;
   margin-inline: auto;
-  padding: var(--page-layout-top, 24px) clamp(24px, calc((100% - 720px) / 2), 96px) 0;
-  padding-left: max(calc(80px * var(--editor-scale, 1) + 16px), clamp(24px, calc((100% - 720px) / 2), 96px));
+  padding: var(--page-layout-top, 24px)
+    max(
+      var(--handle-gutter, calc(56px * var(--editor-scale, 1))),
+      clamp(24px, calc((100% - 720px) / 2), var(--page-layout-gutter, 96px))
+    )
+    0;
 }
 
 .goose-launch-column { display: flex; flex-direction: column; gap: 16px; }
