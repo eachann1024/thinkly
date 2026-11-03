@@ -6,6 +6,7 @@ import { usePages } from "@/stores/usePages";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { holdGitSyncWrites, releaseGitSyncWrites } from "./git-sync-write-barrier";
 import { GitSyncPreparation, gitSyncPreparationFailure } from "./git-sync-preparation";
+import { flushGitSyncPages } from "./git-sync-save";
 
 let installed = false;
 export function installGitSyncResponder() {
@@ -31,9 +32,8 @@ export function installGitSyncResponder() {
       });
       window.dispatchEvent(new CustomEvent("goose-note:flush-editor", { detail: { immediate: true } }));
       const ids = new Set(selected.map((notebook) => notebook.id));
+      await flushGitSyncPages(ids);
       const pages = Object.values(usePages.getState().pages).filter((page) => ids.has(page.workspaceId));
-      await Promise.all(pages.map(page => usePages.getState().flushPendingLocalSaveByPageId(page.id)));
-      if (pages.some((page) => usePages.getState().dirtyLocalPageIds[page.id])) throw new Error(gitText("saveBeforeSync"));
       if (request.finished) return;
       for (const [index, root] of canonical.entries()) {
         const paths = new Set([root, selected[index]!.localPath!]);
