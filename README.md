@@ -66,8 +66,6 @@ Intel Mac、Linux deb / pacman 包不提供。需要请到 [GitHub](https://gith
 
 zip、blockmap、yml 仅供应用内自动更新，无需下载。
 
-1.7.317 及更早的 Release 附件仍是 `Goose.Note-*` 和 `goose-note-app-*`，磁盘上的应用是 `Goose Note.app`；当前版本是 `Thinkly.app`，需要手动安装一次。
-
 ### macOS 首次安装
 
 为控制独立开发成本，作者暂未加入每年 99 美元的 Apple Developer Program，因此未进行 Developer ID 签名与 Apple 公证。首次安装需要你手动完成额外授权。
