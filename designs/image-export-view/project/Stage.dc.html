@@ -26,6 +26,8 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 .mi:hover{background:#eef3fc}
 .sw{position:relative;width:30px;height:18px;border-radius:9px;flex:none}
 .sw span{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:7px;background:#fff;transition:transform .15s}
+.in{font:inherit;font-size:13px;width:100%;box-sizing:border-box;height:30px;padding:0 8px;border:1px solid #dcdcdc;border-radius:6px;background:#ffffff;color:#20242c;outline:none;transition:border-color .15s,box-shadow .15s}
+.in:focus{border-color:#547dd0;box-shadow:0 0 0 3px #e5edfc}
 @keyframes pop{from{opacity:0;transform:translateY(-4px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes toast{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -56,6 +58,7 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 </div>
 <sc-for list="{{opts}}" as="o" hint-placeholder-count="5">
 <button class="mi" role="menuitemcheckbox" aria-checked="{{o.on}}" disabled="{{o.disabled}}" style="{{o.rowStyle}}" onClick="{{o.toggle}}"><span>{{o.label}}</span><span class="sw" aria-hidden="true" style="{{o.track}}"><span style="{{o.knob}}"></span></span></button>
+<sc-if value="{{o.input}}" hint-placeholder-val="{{false}}"><div style="padding:2px 8px 6px 24px"><input class="in" aria-label="品牌文字" maxlength="24" placeholder="留空则不显示品牌" value="{{brandText}}" onInput="{{setBrand}}"></div></sc-if>
 </sc-for>
 </div>
 </sc-if>
@@ -65,19 +68,8 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 <main style="flex:1;min-height:0;margin:0 8px;border-radius:10px;background:#e7e7e7;position:relative;display:flex;align-items:center;justify-content:center;gap:28px;overflow:hidden">
 <button class="nav" aria-label="上一个主题" onClick="{{prev}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
 <div style="display:flex;flex-direction:column;align-items:center;gap:10px;height:100%;box-sizing:border-box;padding:20px 8px 24px;overflow-y:auto;scrollbar-width:none">
-<div style="font-size:12px;color:#526071;display:flex;gap:8px"><span style="color:#20242c;font-weight:460">{{themeName}}</span><span class="goose-tabular">{{pos}}</span></div>
-<div style="{{stage}}">
-<article style="{{card}}">
-<sc-if value="{{showTitle}}" hint-placeholder-val="{{true}}"><h1 style="margin:0 0 12px;font-size:26px;line-height:1.3;font-weight:650;letter-spacing:-.01em">把周会改成异步之后</h1></sc-if>
-<p style="margin:0">试了六周，周会从每周一小时缩成十五分钟的站会，其余全部放进共享文档。最明显的变化是：讨论变少了，但决定变快了。</p>
-<h2 style="margin:18px 0 6px;font-size:17px;font-weight:600">保留下来的三件事</h2>
-<ul style="margin:0;padding-left:20px"><li>周一前写好本周目标，一句话即可</li><li>阻塞问题直接在文档里 @ 负责人</li><li>周五回看，只记录偏差</li></ul>
-<blockquote style="{{quote}}">异步不是少沟通，而是把沟通写下来。</blockquote>
-<sc-if value="{{showFooter}}" hint-placeholder-val="{{true}}">
-<footer style="{{foot}}"><sc-if value="{{showBrand}}" hint-placeholder-val="{{true}}"><span style="font-weight:600">Thinkly</span></sc-if><span style="flex:1"></span><sc-if value="{{showDate}}" hint-placeholder-val="{{true}}"><span class="goose-tabular">{{stamp}}</span></sc-if></footer>
-</sc-if>
-</article>
-</div>
+<div style="font-size:12px;color:#526071;display:flex;gap:8px"><span style="color:#20242c;font-weight:460">{{themeName}}</span><span class="goose-tabular">{{pos}}</span><span aria-hidden="true">·</span><span class="goose-tabular">{{dims}}</span></div>
+<div style="flex:none;box-shadow:0 1px 3px rgba(0,0,0,.06),0 12px 32px rgba(0,0,0,.08)"><dc-import name="ExportCard" theme="{{theme}}" w="{{cw}}" opts="{{cardOpts}}" blocks="{{cardBlocks}}" heading="{{heading}}" hint-size="500px,760px"></dc-import></div>
 </div>
 <button class="nav" aria-label="下一个主题" onClick="{{next}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
 </main>
@@ -105,6 +97,7 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
 var THEMES=[
+{id:"original",name:"保持原样式",g:"cur",bg:"#ffffff",card:"#ffffff",tx:"#20242c",sub:"#526071",ac:"#e9c400",r:0},
 {id:"notebook",name:"笔记本",g:"light",bg:"#ffffff",card:"#ffffff",tx:"#20242c",sub:"#5e5d59",ac:"#2563eb",r:12},
 {id:"github-light",name:"GitHub 浅色",g:"light",bg:"#f6f8fa",card:"#ffffff",tx:"#1f2328",sub:"#59636e",ac:"#0969da",r:12},
 {id:"medium",name:"Medium",g:"light",bg:"#faf9f6",card:"#ffffff",tx:"#242424",sub:"#6b6b6b",ac:"#1a8917",r:4},
@@ -120,36 +113,39 @@ var THEMES=[
 {id:"tokyo-night",name:"Tokyo Night",g:"dark",bg:"#1a1b26",card:"#24283b",tx:"#c0caf5",sub:"#9aa5ce",ac:"#7aa2f7",r:14},
 {id:"catppuccin",name:"Catppuccin",g:"dark",bg:"#24273a",card:"#1e2030",tx:"#cad3f5",sub:"#a5adcb",ac:"#c6a0f6",r:14},
 {id:"synthwave",name:"合成波",g:"dark",bg:"#170a2e",card:"#1c0d38",tx:"#f5e9ff",sub:"#b9a6d6",ac:"#ff2a6d",r:18}];
+var SEL_BLOCKS=[{k:"h2",t:"保留下来的三件事"},{k:"li",t:"周一前写好本周目标，一句话即可"},{k:"li",t:"阻塞问题直接在文档里 @ 负责人"},{k:"p",t:"周五回看，",m:"只记录偏差",t2:"，不复述进度。"}];
+function safeRatio(w,h){var r=Math.min(3,16384/w,16384/h,Math.sqrt(16e6/(w*h)));r=Math.floor(r*100)/100;return r<.1?0:r;}
 class Component extends DCLogic {
-constructor(p){super(p);this.state={theme:"notebook",filter:"all",scope:"page",width:1080,menu:false,footer:true,brand:true,date:true,time:true,title:true,toast:""};}
+constructor(p){super(p);this.state={theme:"notebook",pageTheme:"notebook",filter:"all",scope:"page",width:1080,menu:false,footer:true,brand:true,brandText:"Thinkly",date:true,time:true,title:true,toast:""};}
 flash(m){this.setState({toast:m,menu:false});clearTimeout(this._t);this._t=setTimeout(()=>this.setState({toast:""}),2600);}
-step(d){var i=THEMES.findIndex(t=>t.id===this.state.theme);this.setState({theme:THEMES[(i+d+THEMES.length)%THEMES.length].id});}
+vis(){var s=this.state;return THEMES.filter(t=>t.g==="cur"?s.scope==="sel":(s.filter==="all"||t.g===s.filter));}
+pick(id){this.setState(this.state.scope==="page"?{theme:id,pageTheme:id}:{theme:id});}
+step(d){var l=this.vis(),i=l.findIndex(t=>t.id===this.state.theme);this.pick(l[(i+d+l.length)%l.length].id);}
 renderVals(){
-var s=this.state,self=this,i=THEMES.findIndex(t=>t.id===s.theme),T=THEMES[i],dark=T.g==="dark";
+var s=this.state,self=this,T=THEMES.find(t=>t.id===s.theme)||THEMES[1],list=this.vis(),i=list.findIndex(t=>t.id===s.theme);
 var on="background:#ffffff;color:#20242c;box-shadow:0 1px 2px rgba(0,0,0,.08)",off="background:transparent;color:#526071";
 var sw=function(v,dis){return{track:"background:"+(v?"#547dd0":"#d6d6d6")+";opacity:"+(dis?.45:1),knob:v?"transform:translateX(12px)":""};};
-var opt=function(k,l,dis,ind){var x=sw(s[k]&&!dis,dis);return{label:l,on:!!s[k],disabled:!!dis,track:x.track,knob:x.knob,rowStyle:(ind?"padding-left:24px;":"")+(dis?"color:#8b95a3;cursor:default":""),toggle:function(){if(!dis)self.setState({[k]:!s[k]})}};};
-var list=THEMES.filter(t=>s.filter==="all"||t.g===s.filter);
-var now=new Date(),dd=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
-var cw=s.width===720?400:s.width===1440?600:500;
+var opt=function(k,l,dis,ind,input){var x=sw(s[k]&&!dis,dis);return{label:l,on:!!s[k],disabled:!!dis,input:!!input&&!!s[k]&&!dis,track:x.track,knob:x.knob,rowStyle:(ind?"padding-left:24px;":"")+(dis?"color:#8b95a3;cursor:default":""),toggle:function(){if(!dis)self.setState({[k]:!s[k]})}};};
+var nf=T.id==="kenya-hara",sel=s.scope==="sel",w=s.width,h=Math.round((sel?620:1460)*Math.pow(1080/w,.8)),r=safeRatio(w,h);
+var fmt=function(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,",");};
+var cw=w===720?400:w===1440?600:500;
 return{
 scopePage:s.scope==="page"?on:off,scopeSel:s.scope==="sel"?on:off,
-pickPage:()=>this.setState({scope:"page"}),pickSel:()=>this.setState({scope:"sel"}),
+pickPage:()=>this.setState({scope:"page",theme:s.pageTheme}),pickSel:()=>this.setState({scope:"sel",theme:"original"}),
 menu:s.menu,menuBtn:s.menu?"background:#e5edfc;color:#20242c":"",toggleMenu:()=>this.setState({menu:!s.menu}),
 widths:[[720,"720"],[1080,"1080"],[1440,"1440"]].map(w=>({label:w[1],style:s.width===w[0]?on:off,pick:()=>this.setState({width:w[0]})})),
-opts:[opt("title","标题"),opt("footer","底部栏"),opt("brand","品牌",!s.footer,1),opt("date","日期",!s.footer,1),opt("time","时分秒",!s.footer||!s.date,1)],
+opts:[opt("title","标题"),opt("footer",nf?"底部栏（此主题不含）":"底部栏",nf),opt("brand","品牌",!s.footer||nf,1,1),opt("date","日期",!s.footer||nf,1),opt("time","时分秒",!s.footer||!s.date||nf,1)],
+brandText:s.brandText,setBrand:(e)=>this.setState({brandText:e.target.value}),
 filters:[["all","全部"],["light","浅色"],["dark","深色"]].map(f=>({label:f[1],style:s.filter===f[0]?on:off,pick:()=>this.setState({filter:f[0]})})),
-thumbs:list.map(t=>{var a=t.id===s.theme;return{name:t.name,on:a,pick:()=>this.setState({theme:t.id}),
+thumbs:list.map(t=>{var a=t.id===s.theme;return{name:t.name,on:a,pick:()=>this.pick(t.id),
 wrap:a?"background:#e5edfc;box-shadow:inset 0 0 0 1px #547dd0":"",
 frame:"width:76px;height:56px;border-radius:6px;background:"+t.bg+";box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);display:flex;align-items:flex-end;justify-content:center;overflow:hidden",
 cardBox:"width:56px;height:44px;box-sizing:border-box;background:"+t.card+";border-radius:"+Math.min(t.r,6)+"px "+Math.min(t.r,6)+"px 0 0;padding:7px 7px 0;display:flex;flex-direction:column;gap:4px"+(t.card===t.bg?";box-shadow:inset 0 0 0 1px "+(t.g==="dark"?"rgba(255,255,255,.08)":"rgba(0,0,0,.06)"):""),
 line1:"height:4px;width:70%;border-radius:2px;background:"+t.tx,line2:"height:3px;width:100%;border-radius:2px;background:"+t.sub+";opacity:.6",line3:"height:3px;width:40%;border-radius:2px;background:"+t.ac};}),
-themeName:T.name,pos:(i+1)+" / "+THEMES.length,prev:()=>this.step(-1),next:()=>this.step(1),
-showTitle:s.title,showFooter:s.footer,showBrand:s.brand,showDate:s.date,stamp:s.time?dd+" 14:32:08":dd,
-stage:"width:"+cw+"px;flex:none;background:"+T.bg+";padding:28px;box-sizing:border-box;box-shadow:0 1px 3px rgba(0,0,0,.06),0 12px 32px rgba(0,0,0,.08);transition:background-color .2s,width .2s",
-card:"background:"+T.card+";color:"+T.tx+";border-radius:"+T.r+"px;padding:30px 28px;font-size:14px;line-height:1.7;transition:background-color .2s,color .2s",
-quote:"margin:16px 0 0;padding:2px 0 2px 12px;border-left:3px solid "+T.ac+";color:"+T.sub,
-foot:"display:flex;gap:8px;margin-top:24px;padding-top:10px;border-top:1px solid "+(dark?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)")+";font-size:11px;color:"+T.sub,
+themeName:T.name,pos:i<0?"":(i+1)+" / "+list.length,prev:()=>this.step(-1),next:()=>this.step(1),
+dims:r?fmt(Math.ceil(w*r))+" × "+fmt(Math.ceil(h*r))+" px"+(r<3?" · 已降至 "+r+"×":""):"超出单张图片上限",
+theme:s.theme,cw:cw,heading:"把周会改成异步之后",cardBlocks:sel?SEL_BLOCKS:null,
+cardOpts:{title:s.title,footer:s.footer,brand:s.brand,brandText:s.brandText,date:s.date,time:s.time},
 copy:()=>this.flash("已复制到剪贴板"),save:()=>this.flash("已保存 把周会改成异步之后.png"),toast:s.toast};
 }
 }

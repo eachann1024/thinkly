@@ -13,17 +13,23 @@ body{margin:0}
 a{color:#547dd0}a:hover{color:#3f66b8}
 .ib{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#526071;cursor:pointer;transition:background-color .15s,color .15s}
 .ib:hover{background:#e6e6e6;color:#20242c}
-.btn{font:inherit;font-size:13px;font-weight:460;height:30px;padding:0 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background-color .15s,transform .12s}
+.btn{font:inherit;font-size:13px;font-weight:460;height:30px;padding:0 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background-color .15s,transform .12s,opacity .15s}
 .btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
 .btn-2{background:#ffffff;color:#20242c;border:1px solid #dcdcdc}.btn-2:hover{background:#f7f7f7}
 .btn-1{background:#2f3540;color:#ffffff;border:0}.btn-1:hover{background:#3b4250}
-.row{font:inherit;width:100%;height:36px;display:flex;align-items:center;gap:10px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:#20242c;font-size:13px;text-align:left;cursor:pointer;transition:background-color .15s}
+.row{font:inherit;width:100%;min-height:36px;display:flex;align-items:center;gap:10px;padding:4px 8px;border:0;border-radius:6px;background:transparent;color:#20242c;font-size:13px;text-align:left;cursor:pointer;transition:background-color .15s}
 .row:hover{background:#eef3fc}
 .seg{font:inherit;font-size:12px;font-weight:460;flex:1;height:26px;border:0;border-radius:6px;cursor:pointer;transition:background-color .15s,color .15s}
 .sw{position:relative;width:30px;height:18px;border-radius:9px;border:0;padding:0;cursor:pointer;transition:background-color .15s}
 .sw span{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:7px;background:#fff;transition:transform .15s}
 .opt{display:flex;align-items:center;justify-content:space-between;height:32px;font-size:13px}
+.in{font:inherit;font-size:13px;width:100%;box-sizing:border-box;height:30px;padding:0 8px;border:1px solid #dcdcdc;border-radius:6px;background:#ffffff;color:#20242c;outline:none;transition:border-color .15s,box-shadow .15s}
+.in:focus{border-color:#547dd0;box-shadow:0 0 0 3px #e5edfc}
+.lnk{font:inherit;font-size:12px;font-weight:460;border:0;background:transparent;color:#547dd0;padding:0;cursor:pointer}
+.lnk:hover{color:#3f66b8}
 @keyframes toast{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </helmet>
@@ -41,8 +47,11 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 <button class="seg" style="{{scopePage}}" onClick="{{pickPage}}">整页</button>
 <button class="seg" style="{{scopeSel}}" onClick="{{pickSel}}">选中内容</button>
 </div>
-<button class="btn btn-2" onClick="{{copy}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>复制</button>
-<button class="btn btn-1" onClick="{{save}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>保存图片</button>
+<button class="btn btn-2" disabled="{{blocked}}" onClick="{{copy}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>复制</button>
+<button class="btn btn-1" disabled="{{saveOff}}" onClick="{{save}}" style="min-width:104px;justify-content:center">
+<sc-if value="{{busy}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#ffffff;animation:spin .8s linear infinite"></span>正在生成…</sc-if>
+<sc-if value="{{idle}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>保存图片</sc-if>
+</button>
 </header>
 
 <div style="flex:1;min-height:0;display:flex;gap:0;padding:0 8px 8px">
@@ -55,7 +64,7 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 <sc-for list="{{g.items}}" as="t" hint-placeholder-count="5">
 <button class="row" style="{{t.rowStyle}}" onClick="{{t.pick}}" aria-pressed="{{t.on}}">
 <span aria-hidden="true" style="{{t.swatch}}"><span style="{{t.swatchCard}}"></span></span>
-<span style="flex:1">{{t.name}}</span>
+<span style="flex:1;display:flex;flex-direction:column;min-width:0"><span>{{t.name}}</span><sc-if value="{{t.hint}}" hint-placeholder-val="{{false}}"><span style="font-size:11px;line-height:15px;color:#526071">{{t.hint}}</span></sc-if></span>
 <sc-if value="{{t.on}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#547dd0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></sc-if>
 </button>
 </sc-for>
@@ -64,22 +73,24 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 </nav>
 
 <main style="flex:1;min-width:0;position:relative;background:#e9e9e9;border-top:1px solid #e6e6e6;border-bottom:1px solid #e6e6e6;overflow:auto">
-<div style="min-height:100%;box-sizing:border-box;display:flex;justify-content:center;padding:40px 32px 72px">
-<div style="{{stage}}">
-<article style="{{card}}">
-<sc-if value="{{showTitle}}" hint-placeholder-val="{{true}}"><h1 style="{{h1}}">把周会改成异步之后</h1></sc-if>
-<p style="{{p}}">试了六周，周会从每周一小时缩成十五分钟的站会，其余全部放进共享文档。最明显的变化是：讨论变少了，但决定变快了。</p>
-<h2 style="{{h2}}">保留下来的三件事</h2>
-<ul style="{{ul}}"><li>周一前写好本周目标，一句话即可</li><li>阻塞问题直接在文档里 @ 负责人</li><li>周五回看，只记录偏差</li></ul>
-<blockquote style="{{quote}}">异步不是少沟通，而是把沟通写下来。</blockquote>
-<sc-if value="{{showFooter}}" hint-placeholder-val="{{true}}">
-<footer style="{{foot}}"><sc-if value="{{showBrand}}" hint-placeholder-val="{{true}}"><span style="font-weight:600">Thinkly</span></sc-if><span style="flex:1"></span><sc-if value="{{showDate}}" hint-placeholder-val="{{true}}"><span class="goose-tabular">{{stamp}}</span></sc-if></footer>
+<sc-if value="{{excerpt}}" hint-placeholder-val="{{false}}">
+<div role="note" style="position:sticky;top:0;z-index:2;display:flex;justify-content:center;padding:10px 12px 0;pointer-events:none"><span style="font-size:12px;color:#20242c;background:#ffffff;border:1px solid #e0e0e0;border-radius:6px;padding:4px 10px">{{excerpt}}</span></div>
 </sc-if>
-</article>
+<div style="min-height:100%;box-sizing:border-box;display:flex;justify-content:center;align-items:flex-start;padding:40px 32px 72px">
+<sc-if value="{{noSel}}" hint-placeholder-val="{{false}}">
+<div style="align-self:center;width:300px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:28px 24px;background:#fafafa;border:1px dashed #cfcfcf;border-radius:10px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#526071" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M9 12h6"/></svg>
+<span style="font-size:14px;font-weight:560">编辑器里没有选中内容</span>
+<span style="font-size:12px;line-height:18px;color:#526071">回到笔记选中一段再来，或者直接导出整页。</span>
+<div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-2">返回笔记</button><button class="btn btn-1" onClick="{{pickPage}}">导出整页</button></div>
 </div>
+</sc-if>
+<sc-if value="{{hasCard}}" hint-placeholder-val="{{true}}">
+<div style="flex:none;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06)"><dc-import name="ExportCard" theme="{{theme}}" w="{{cw}}" opts="{{cardOpts}}" blocks="{{cardBlocks}}" heading="{{heading}}" hint-size="520px,760px"></dc-import></div>
+</sc-if>
 </div>
 <div style="position:sticky;bottom:12px;margin:-48px 12px 0;display:flex;justify-content:space-between;align-items:center;pointer-events:none">
-<span class="goose-tabular" style="font-size:12px;color:#526071;background:#f4f4f4;border-radius:6px;padding:4px 8px">{{dims}}</span>
+<span class="goose-tabular" style="{{dimChip}}">{{dimShort}}</span>
 <div style="pointer-events:auto;display:flex;align-items:center;gap:2px;background:#ffffff;border:1px solid #e0e0e0;border-radius:8px;padding:2px">
 <button class="ib" aria-label="缩小"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
 <span class="goose-tabular" style="font-size:12px;width:44px;text-align:center">适应</span>
@@ -94,18 +105,19 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 <div style="display:flex;padding:2px;background:#f1f1f1;border-radius:8px">
 <sc-for list="{{widths}}" as="w" hint-placeholder-count="3"><button class="seg" style="{{w.style}}" onClick="{{w.pick}}">{{w.label}}</button></sc-for>
 </div>
-</section>
-<section style="display:flex;flex-direction:column;gap:8px">
-<div style="font-size:12px;color:#526071;font-weight:460">清晰度</div>
-<div style="display:flex;padding:2px;background:#f1f1f1;border-radius:8px">
-<sc-for list="{{scales}}" as="s" hint-placeholder-count="3"><button class="seg" style="{{s.style}}" onClick="{{s.pick}}">{{s.label}}</button></sc-for>
+<div style="display:flex;flex-direction:column;gap:4px;padding:10px;background:#fafafa;border:1px solid #ececec;border-radius:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span class="goose-tabular" style="font-size:13px;font-weight:560">{{dims}}</span><span class="goose-tabular" style="{{ratioS}}">{{ratioLabel}}</span></div>
+<span style="{{noteS}}">{{note}}</span>
+<sc-if value="{{suggestSel}}" hint-placeholder-val="{{false}}"><button class="lnk" style="align-self:flex-start" onClick="{{pickSel}}">改为导出选中内容</button></sc-if>
 </div>
 </section>
 <section style="display:flex;flex-direction:column;gap:2px">
 <div style="font-size:12px;color:#526071;font-weight:460;margin-bottom:4px">内容</div>
 <sc-for list="{{opts}}" as="o" hint-placeholder-count="5">
 <div class="opt" style="{{o.rowStyle}}"><span>{{o.label}}</span><button class="sw" role="switch" aria-checked="{{o.on}}" aria-label="{{o.label}}" disabled="{{o.disabled}}" style="{{o.track}}" onClick="{{o.toggle}}"><span style="{{o.knob}}"></span></button></div>
+<sc-if value="{{o.input}}" hint-placeholder-val="{{false}}"><div style="padding:2px 0 8px 14px;display:flex;flex-direction:column;gap:4px"><input class="in" aria-label="品牌文字" maxlength="24" placeholder="留空则不显示品牌" value="{{brandText}}" onInput="{{setBrand}}"><span style="font-size:11px;color:#526071">会记住，下次直接沿用</span></div></sc-if>
 </sc-for>
+<sc-if value="{{noFooter}}" hint-placeholder-val="{{false}}"><span style="font-size:12px;line-height:18px;color:#526071;margin-top:6px">原研哉主题本身不带底部栏，换主题后恢复。</span></sc-if>
 </section>
 </aside>
 
@@ -113,61 +125,77 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 
 <sc-if value="{{toast}}" hint-placeholder-val="{{false}}">
 <div role="status" style="position:absolute;left:50%;bottom:28px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:#ffffff;border:1px solid #e0e0e0;border-radius:8px;padding:8px 8px 8px 14px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.08);animation:toast .2s ease-out">
-<span>{{toast}}</span><a href="#" style="font-weight:460;text-decoration:none;padding:4px 6px">在访达中显示</a>
+<span style="{{toastS}}">{{toast}}</span><sc-if value="{{toastLink}}" hint-placeholder-val="{{true}}"><a href="#" style="font-weight:460;text-decoration:none;padding:4px 6px">在访达中显示</a></sc-if>
 </div>
 </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+<script type="text/x-dc" data-dc-script data-props='{"scenario":{"editor":"enum","options":["正常","超长","过长","极长","选区为空","导出失败"],"default":"正常"},"$preview":{"width":1280,"height":800}}'>
 var THEMES=[
-{id:"notebook",name:"笔记本",g:"cur",bg:"#ffffff",card:"#ffffff",tx:"#20242c",sub:"#5e5d59",ac:"#2563eb",r:12},
-{id:"github-light",name:"GitHub 浅色",g:"light",bg:"#f6f8fa",card:"#ffffff",tx:"#1f2328",sub:"#59636e",ac:"#0969da",r:12},
-{id:"medium",name:"Medium",g:"light",bg:"#faf9f6",card:"#ffffff",tx:"#242424",sub:"#6b6b6b",ac:"#1a8917",r:4},
-{id:"kenya-hara",name:"原研哉",g:"light",bg:"#fefefe",card:"#fefefe",tx:"#333333",sub:"#777777",ac:"#888888",r:0},
-{id:"typewriter",name:"打字机",g:"light",bg:"#f5f0e6",card:"#faf6ed",tx:"#3b3226",sub:"#6f604c",ac:"#8b4513",r:2},
-{id:"stationery",name:"信笺",g:"light",bg:"#fef9e7",card:"#fffef5",tx:"#3d3a2e",sub:"#6d6652",ac:"#d97706",r:12},
-{id:"mocha-mousse",name:"摩卡慕斯",g:"light",bg:"#f5ede0",card:"#fdf8ee",tx:"#3e2f26",sub:"#7a6455",ac:"#a47864",r:18},
-{id:"brutalist",name:"粗野主义",g:"light",bg:"#f5f5f5",card:"#ffffff",tx:"#111111",sub:"#555555",ac:"#ff5500",r:0},
-{id:"risograph",name:"孔版印刷",g:"light",bg:"#faf5ec",card:"#fffaf0",tx:"#2b2b3a",sub:"#5f5f6e",ac:"#f06f6f",r:4},
-{id:"poster",name:"海报",g:"dark",bg:"#121a2c",card:"#121a2c",tx:"#f0efec",sub:"#a9b3c6",ac:"#00d9ff",r:0},
-{id:"github-dark",name:"GitHub 深色",g:"dark",bg:"#0d1117",card:"#0d1117",tx:"#e6edf3",sub:"#9198a1",ac:"#2f81f7",r:12},
-{id:"vercel-dark",name:"Vercel",g:"dark",bg:"#0a0a0a",card:"#0a0a0a",tx:"#ededed",sub:"#a1a1a1",ac:"#ffffff",r:0},
-{id:"tokyo-night",name:"Tokyo Night",g:"dark",bg:"#1a1b26",card:"#24283b",tx:"#c0caf5",sub:"#9aa5ce",ac:"#7aa2f7",r:14},
-{id:"catppuccin",name:"Catppuccin",g:"dark",bg:"#24273a",card:"#1e2030",tx:"#cad3f5",sub:"#a5adcb",ac:"#c6a0f6",r:14},
-{id:"synthwave",name:"合成波",g:"dark",bg:"#170a2e",card:"#1c0d38",tx:"#f5e9ff",sub:"#b9a6d6",ac:"#ff2a6d",r:18}];
+{id:"original",name:"保持原样式",hint:"字体、颜色、高亮照搬编辑器",g:"cur",bg:"#ffffff",card:"#ffffff",ac:"#e9c400"},
+{id:"notebook",name:"笔记本",g:"light",bg:"#ffffff",card:"#ffffff",ac:"#2563eb"},
+{id:"github-light",name:"GitHub 浅色",hint:"右下角点阵可扫码",g:"light",bg:"#ffffff",card:"#ffffff",ac:"#1a7f37"},
+{id:"medium",name:"Medium",g:"light",bg:"#faf9f6",card:"#ffffff",ac:"#1a8917"},
+{id:"kenya-hara",name:"原研哉",g:"light",bg:"#fefefe",card:"#fefefe",ac:"#b8432f",noFoot:1},
+{id:"typewriter",name:"打字机",g:"light",bg:"#f5f0e6",card:"#faf6ed",ac:"#8b4513"},
+{id:"stationery",name:"信笺",g:"light",bg:"#fef9e7",card:"#fffef5",ac:"#d97706"},
+{id:"mocha-mousse",name:"摩卡慕斯",g:"light",bg:"#f5ede0",card:"#fdf8ee",ac:"#a47864"},
+{id:"brutalist",name:"粗野主义",g:"light",bg:"#f5f5f5",card:"#ffffff",ac:"#ff5500"},
+{id:"risograph",name:"孔版印刷",g:"light",bg:"#faf5ec",card:"#fffaf0",ac:"#f06f6f"},
+{id:"poster",name:"海报",g:"dark",bg:"#121a2c",card:"#121a2c",ac:"#00d9ff"},
+{id:"github-dark",name:"GitHub 深色",hint:"右下角点阵可扫码",g:"dark",bg:"#0d1117",card:"#0d1117",ac:"#39d353"},
+{id:"vercel-dark",name:"Vercel",g:"dark",bg:"#0a0a0a",card:"#0a0a0a",ac:"#ffffff"},
+{id:"tokyo-night",name:"Tokyo Night",g:"dark",bg:"#1a1b26",card:"#24283b",ac:"#7aa2f7"},
+{id:"catppuccin",name:"Catppuccin",g:"dark",bg:"#24273a",card:"#1e2030",ac:"#c6a0f6"},
+{id:"synthwave",name:"合成波",g:"dark",bg:"#170a2e",card:"#1c0d38",ac:"#ff2a6d"}];
+var SEL_BLOCKS=[{k:"h2",t:"保留下来的三件事"},{k:"li",t:"周一前写好本周目标，一句话即可"},{k:"li",t:"阻塞问题直接在文档里 @ 负责人"},{k:"p",t:"周五回看，",m:"只记录偏差",t2:"，不复述进度。"}];
+var H={"正常":1460,"超长":3400,"过长":24000,"极长":180000,"选区为空":1460,"导出失败":1460};
+var BLK={"超长":64,"过长":420,"极长":3100};
+function safeRatio(w,h){var r=Math.min(3,16384/w,16384/h,Math.sqrt(16e6/(w*h)));r=Math.floor(r*100)/100;return r<.1?0:r;}
 class Component extends DCLogic {
-constructor(p){super(p);this.state={theme:"notebook",scope:"page",width:1080,scale:2,footer:true,brand:true,date:true,time:true,title:true,toast:""};}
-flash(m){this.setState({toast:m});clearTimeout(this._t);this._t=setTimeout(()=>this.setState({toast:""}),2600);}
+constructor(p){super(p);this.state={theme:"notebook",pageTheme:"notebook",scope:"page",width:1080,footer:true,brand:true,brandText:"Thinkly",date:true,time:true,title:true,busy:false,toast:"",toastErr:false};}
+flash(m,err){this.setState({toast:m,toastErr:!!err,busy:false});clearTimeout(this._t);this._t=setTimeout(()=>this.setState({toast:""}),2600);}
 renderVals(){
-var s=this.state,self=this,T=THEMES.find(t=>t.id===s.theme);
+var s=this.state,self=this,sc=this.props.scenario||"正常",T=THEMES.find(t=>t.id===s.theme)||THEMES[1];
 var on="background:#ffffff;color:#20242c;box-shadow:0 1px 2px rgba(0,0,0,.08)",off="background:transparent;color:#526071";
-var mk=function(t){var a=t.id===s.theme;return{name:t.name,on:a,pick:function(){self.setState({theme:t.id})},
+var mk=function(t){var a=t.id===s.theme;return{name:t.name,hint:t.hint||"",on:a,pick:function(){self.setState(s.scope==="page"?{theme:t.id,pageTheme:t.id}:{theme:t.id})},
 rowStyle:a?"background:#e5edfc;box-shadow:inset 0 0 0 1px #547dd0":"",
 swatch:"width:30px;height:22px;flex:none;border-radius:4px;background:"+t.bg+";box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);display:flex;align-items:flex-end;justify-content:center;overflow:hidden",
 swatchCard:"width:20px;height:14px;background:"+t.card+";border-top:2px solid "+t.ac+";border-radius:2px 2px 0 0"};};
 var grp=function(k,l){var it=THEMES.filter(t=>t.g===k).map(mk);return{label:l,count:k==="cur"?"":it.length,items:it};};
+var noFoot=!!T.noFoot;
 var sw=function(v,dis){return{track:"background:"+(v?"#547dd0":"#d6d6d6")+";opacity:"+(dis?.45:1),knob:v?"transform:translateX(12px)":""};};
-var opt=function(k,l,dis,ind){var x=sw(s[k]&&!dis,dis);return{label:l,on:!!s[k],disabled:!!dis,track:x.track,knob:x.knob,rowStyle:(ind?"padding-left:14px;":"")+(dis?"color:#8b95a3":""),toggle:function(){if(!dis)self.setState({[k]:!s[k]})}};};
-var pad=s.width===720?28:s.width===1440?56:40,base=s.width===720?15:16;
-var h=s.width===720?1720:s.width===1440?1180:1460;
-var now=new Date(),dd=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
+var opt=function(k,l,dis,ind,input){var x=sw(s[k]&&!dis,dis);return{label:l,on:!!s[k],disabled:!!dis,input:!!input&&!!s[k]&&!dis,track:x.track,knob:x.knob,rowStyle:(ind?"padding-left:14px;":"")+(dis?"color:#8b95a3":""),toggle:function(){if(!dis)self.setState({[k]:!s[k]})}};};
+var noSel=s.scope==="sel"&&sc==="选区为空";
+var w=s.width,h=Math.round(H[sc]*Math.pow(1080/w,.8)),r=safeRatio(w,h),blocked=noSel||r===0;
+var fmt=function(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,",");};
+var dims=r?fmt(Math.ceil(w*r))+" × "+fmt(Math.ceil(h*r))+" px":"— × — px";
+var note,tone="#526071",ratioLabel=r?r+"×":"无法导出";
+if(noSel){note="没有选中内容，暂时无法生成。";dims="— × — px";ratioLabel="";}
+else if(r===3)note="固定 3× 高清导出，屏幕和打印都清楚。";
+else if(r>=1){note="单张图片上限 1600 万像素，这篇较长，清晰度自动降到 "+r+"×，文字依然清楚。";tone="#855600";}
+else if(r>0){note="内容太长，清晰度只能降到 "+r+"×，文字会发虚。建议只导出需要的部分。";tone="#855600";}
+else{note="内容过长，无法导出为单张图片。请缩小范围后再试。";tone="#b42318";}
+var excerpt=BLK[sc]&&!noSel?"预览只显示前 16 块，导出是全文（共 "+BLK[sc]+" 块，约 "+fmt(h)+" px 高）":"";
+var sel=s.scope==="sel";
 return{
-groups:[grp("cur","当前笔记样式"),grp("light","浅色"),grp("dark","深色")],
-scopePage:s.scope==="page"?on:off,scopeSel:s.scope==="sel"?on:off,
-pickPage:()=>this.setState({scope:"page"}),pickSel:()=>this.setState({scope:"sel"}),
-widths:[[720,"手机 720"],[1080,"标准 1080"],[1440,"宽屏 1440"]].map(w=>({label:w[1],style:s.width===w[0]?on:off,pick:()=>this.setState({width:w[0]})})),
-scales:[1,2,3].map(n=>({label:n+"×",style:s.scale===n?on:off,pick:()=>this.setState({scale:n})})),
-opts:[opt("title","标题"),opt("footer","底部栏"),opt("brand","品牌",!s.footer,1),opt("date","日期",!s.footer,1),opt("time","时分秒",!s.footer||!s.date,1)],
-showTitle:s.title,showFooter:s.footer,showBrand:s.brand,showDate:s.date,stamp:s.time?dd+" 14:32:08":dd,
-dims:(s.width*s.scale)+" × "+(h*s.scale)+" px",
-stage:"width:"+(s.width===720?340:s.width===1440?560:440)+"px;flex:none;align-self:flex-start;background:"+T.bg+";padding:"+(pad*0.6)+"px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);transition:background-color .2s",
-card:"background:"+T.card+";color:"+T.tx+";border-radius:"+T.r+"px;padding:"+(pad*0.7)+"px "+(pad*0.6)+"px;font-size:"+(base*0.8)+"px;line-height:1.65;transition:background-color .2s,color .2s",
-h1:"margin:0 0 10px;font-size:22px;line-height:1.3;font-weight:650;letter-spacing:-.01em",
-h2:"margin:16px 0 6px;font-size:15px;font-weight:600",
-p:"margin:0;color:"+T.tx,ul:"margin:0;padding-left:18px;color:"+T.tx,
-quote:"margin:14px 0 0;padding:2px 0 2px 12px;border-left:3px solid "+T.ac+";color:"+T.sub,
-foot:"display:flex;gap:8px;margin-top:22px;padding-top:10px;border-top:1px solid "+(T.g==="dark"?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)")+";font-size:11px;color:"+T.sub,
-copy:()=>this.flash("已复制到剪贴板"),save:()=>this.flash("已保存 把周会改成异步之后.png"),toast:s.toast};
+groups:[grp("cur","原样"),grp("light","浅色"),grp("dark","深色")],
+scopePage:!sel?on:off,scopeSel:sel?on:off,
+pickPage:()=>this.setState({scope:"page",theme:s.pageTheme}),pickSel:()=>this.setState({scope:"sel",theme:"original"}),
+widths:[[720,"手机 720"],[1080,"标准 1080"],[1440,"宽屏 1440"]].map(x=>({label:x[1],style:s.width===x[0]?on:off,pick:()=>this.setState({width:x[0]})})),
+dims:dims,ratioLabel:ratioLabel,note:note,suggestSel:!sel&&r<1,
+ratioS:"font-size:12px;font-weight:460;color:"+(r===3?"#526071":tone),noteS:"font-size:12px;line-height:18px;color:"+tone,
+dimShort:noSel?"未选中内容":r?dims+(r===3?" · 3×":" · "+r+"×"):"超出单张图片上限",
+dimChip:"font-size:12px;border-radius:6px;padding:4px 8px;background:"+(r===0&&!noSel?"#fdecea":"#f4f4f4")+";color:"+(r===0&&!noSel?"#b42318":"#526071"),
+opts:[opt("title",sel?"笔记标题":"标题"),opt("footer","底部栏",noFoot),opt("brand","品牌",!s.footer||noFoot,1,1),opt("date","日期",!s.footer||noFoot,1),opt("time","时分秒",!s.footer||!s.date||noFoot,1)],
+brandText:s.brandText,setBrand:(e)=>this.setState({brandText:e.target.value}),noFooter:noFoot,
+excerpt:excerpt,noSel:noSel,hasCard:!noSel,theme:s.theme,cw:w===720?420:w===1440?600:520,
+cardOpts:{title:s.title,footer:s.footer,brand:s.brand,brandText:s.brandText,date:s.date,time:s.time},
+cardBlocks:sel?SEL_BLOCKS:null,heading:"把周会改成异步之后",
+blocked:blocked,saveOff:blocked||s.busy,busy:s.busy,idle:!s.busy,
+copy:()=>this.flash("已复制到剪贴板"),
+save:()=>{this.setState({busy:true});clearTimeout(this._b);this._b=setTimeout(()=>sc==="导出失败"?this.flash("生成失败：有 1 张图片没能载入，已跳过后可重试",true):this.flash("已保存 把周会改成异步之后.png"),900);},
+toast:s.toast,toastLink:!s.toastErr,toastS:s.toastErr?"color:#b42318":""};
 }
 }
 </script>
