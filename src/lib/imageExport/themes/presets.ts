@@ -33,7 +33,6 @@ const CARD_THEME_IDS = [
   "typewriter",
   "risograph",
   "poster",
-  "github-dark",
   "vercel-dark",
   "tokyo-night",
   "catppuccin",
@@ -47,10 +46,11 @@ export const CARD_THEMES: Array<CardTheme & { id: CardThemeId }> =
 
 const REMOVED_THEME_REPLACEMENTS: Record<string, CardThemeId> = {
   notion: "notebook",
-  obsidian: "github-dark",
+  obsidian: "notebook",
   academic: "medium",
   linear: "notebook",
   "github-light": "notebook",
+  "github-dark": "notebook",
   "solarized-light": "typewriter",
   neon: "risograph",
 };
