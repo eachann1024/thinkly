@@ -1,5 +1,6 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type {
+  AuxiliaryAISetupConfig,
   AuxiliarySettingsSection,
   AuxiliaryWindowState,
 } from "@/lib/auxiliary-window/contract";
@@ -41,4 +42,9 @@ export function openPageInMain(pageId: string): Promise<boolean> {
 export function openSettingsInMain(section: AuxiliarySettingsSection): Promise<boolean> {
   const open = window.gooseDesktop?.auxiliary?.openSettings;
   return open ? open(section) : Promise.resolve(false);
+}
+
+export function applyAISetupInMain(config: AuxiliaryAISetupConfig): Promise<boolean> {
+  const apply = window.gooseDesktop?.auxiliary?.applyAISetup;
+  return apply ? apply(config) : Promise.resolve(false);
 }

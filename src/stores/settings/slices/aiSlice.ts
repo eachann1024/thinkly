@@ -106,11 +106,12 @@ export function createAISlice(set: SetFn): AISlice {
         const normalizedModelOptions = normalizeAIModelOptions(modelOptions);
         const preservedSelectedModelId =
           state.ai.selectedModelId &&
-          normalizedModelOptions.some(
-            (item) => item.id === state.ai.selectedModelId,
-          )
+          (normalizedModelOptions.length === 0 ||
+            normalizedModelOptions.some(
+              (item) => item.id === state.ai.selectedModelId,
+            ))
             ? state.ai.selectedModelId
-            : (normalizedModelOptions[0]?.id ?? state.ai.selectedModelId);
+            : (normalizedModelOptions[0]?.id ?? null);
         const preservedWorkspaceModelId =
           state.ai.workspaceSelectedModelId &&
           normalizedModelOptions.some(

@@ -62,11 +62,24 @@ export type AuxiliaryOpenResponse =
   | { status: "opened"; requestId: string; kind: AuxiliaryKind }
   | AuxiliaryResult;
 
+export type AuxiliaryAISetupConfig = {
+  providerId: string;
+  protocol?: string;
+  baseURL: string;
+  apiKey: string;
+  modelOptions: Array<{ id: string; label: string; description?: string }>;
+  selectedModelId: string | null;
+  enabled: boolean;
+};
+
 export type AuxiliaryRelayMessage =
   | { type: "open-page"; pageId: string }
-  | { type: "open-settings"; section: AuxiliarySettingsSection };
+  | { type: "open-settings"; section: AuxiliarySettingsSection }
+  | { type: "apply-ai-setup"; config: AuxiliaryAISetupConfig };
 
-export type AuxiliaryMainCommand = { type: "open-page"; pageId: string };
+export type AuxiliaryMainCommand =
+  | { type: "open-page"; pageId: string }
+  | { type: "apply-ai-setup"; config: AuxiliaryAISetupConfig };
 
 export type AuxiliarySnapshotResponse =
   | { ok: true; value: unknown }
@@ -80,6 +93,7 @@ export interface AuxiliaryBridge {
   close: () => Promise<void>;
   openPage: (pageId: string) => Promise<boolean>;
   openSettings: (section: AuxiliarySettingsSection) => Promise<boolean>;
+  applyAISetup: (config: AuxiliaryAISetupConfig) => Promise<boolean>;
   requestSnapshot: <T = unknown>(key: string) => Promise<AuxiliarySnapshotResponse & { value?: T }>;
   onSnapshotRequest: (cb: (requestId: string, key: string) => void) => () => void;
   replySnapshot: (requestId: string, payload: unknown, ok?: boolean) => void;
