@@ -47,12 +47,14 @@ export const createLocalPageRecordAction = async (
     title,
     content,
     filePath: requestedFilePath,
+    settings,
   }: {
     workspaceId: string;
     parentId?: string;
     title?: string;
     content?: JSONContent;
     filePath?: string;
+    settings?: import("@/lib/note-metadata/contract").NoteSettings;
   },
 ): Promise<string | null> => queueLocalPageCreation(workspaceId, async () => {
   const notebook = useNotebooks.getState().notebooks[workspaceId];
@@ -93,10 +95,12 @@ export const createLocalPageRecordAction = async (
     fontSize: "default",
     fontFamily: "default",
     localFilePath: filePath,
+    localMetadataId: id,
     createdAt: now,
     updatedAt: now,
     order: now,
     ...(randomIcon ? { icon: randomIcon } : {}),
+    ...settings,
   };
 
   set((state) => ({

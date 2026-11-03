@@ -38,9 +38,9 @@ export async function flushGitSyncPages(notebookIds: Set<string>): Promise<void>
         baseSettings: recoverySettings(latest),
         baseSignature: () => getContentDerivations(content).recoverySignature,
         baseUpdatedAt: latest.updatedAt,
-        ...(latest.editorDraft ? { draftPage: {
-          ...latest, content, localFilePath: undefined, localUnsaved: true,
-        } } : {}),
+        draftPage: {
+          ...latest, content, editorDraft: true, localFilePath: undefined, localUnsaved: true,
+        },
       });
       if (!entry) throw new Error(gitText("saveBeforeSync"));
       queueLocalPageSave(page.id, content, usePages.getState, entry.revision);
@@ -58,11 +58,9 @@ export async function flushGitSyncPages(notebookIds: Set<string>): Promise<void>
     return;
   }
 
-  const needsReview = isRecoveredLocalSaveConfirmationRequired(page.id);
-  const message = gitText(needsReview ? "reviewBeforeSync" : "saveBeforeSync");
+  const message = gitText("saveBeforeSync");
   const result = results[failedIndex];
-  const reason = needsReview ? gitText("reviewRecoveredNote")
-    : result?.status === "rejected" ? describeDiskWriteError(result.reason) : message;
+  const reason = result?.status === "rejected" ? describeDiskWriteError(result.reason) : message;
   toast.warning(message, {
     id: noticeId,
     duration: Infinity,
