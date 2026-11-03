@@ -1,24 +1,135 @@
 {
   "v": 3,
-  "createdOnFiles": { "v": 1, "at": "2026-11-03T09:00:00Z" },
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-03T09:00:00Z"
+  },
   "title": "AI 助手 · 动态改版三方案",
-  "launch": { "view": "canvas" },
+  "launch": {
+    "view": "canvas"
+  },
   "pages": [],
   "boards": {
-    "Main.dc.html": { "x": 0, "y": 0, "w": 420, "h": 780, "title": "A 静流 · 空闲" },
-    "Prism.dc.html": { "x": 500, "y": 0, "w": 420, "h": 780, "title": "B 棱光 · 空闲" },
-    "Field.dc.html": { "x": 1000, "y": 0, "w": 420, "h": 780, "title": "C 点场 · 空闲" },
-    "QuietRun.dc.html": { "x": 0, "y": 1080, "w": 420, "h": 780, "title": "A 静流 · 生成中" },
-    "PrismRun.dc.html": { "x": 500, "y": 1080, "w": 420, "h": 780, "title": "B 棱光 · 生成中" },
-    "FieldRun.dc.html": { "x": 1000, "y": 1080, "w": 420, "h": 780, "title": "C 点场 · 生成中" },
-    "WriteIn.dc.html": { "x": 0, "y": 2160, "w": 920, "h": 560, "title": "编辑器 · AI 写入笔记" },
-    "Spark.dc.html": { "x": 1000, "y": 2160, "w": 420, "h": 560, "title": "工具栏 AI 按钮 + 选区浮条" }
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 420,
+      "h": 780,
+      "title": "A 静流 · 空闲"
+    },
+    "Prism.dc.html": {
+      "x": 500,
+      "y": 0,
+      "w": 420,
+      "h": 780,
+      "title": "B 棱光 · 空闲"
+    },
+    "Field.dc.html": {
+      "x": 1000,
+      "y": 0,
+      "w": 420,
+      "h": 780,
+      "title": "C 点场 · 空闲"
+    },
+    "QuietRun.dc.html": {
+      "x": 0,
+      "y": 1080,
+      "w": 420,
+      "h": 780,
+      "title": "A 静流 · 生成中"
+    },
+    "PrismRun.dc.html": {
+      "x": 500,
+      "y": 1080,
+      "w": 420,
+      "h": 780,
+      "title": "B 棱光 · 生成中"
+    },
+    "FieldRun.dc.html": {
+      "x": 1000,
+      "y": 1080,
+      "w": 420,
+      "h": 780,
+      "title": "C 点场 · 生成中"
+    },
+    "WriteIn.dc.html": {
+      "x": 0,
+      "y": 2160,
+      "w": 920,
+      "h": 560,
+      "title": "编辑器 · AI 写入笔记"
+    },
+    "Spark.dc.html": {
+      "x": 1000,
+      "y": 2160,
+      "w": 420,
+      "h": 560,
+      "title": "工具栏 AI 按钮 + 选区浮条"
+    },
+    "FieldOrbit.dc.html": {
+      "x": 0,
+      "y": 3080,
+      "w": 420,
+      "h": 780,
+      "title": "C1 星轨 · 空闲"
+    },
+    "FieldLens.dc.html": {
+      "x": 500,
+      "y": 3080,
+      "w": 420,
+      "h": 780,
+      "title": "C2 透镜 · 空闲"
+    },
+    "FieldDial.dc.html": {
+      "x": 1000,
+      "y": 3080,
+      "w": 420,
+      "h": 780,
+      "title": "C3 罗盘 · 空闲"
+    }
   },
-  "order": ["Main.dc.html", "Prism.dc.html", "Field.dc.html", "QuietRun.dc.html", "PrismRun.dc.html", "FieldRun.dc.html", "WriteIn.dc.html", "Spark.dc.html"],
+  "order": [
+    "Main.dc.html",
+    "Prism.dc.html",
+    "Field.dc.html",
+    "QuietRun.dc.html",
+    "PrismRun.dc.html",
+    "FieldRun.dc.html",
+    "WriteIn.dc.html",
+    "Spark.dc.html",
+    "FieldOrbit.dc.html",
+    "FieldLens.dc.html",
+    "FieldDial.dc.html"
+  ],
   "notes": {
-    "t1": { "x": 0, "y": -260, "text": "空闲：输入框压到一行，空状态会呼吸", "kind": "title1", "maxW": 1420 },
-    "t2": { "x": 0, "y": 820, "text": "生成中：思考、读取、流式输出都在动", "kind": "title1", "maxW": 1420 },
-    "t3": { "x": 0, "y": 1900, "text": "其他界面：AI 写进笔记、入口按钮", "kind": "title1", "maxW": 1420 }
+    "t1": {
+      "x": 0,
+      "y": -260,
+      "text": "空闲：输入框压到一行，空状态会呼吸",
+      "kind": "title1",
+      "maxW": 1420
+    },
+    "t2": {
+      "x": 0,
+      "y": 820,
+      "text": "生成中：思考、读取、流式输出都在动",
+      "kind": "title1",
+      "maxW": 1420
+    },
+    "t3": {
+      "x": 0,
+      "y": 1900,
+      "text": "其他界面：AI 写进笔记、入口按钮",
+      "kind": "title1",
+      "maxW": 1420
+    },
+    "t4": {
+      "x": 0,
+      "y": 2820,
+      "text": "C 点场深化：中心更大气、细节更多",
+      "kind": "title1",
+      "maxW": 1420
+    }
   },
   "designSystems": []
 }
