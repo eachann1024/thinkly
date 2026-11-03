@@ -92,10 +92,10 @@ export function createUpdatePageSlice(
             } : {}),
             baseSignature,
             baseUpdatedAt,
-            ...(page?.editorDraft ? { draftPage: {
+            ...(page?.editorDraft || isLocal ? { draftPage: {
               ...page,
               content: updates.content ?? page.content,
-              ...(isLocal ? { localFilePath: undefined, localUnsaved: true } : {}),
+              ...(isLocal ? { editorDraft: true, localFilePath: undefined, localUnsaved: true } : {}),
             } } : {}),
           })
         : null;

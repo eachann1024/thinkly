@@ -13,6 +13,7 @@ import { i18nYaml } from "@/i18n/core";
 import type { StoreSet, StoreGet } from "../../hydrate";
 import type { JSONContent } from "@/types";
 import { localPageHasPersistableContent } from "@/lib/unsavedLocalPage";
+import { getRecoveryEntry } from "@/lib/storage/recoveryJournal";
 import {
   assignUnsavedLocalFilePathAction,
   cloneLocalPageContent,
@@ -59,7 +60,7 @@ export const saveLocalPageContentUnlocked = async (
   if (page.editorDraft && filePath) await validateEditorDraftTarget(get, pageId, filePath);
   if (!filePath) {
     if (!page.localUnsaved) return false;
-    if (!localPageHasPersistableContent(content) && !options?.force) {
+    if (!localPageHasPersistableContent(content) && !options?.force && !getRecoveryEntry("local-file", pageId)) {
       set((state) => ({ dirtyLocalPageIds: { ...state.dirtyLocalPageIds, [pageId]: false } }));
       return true;
     }

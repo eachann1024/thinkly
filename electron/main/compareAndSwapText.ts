@@ -15,6 +15,7 @@ export async function compareAndSwapText(
     let mode = 0o600;
     try {
       const info = await lstat(target);
+      if (expected === null) return false;
       if (!info.isFile() || info.isSymbolicLink()) throw new Error("Unsafe note file target");
       mode = info.mode & 0o777;
       current = await readFile(target, "utf8");

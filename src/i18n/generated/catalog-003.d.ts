@@ -2,16 +2,6 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
-    "src/pages/workspace/components/ai-cards/ChecklistCard.tsx#messages:1": { "insert": {  } };
-    "src/pages/workspace/components/ai-cards/ComparisonCard.tsx#messages:1": { "recommended": {  } };
-    "src/pages/workspace/components/ai-cards/CountdownCard.tsx#messages:1": { "arrived": {  }; "days": {  }; "hours": {  }; "invalid": {  }; "minutes": {  }; "seconds": {  } };
-    "src/pages/workspace/components/ai-cards/DefinitionCard.tsx#messages:1": { "copied": {  }; "copy": {  }; "examples": {  } };
-    "src/pages/workspace/components/ai-cards/ExchangeCard.tsx#messages:1": { "asOf": { "date": string | number }; "rate": { "base": string | number; "quote": string | number; "rate": string | number }; "trend": { "days": string | number } };
-    "src/pages/workspace/components/ai-cards/FlashcardsCard.tsx#messages:1": { "flip": {  }; "next": {  }; "previous": {  }; "shuffle": {  } };
-    "src/pages/workspace/components/ai-cards/InfoCard.tsx#messages:1": { "crypto": {  }; "exchange": {  }; "stats": {  }; "unitConverter": {  }; "weather": {  }; "webResults": {  }; "worldTime": {  } };
-    "src/pages/workspace/components/ai-cards/QuizCard.tsx#messages:1": { "correct": {  }; "next": {  }; "result": {  }; "retry": {  }; "score": { "correct": string | number; "total": string | number }; "wrong": {  } };
-    "src/pages/workspace/components/ai-cards/RecipeCard.tsx#messages:1": { "fewer": {  }; "ingredients": {  }; "more": {  }; "servings": { "count": string | number }; "steps": {  } };
-    "src/pages/workspace/components/ai-cards/StepsCard.tsx#messages:1": { "allDone": {  }; "finish": {  }; "goToStep": { "index": string | number }; "next": {  }; "previous": {  }; "restart": {  } };
     "src/pages/workspace/components/ai-cards/TimelineCard.tsx#messages:1": { "less": {  }; "more": {  } };
     "src/pages/workspace/components/ai-cards/TimerCard.tsx#messages:1": { "finished": { "title": string | number }; "pause": {  }; "reset": {  }; "resume": {  }; "start": {  }; "timeUp": {  } };
     "src/pages/workspace/components/ai-cards/UnitConverterCard.tsx#messages:1": { "from": {  }; "swap": {  }; "to": {  }; "value": {  } };
@@ -91,7 +81,7 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/messages/AssistantLetterFold.tsx#messages:1": { "thinking": {  } };
     "src/pages/workspace/components/notebook-ai/messages/AssistantMessage.tsx#messages:1": { "thisResponseCouldNotBeGenerated": {  } };
     "src/pages/workspace/components/notebook-ai/messages/MessageActionBar.tsx#messages:1": { "copy": {  }; "copyMessage": {  }; "nextResponseBranch": {  }; "previousResponseBranch": {  } };
-    "src/pages/workspace/components/notebook-ai/messages/UserMessage.tsx#messages:1": { "detailLocalSkill": { "value1": string | number }; "detailOpen": { "value1": string | number }; "detailSelectionFrom": { "value1": string | number } };
+    "src/pages/workspace/components/notebook-ai/messages/UserMessage.tsx#messages:1": { "detailLocalSkill": { "value1": string | number }; "detailOpen": { "value1": string | number }; "detailSelectionFrom": { "value1": string | number }; "image": {  } };
     "src/pages/workspace/components/notebook-ai/messages/messagePresentation.ts#messages:1": { "compactCommand": {  } };
     "src/pages/workspace/components/notebook-ai/panel/AiUnavailableState.tsx#messages:1": { "aiAssistantIsOff": {  }; "aiIsTemporarilyUnavailable": {  }; "aiStatus": {  }; "checkTheServiceAndModelInAiSettings": {  }; "chooseAModel": {  }; "loadingAiSettings": {  }; "noModelSelected": {  }; "retry": {  }; "setUpAi": {  } };
     "src/pages/workspace/components/notebook-ai/panel/NotebookAiPanelBody.tsx#messages:1": { "dismissError": {  }; "whyThisResponseFailed": {  } };
@@ -106,7 +96,7 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/session/useStreamLifecycle.ts#messages:1": { "aiResponseTimedOutThisTaskWasPaused": {  }; "completedContentWasPreservedYouCanRetryAt": {  } };
     "src/pages/workspace/components/notebook-ai/toolProgressInfoText.ts#messages:1": { "cardShown": {  }; "crypto": {  }; "exchange": {  }; "exchangeDone": { "base": string | number; "quote": string | number; "rate": string | number }; "generating": {  }; "querying": {  }; "showCalculator": {  }; "showChecklist": {  }; "showChoices": {  }; "showComparison": {  }; "showCountdown": {  }; "showDefinition": {  }; "showFlashcards": {  }; "showQuiz": {  }; "showRecipe": {  }; "showStats": {  }; "showSteps": {  }; "showTimeline": {  }; "showTimer": {  }; "showUnitConverter": {  }; "showWidget": {  }; "weather": {  }; "weatherDone": { "days": string | number; "place": string | number; "temp": string | number }; "worldTime": {  }; "worldTimeDone": { "count": string | number } };
     "src/pages/workspace/components/notebook-ai/toolProgressValues.ts#messages:1": { "chat": {  }; "createNote": {  }; "deleteNotes": {  }; "editNotes": {  }; "liveInfo": {  }; "searchNotes": {  }; "visualization": {  }; "webResearch": {  } };
-    "src/pages/workspace/components/notebook-ai/useArtifactPreview.ts#messages:1": { "previewError": { "error": string | number }; "previewUnavailable": {  }; "systemPreviewError": { "error": string | number }; "unknownError": {  } };
+    "src/pages/workspace/components/notebook-ai/useArtifactPreview.ts#messages:1": { "preview": {  }; "previewError": { "error": string | number }; "previewUnavailable": {  }; "systemPreviewError": { "error": string | number }; "unknownError": {  } };
     "src/pages/workspace/components/notebook-ai/workCardHeading.ts#messages:1": { "awaitingApproval": {  }; "blocked": {  }; "canceled": {  }; "complete": {  }; "detailSteps": { "value1": string | number; "value2": string | number }; "disconnected": {  }; "failed": {  }; "interrupted": {  }; "limited": {  }; "pending": {  }; "processing": {  }; "stopped": {  }; "thePageContentHasChanged": {  }; "timeout": {  }; "undone": {  }; "writeCanceled": {  } };
     "src/pages/workspace/components/outline/OutlineHeadingMarker.tsx#localMessages:1": { "collapseSubheadings": {  }; "expandSubheadings": {  } };
     "src/pages/workspace/components/outline/OutlinePanel.tsx#localMessages:1": { "documentOutline": {  }; "heading": { "level": string | number; "text": string | number }; "noHeadingsInThisNote": {  } };
@@ -128,5 +118,9 @@ declare module "../types" {
     "src/pages/workspace/components/page/titlebar/DesktopWindowNavigation.tsx#localMessages:1": { "back": {  }; "forward": {  }; "hideSidebar": {  }; "showSidebar": {  } };
     "src/pages/workspace/components/page/titlebar/PageFileTitle.tsx#localMessages:1": { "copyFilePath": { "name": string | number }; "copyPathFailed": {  }; "copyPathHint": {  }; "desktopUnavailable": {  }; "fileManager": {  }; "finder": {  }; "pathCopied": {  }; "revealFailed": { "app": string | number }; "revealHint": { "app": string | number } };
     "src/pages/workspace/components/page/titlebar/TitleBarAiToggle.tsx#localMessages:1": { "closeAi": {  }; "openAi": {  } };
+    "src/pages/workspace/components/page/titlebar/WindowAlwaysOnTopButton.tsx#localMessages:1": { "pinWindow": {  }; "unpinWindow": {  } };
+    "src/pages/workspace/components/search-sheet/SearchSheet.tsx#localMessages:1": { "allNotebooks": {  }; "askAi": {  }; "clearSearch": {  }; "currentNotebook": {  }; "enableAiAnswers": {  }; "hide": {  }; "loadMoreResults": {  }; "newLine": {  }; "noMatchingNotes": {  }; "noteCount": { "count": string | number }; "notes": {  }; "open": {  }; "recentlyOpened": {  }; "searchAllNotebooks": {  }; "searchCurrentNotebook": {  }; "searchNotes": {  }; "searchNotesOrAskAi": {  }; "searchResults": {  }; "searching": {  }; "select": {  }; "someNotebooksCouldnTBeRead": {  }; "splitOpen": {  }; "switchScope": {  }; "switchScopeHint": { "name": string | number }; "tryAgain": {  } };
+    "src/pages/workspace/components/search-sheet/SearchSheetAnswer.tsx#localMessages:1": { "backToResults": {  }; "continueInAiPanel": {  }; "jumpToLatest": {  }; "sources": {  } };
+    "src/pages/workspace/components/search-sheet/SearchSheetFilters.tsx#localMessages:1": { "allNotebooks": {  }; "bestMatch": {  }; "currentNamed": { "name": string | number }; "currentNotebook": {  }; "notebookRemoved": {  }; "recentlyEdited": {  }; "searchScope": { "scope": string | number }; "searchTitlesOnly": {  }; "sortBy": { "sort": string | number } };
   }
 }
