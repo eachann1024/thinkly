@@ -20,14 +20,14 @@ export function ReflectionTopics({ topics }: { topics: ReflectionTopic[] }) {
   useLocale();
   if (topics.length === 0) return null;
   return (
-    <div>
-      <h3 className="mb-3 text-sm font-medium text-foreground">{uiText("topics")}</h3>
-      <div className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full" role="img" aria-label={uiText("topics")}>
+    <section aria-label={uiText("topics")}>
+      <h3 className="mb-2.5 text-sm font-medium text-foreground">{uiText("topics")}</h3>
+      <div className="flex h-2.5 w-full gap-0.5 overflow-hidden rounded-full" role="img" aria-label={uiText("topics")}>
         {topics.map((topic, i) => (
           <span key={topic.name} style={{ width: `${topic.share}%`, backgroundColor: topicColor(i) }} />
         ))}
       </div>
-      <ul className="mt-4 space-y-3">
+      <ul className="mt-3.5 flex list-none flex-col gap-2.5 p-0">
         {topics.map((topic, i) => (
           <li key={topic.name} className="flex items-start gap-3">
             <span
@@ -43,6 +43,6 @@ export function ReflectionTopics({ topics }: { topics: ReflectionTopic[] }) {
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 }

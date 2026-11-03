@@ -36,13 +36,13 @@ export function ReflectionScheduleTag({ range, enabled }: { range: ScopeRange; e
     year: "numeric", month: "numeric", day: "numeric", weekday: "short",
     hour: "2-digit", minute: "2-digit", hourCycle: "h23",
   }).format(nextAt);
-  const date = new Intl.DateTimeFormat(locale, { year: "numeric", month: "numeric", day: "numeric" });
+  const hint = uiText(`schedule${range.scope}` as "schedule7d");
   return (
     <span
-      className="inline-flex max-w-full items-center rounded-md bg-muted px-2 py-1 text-xs font-normal text-muted-foreground"
-      title={`${enabled ? uiText("next", { time }) : uiText("paused")} · ${uiText(`schedule${range.scope}` as "schedule7d")}`}
+      className="inline-flex max-w-full items-center whitespace-nowrap rounded-md bg-muted px-2 py-1 text-xs font-normal tabular-nums text-muted-foreground"
+      title={`${enabled ? uiText("next", { time }) : uiText("paused")} · ${hint}`}
     >
-      {date.format(range.start)} – {date.format(range.end - 1)}
+      {enabled ? uiText("next", { time }) : uiText("paused")}
     </span>
   );
 }
