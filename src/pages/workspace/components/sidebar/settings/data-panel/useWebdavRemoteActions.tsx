@@ -13,6 +13,7 @@ zh-Hans:
   confirmDeleteBackup: "确定删除云端备份「{{name}}」？删除后无法从云端找回。"
   confirmRestoreLatest: "确定从云端恢复最新备份「{{name}}」？校验后请选择一个空文件夹存放恢复的笔记本。"
   confirmRestoreBackup: "确定恢复云端备份「{{name}}」？校验后请选择一个空文件夹存放恢复的笔记本。"
+  confirm_38cf: "确定"
 en:
   cloudBackupDeleted_5e7b: "Cloud backup deleted"
   couldNotDeleteBackup_31a4: "Could not delete backup"
@@ -24,6 +25,7 @@ en:
   confirmDeleteBackup: "Delete cloud backup “{{name}}”? It cannot be recovered from the cloud."
   confirmRestoreLatest: "Restore the latest cloud backup “{{name}}”? After validation, choose an empty folder for the restored notebooks."
   confirmRestoreBackup: "Restore cloud backup “{{name}}”? After validation, choose an empty folder for the restored notebooks."
+  confirm_38cf: "Confirm"
 ja:
   cloudBackupDeleted_5e7b: "クラウドバックアップを削除しました"
   couldNotDeleteBackup_31a4: "バックアップを削除できませんでした"
@@ -35,6 +37,7 @@ ja:
   confirmDeleteBackup: "クラウドバックアップ「{{name}}」を削除しますか？削除後はクラウドから復元できません。"
   confirmRestoreLatest: "クラウドの最新バックアップ「{{name}}」を復元しますか？検証後、復元先の空のフォルダを選択してください。"
   confirmRestoreBackup: "クラウドバックアップ「{{name}}」を復元しますか？検証後、復元先の空のフォルダを選択してください。"
+  confirm_38cf: "OK"
 `;
 const uiText = createTranslator(localMessages);
 import {
@@ -43,6 +46,7 @@ import {
   type WebdavBackupFile,
 } from "@/lib/webdavSync";
 import { toast } from "@/components/ui/sonner";
+import { openConfirm } from "@/windows/open/openConfirm";
 import type { useWebdavSyncActions } from "./useWebdavSyncActions";
 
 export function useWebdavRemoteActions(
@@ -58,15 +62,54 @@ export function useWebdavRemoteActions(
     updateWebdavSettings,
     showAllRemote,
     remoteFiles,
+    handleSyncLatest,
     activationRef,
     isCurrentActivation,
     operationStateRef,
     nextOperationId,
     sendWebdavEvent,
     readRemoteList,
-    confirmation,
   } = input;
 
+  const askConfirmation = async (
+    action: "restore" | "delete" | "latest",
+    file: WebdavBackupFile,
+    epoch: number,
+    id: number,
+  ) => {
+    sendWebdavEvent({
+      type: "confirmation.requested",
+      action,
+      file,
+      id,
+      epoch,
+      connection: {
+        url: webdavUrl,
+        username: webdavUsername,
+        password: webdavPassword,
+        dir: webdavRemoteDir,
+      },
+    });
+    const choice = await openConfirm({
+      title: action === "delete"
+        ? uiText("deleteCloudBackup_6352")
+        : action === "latest"
+          ? uiText("restoreFromCloud_6e37")
+          : uiText("restoreCloudBackup_bfc3"),
+      body: action === "delete"
+        ? uiText("confirmDeleteBackup", { name: file.basename })
+        : action === "latest"
+          ? uiText("confirmRestoreLatest", { name: file.basename })
+          : uiText("confirmRestoreBackup", { name: file.basename }),
+      confirmLabel: uiText("confirm_38cf"),
+      danger: true,
+    }, 280);
+    if (!choice) {
+      sendWebdavEvent({ type: "confirmation.cancelled" });
+      return;
+    }
+    void confirmRemoteAction();
+  };
   const requestConfirmation = (
     action: "restore" | "delete",
     file: WebdavBackupFile,
@@ -78,26 +121,17 @@ export function useWebdavRemoteActions(
       current.list.status === "loading"
     )
       return;
-    sendWebdavEvent({
-      type: "confirmation.requested",
-      action,
-      file,
-      id: ++nextOperationId.current,
-      epoch: activationRef.current.epoch,
-      connection: {
-        url: webdavUrl,
-        username: webdavUsername,
-        password: webdavPassword,
-        dir: webdavRemoteDir,
-      },
-    });
+    void askConfirmation(action, file, activationRef.current.epoch, ++nextOperationId.current);
+  };
+  const confirmLatest = async () => {
+    const found = await handleSyncLatest();
+    if (!found) return;
+    void askConfirmation("latest", found.file, found.epoch, found.id);
   };
   const handleRestore = (file: WebdavBackupFile) =>
     requestConfirmation("restore", file);
   const handleDelete = (file: WebdavBackupFile) =>
     requestConfirmation("delete", file);
-  const cancelConfirmation = () =>
-    sendWebdavEvent({ type: "confirmation.cancelled" });
 
   const confirmRemoteAction = async () => {
     const pending = operationStateRef.current.operation;
@@ -150,22 +184,6 @@ export function useWebdavRemoteActions(
     }
   };
 
-  const confirmConfig = confirmation
-    ? {
-        title:
-          confirmation.action === "delete"
-            ? uiText("deleteCloudBackup_6352")
-            : confirmation.action === "latest"
-              ? uiText("restoreFromCloud_6e37")
-              : uiText("restoreCloudBackup_bfc3"),
-        description:
-          confirmation.action === "delete"
-            ? uiText("confirmDeleteBackup", { name: confirmation.file.basename })
-            : confirmation.action === "latest"
-              ? uiText("confirmRestoreLatest", { name: confirmation.file.basename })
-              : uiText("confirmRestoreBackup", { name: confirmation.file.basename }),
-      }
-    : null;
   const visibleRemoteFiles = showAllRemote
     ? remoteFiles
     : remoteFiles.slice(0, 3);
@@ -173,9 +191,7 @@ export function useWebdavRemoteActions(
     ...input,
     handleRestore,
     handleDelete,
+    handleSyncLatest: confirmLatest,
     visibleRemoteFiles,
-    confirmConfig,
-    cancelConfirmation,
-    confirmRemoteAction,
   };
 }

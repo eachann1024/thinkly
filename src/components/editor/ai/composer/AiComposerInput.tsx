@@ -2,13 +2,11 @@ import { forwardRef, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { ComposerSuggestionsList } from "./ComposerSuggestionsList";
 import { SkillSuggestionsList } from "./SkillSuggestionsList";
-import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import type {
   AiComposerInputHandle,
   AiComposerInputProps,
 } from "./composerInputTypes";
 import { useAiComposerController } from "./useAiComposerController";
-import { SelectionQuotePreview } from "./SelectionQuotePreview";
 
 export {
   COMPOSER_CHIP_DELETE_FLUSH_MS,
@@ -58,10 +56,6 @@ export const AiComposerInput = forwardRef<
     command,
     commandItems,
     insertCommand,
-    imagePreviewContent,
-    setImagePreviewContent,
-    quotePreview,
-    setQuotePreview,
   } = useAiComposerController(props, ref);
   return (
     <div
@@ -121,14 +115,6 @@ export const AiComposerInput = forwardRef<
           onSelect={insertCommand}
         />
       ) : null}
-
-      <FullscreenPreview
-        open={Boolean(imagePreviewContent)}
-        content={imagePreviewContent}
-        title={imagePreviewContent?.fileName}
-        onClose={() => setImagePreviewContent(null)}
-      />
-      <SelectionQuotePreview quote={quotePreview} onClose={() => setQuotePreview(null)} />
     </div>
   );
 });

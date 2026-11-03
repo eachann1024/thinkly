@@ -53,6 +53,7 @@ export function useWebdavSyncActions(
     readRemoteList,
     beginWebdavOperation,
     sendWebdavEvent,
+    operationStateRef,
   } = input;
 
   const handleUploadNow = async () => {
@@ -108,7 +109,6 @@ export function useWebdavSyncActions(
     const id = beginWebdavOperation("findingLatest");
     if (id === null) return;
     const epoch = activationRef.current.epoch;
-    let awaitingConfirmation = false;
     try {
       const list = await readRemoteList();
       if (!isCurrentActivation(epoch)) return;
@@ -116,26 +116,14 @@ export function useWebdavSyncActions(
         toast.error(uiText("noUsableBackupsFoundInThe_3663"));
         return;
       }
-      sendWebdavEvent({
-        type: "confirmation.requested",
-        id,
-        action: "latest",
-        file: list[0],
-        epoch,
-        connection: {
-          url: webdavUrl,
-          username: webdavUsername,
-          password: webdavPassword,
-          dir: webdavRemoteDir,
-        },
-      });
-      awaitingConfirmation = true;
+      return { file: list[0], epoch, id };
     } catch (err: any) {
       if (!isCurrentActivation(epoch)) return;
       console.error(err);
       toast.error(uiText("syncFailed_d610"), { description: err.message || String(err) });
     } finally {
-      if (!awaitingConfirmation)
+      const operation = operationStateRef.current.operation;
+      if (operation.status === "findingLatest" && operation.id === id)
         sendWebdavEvent({ type: "operation.finished", id });
     }
   };

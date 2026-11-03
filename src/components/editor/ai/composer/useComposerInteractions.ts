@@ -1,11 +1,15 @@
-import { useCallback, useState } from "react";
-import { parseSelectionQuoteAttrs, type AiSelectionQuoteAttrs } from "./selectionQuoteData";
+import { useCallback } from "react";
+import { openSelectionQuote } from "@/windows/open/openSelectionQuote";
+import { parseSelectionQuoteAttrs } from "./selectionQuoteData";
 import { cleanupOrphanComposerZwspNodes, placeCaretInEditor } from "./composerChipDom";
 import { extractClipboardImageFiles } from "@/components/editor/utils/pasteClipboardImage";
 import {
   getPreviewableImageChip,
   parseImageChipAttrs,
 } from "./composerImageChip";
+import { openFullscreenPreview } from "@/lib/preview/fullscreenPreviewWindow";
+import { getPageTitle } from "@/components/editor/utils/page-title";
+import { usePages } from "@/stores/usePages";
 import type { AiComposerInputProps } from "./composerInputTypes";
 import type { ComposerContentState } from "./useComposerContentState";
 import type { useComposerImages } from "./useComposerImages";
@@ -21,11 +25,9 @@ export function useComposerInteractions(
 ) {
   const { disabled } = props;
   const { imageRegistryRef, editorRef, emitCurrentContent } = state;
-  const [quotePreview, setQuotePreview] = useState<AiSelectionQuoteAttrs | null>(null);
   const {
     hideImagePreview,
     removeImageChip,
-    setImagePreviewContent,
     insertImages,
   } = images;
   const handleClickNative = useCallback(
@@ -45,7 +47,7 @@ export function useComposerInteractions(
           }
           emitCurrentContent();
         } else {
-          setQuotePreview(parseSelectionQuoteAttrs(quoteChip.dataset.aiSelectionQuoteAttrs));
+          openSelectionQuote(parseSelectionQuoteAttrs(quoteChip.dataset.aiSelectionQuoteAttrs));
         }
         return;
       }
@@ -65,11 +67,13 @@ export function useComposerInteractions(
           : null;
         if (attrs && entry) {
           hideImagePreview();
-          setImagePreviewContent({
-            kind: "image",
-            data: entry.file,
-            fileName: attrs.fileName,
-          });
+          const pageId = usePages.getState().activePageId;
+          const page = pageId ? usePages.getState().pages[pageId] : undefined;
+          void openFullscreenPreview(
+            { kind: "image", data: entry.file, fileName: attrs.fileName },
+            attrs.fileName,
+            page ? getPageTitle(page) : undefined,
+          );
         }
         return;
       }
@@ -80,7 +84,7 @@ export function useComposerInteractions(
         onOpenPage(mentionId);
       }
     },
-    [disabled, editorRef, emitCurrentContent, hideImagePreview, onOpenPage, removeImageChip, setImagePreviewContent],
+    [disabled, editorRef, emitCurrentContent, hideImagePreview, onOpenPage, removeImageChip],
   );
 
   const handleBlurNative = useCallback(() => {
@@ -102,5 +106,5 @@ export function useComposerInteractions(
     [disabled, insertImages],
   );
 
-  return { handleClickNative, handleBlurNative, handlePasteNative, quotePreview, setQuotePreview };
+  return { handleClickNative, handleBlurNative, handlePasteNative };
 }
