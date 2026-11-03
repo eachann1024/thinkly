@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { request } from "node:https";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 // 用 gemini 3.8 把「上一版 → 这一版」的面向用户提交整理成三类更新日志。
 // 网关地址和密钥只从环境变量读：MAGPIE_BASE_URL（必需）、MAGPIE_API_KEY（网关要求鉴权时才需要）、
 // CHANGELOG_MODEL（可选，默认 gemini 3.8）。读不到或调用失败时返回 fallback，由调用方退回逐条提交标题。
+// MAGPIE_CA_CERT（可选）：证书文件路径。设置后只信任这一张证书（替换系统 CA，不是追加），用于自签的公网网关，
+// 例如 scripts/release/pubgw-cert.pem；证书 SAN 含网关 IP，主机名校验照常进行。
 export const DEFAULT_CHANGELOG_MODEL = "antigravity/gemini-3.8-flash";
 export const SECTION_ORDER = ["新增", "优化", "修复"];
 const PROMPT_PATH = resolve(fileURLToPath(new URL(".", import.meta.url)), "changelog-prompt.md");
@@ -65,6 +68,28 @@ export function validatePolishedMarkdown(raw) {
   return out;
 }
 
+// 只信任 caFile 这一张证书的最小 fetch：返回 ok/status/json，够 requestPolish 用。
+export function pinnedFetch(caFile) {
+  const ca = readFileSync(caFile, "utf8");
+  return (url, { method, headers, body, signal }) => new Promise((resolveResponse, reject) => {
+    const req = request(url, { method, headers, ca, signal }, (res) => {
+      const chunks = [];
+      res.on("data", (chunk) => chunks.push(chunk));
+      res.on("end", () => {
+        const text = Buffer.concat(chunks).toString("utf8");
+        resolveResponse({
+          ok: res.statusCode >= 200 && res.statusCode < 300,
+          status: res.statusCode,
+          json: async () => JSON.parse(text),
+        });
+      });
+      res.on("error", reject);
+    });
+    req.on("error", reject);
+    req.end(body);
+  });
+}
+
 function chatUrl(baseUrl) {
   return `${baseUrl.trim().replace(/\/+$/, "").replace(/\/v1$/, "")}/v1/chat/completions`;
 }
@@ -95,9 +120,11 @@ async function requestPolish({ baseUrl, apiKey, model, version, lines, fetchImpl
 /**
  * @returns {Promise<{status: "polished", lines: string[], model: string} | {status: "empty", model: string} | {status: "fallback", reason: string}>}
  */
-export async function polishChangelog({ version, commits, env = process.env, fetchImpl = fetch }) {
+export async function polishChangelog({ version, commits, env = process.env, fetchImpl }) {
   const baseUrl = env.MAGPIE_BASE_URL?.trim();
   if (!baseUrl) return { status: "fallback", reason: "没有设置 MAGPIE_BASE_URL，跳过 gemini 3.8 润色" };
+  const caFile = env.MAGPIE_CA_CERT?.trim();
+  fetchImpl ??= caFile ? pinnedFetch(caFile) : fetch;
   const model = env.CHANGELOG_MODEL?.trim() || DEFAULT_CHANGELOG_MODEL;
   const lines = commitInputLines(commits);
   if (!lines.length) return { status: "fallback", reason: "没有可润色的提交" };

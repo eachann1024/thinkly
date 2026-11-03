@@ -54,6 +54,10 @@ jobs:
           PUBLISH: ${{ inputs.publish == true }}
           FORCE: ${{ inputs.force == true }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
+          # 更新日志润色：受限公网网关，只信任仓库里的自签证书；只在 main 上的定时/手动运行里传密钥。
+          MAGPIE_BASE_URL: ${{ github.ref == 'refs/heads/main' && vars.MAGPIE_BASE_URL || '' }}
+          MAGPIE_API_KEY: ${{ github.ref == 'refs/heads/main' && secrets.MAGPIE_API_KEY || '' }}
+          MAGPIE_CA_CERT: scripts/release/pubgw-cert.pem
         run: node scripts/select-desktop-release.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: steps.check.outputs.should_build == 'true'
