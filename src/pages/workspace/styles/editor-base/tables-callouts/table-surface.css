@@ -10,8 +10,16 @@
 }
 .workspace-editor-surface .bn-editor [data-content-type="table"] {
   padding-block: 0;
+  min-width: 0;
+  max-width: 100%;
 }
 .workspace-editor-surface .bn-editor [data-content-type="table"] .tableWrapper {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
   padding: 0
     calc(28px * var(--editor-scale, 1)) calc(28px * var(--editor-scale, 1)) 0;
 }
