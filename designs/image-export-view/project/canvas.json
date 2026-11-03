@@ -2,7 +2,8 @@
 "boards":{
 "Main.dc.html":{"x":0,"y":0,"w":1280,"h":800,"title":"A 工作台 · 三栏","expand":"fill","is_interactive":true},
 "Stage.dc.html":{"x":1360,"y":0,"w":1280,"h":800,"title":"B 沉浸画布 · 底部主题条","expand":"fill","is_interactive":true},
-"Compose.dc.html":{"x":2720,"y":0,"w":1280,"h":800,"title":"C 内容取舍 · 左稿右图","expand":"fill","is_interactive":true}},
-"order":["Main.dc.html","Stage.dc.html","Compose.dc.html"],
+"Compose.dc.html":{"x":2720,"y":0,"w":1280,"h":800,"title":"C 内容取舍 · 左稿右图","expand":"fill","is_interactive":true},
+"ExportCard.dc.html":{"x":4080,"y":0,"w":520,"h":800,"title":"共享 · 导出卡片"}},
+"order":["Main.dc.html","Stage.dc.html","Compose.dc.html","ExportCard.dc.html"],
 "notes":{"t1":{"x":0,"y":-260,"text":"生成图片：从弹窗改为独立界面","kind":"title1","maxW":4000}},
 "designSystems":[]}

@@ -24,6 +24,8 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 .dot{width:26px;height:26px;border-radius:13px;border:0;padding:0;cursor:pointer;transition:transform .12s}
 .dot:hover{transform:scale(1.08)}
 .chip{font:inherit;font-size:12px;font-weight:460;height:28px;padding:0 10px;border-radius:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background-color .15s,color .15s}
+.in{font:inherit;font-size:12px;width:128px;box-sizing:border-box;height:28px;padding:0 8px;border:1px solid #dcdcdc;border-radius:6px;background:#ffffff;color:#20242c;outline:none;transition:border-color .15s,box-shadow .15s}
+.in:focus{border-color:#547dd0;box-shadow:0 0 0 3px #e5edfc}
 @keyframes toast{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -61,6 +63,8 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 <main style="flex:1;min-width:0;display:flex;flex-direction:column;background:#e9e9e9;border:1px solid #e6e6e6;border-radius:10px;overflow:hidden">
 <div style="flex:none;display:flex;align-items:center;gap:14px;padding:10px 14px;background:#fafafa;border-bottom:1px solid #e6e6e6">
 <div role="radiogroup" aria-label="卡片主题" style="display:flex;align-items:center;gap:6px">
+<sc-for list="{{origs}}" as="t" hint-placeholder-count="1"><button class="dot" role="radio" aria-checked="{{t.on}}" aria-label="{{t.name}}" title="{{t.name}}" style="{{t.dot}}" onClick="{{t.pick}}"></button></sc-for>
+<span aria-hidden="true" style="width:1px;height:18px;background:#dedede;margin:0 4px"></span>
 <sc-for list="{{lights}}" as="t" hint-placeholder-count="9"><button class="dot" role="radio" aria-checked="{{t.on}}" aria-label="{{t.name}}" title="{{t.name}}" style="{{t.dot}}" onClick="{{t.pick}}"></button></sc-for>
 <span aria-hidden="true" style="width:1px;height:18px;background:#dedede;margin:0 4px"></span>
 <sc-for list="{{darks}}" as="t" hint-placeholder-count="6"><button class="dot" role="radio" aria-checked="{{t.on}}" aria-label="{{t.name}}" title="{{t.name}}" style="{{t.dot}}" onClick="{{t.pick}}"></button></sc-for>
@@ -69,26 +73,13 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 </div>
 
 <div style="flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;padding:28px 24px">
-<div style="{{stage}}">
-<article style="{{card}}">
-<sc-for list="{{shown}}" as="b" hint-placeholder-count="6">
-<sc-if value="{{b.isH1}}" hint-placeholder-val="{{false}}"><h1 style="margin:0 0 12px;font-size:24px;line-height:1.3;font-weight:650;letter-spacing:-.01em">{{b.label}}</h1></sc-if>
-<sc-if value="{{b.isH2}}" hint-placeholder-val="{{false}}"><h2 style="margin:16px 0 6px;font-size:16px;font-weight:600">{{b.label}}</h2></sc-if>
-<sc-if value="{{b.isP}}" hint-placeholder-val="{{true}}"><p style="margin:0 0 8px">{{b.label}}</p></sc-if>
-<sc-if value="{{b.isLi}}" hint-placeholder-val="{{false}}"><div style="display:flex;gap:8px;margin:0 0 4px"><span aria-hidden="true" style="{{bullet}}"></span><span>{{b.label}}</span></div></sc-if>
-<sc-if value="{{b.isQ}}" hint-placeholder-val="{{false}}"><blockquote style="{{quote}}">{{b.label}}</blockquote></sc-if>
-<sc-if value="{{b.isImg}}" hint-placeholder-val="{{false}}"><div style="{{img}}">{{b.label}}</div></sc-if>
-</sc-for>
-<sc-if value="{{empty}}" hint-placeholder-val="{{false}}"><p style="margin:0;opacity:.6">在左侧勾选要放进图片的内容</p></sc-if>
-<sc-if value="{{showFooter}}" hint-placeholder-val="{{true}}">
-<footer style="{{foot}}"><sc-if value="{{showBrand}}" hint-placeholder-val="{{true}}"><span style="font-weight:600">Thinkly</span></sc-if><span style="flex:1"></span><sc-if value="{{showDate}}" hint-placeholder-val="{{true}}"><span class="goose-tabular">{{stamp}}</span></sc-if></footer>
-</sc-if>
-</article>
-</div>
+<sc-if value="{{empty}}" hint-placeholder-val="{{false}}"><p style="align-self:center;margin:0;font-size:13px;color:#526071">在左侧勾选要放进图片的内容</p></sc-if>
+<sc-if value="{{hasCard}}" hint-placeholder-val="{{true}}"><div style="flex:none;align-self:flex-start;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06)"><dc-import name="ExportCard" theme="{{theme}}" w="{{cw}}" opts="{{cardOpts}}" blocks="{{cardBlocks}}" heading="{{heading}}" hint-size="480px,760px"></dc-import></div></sc-if>
 </div>
 
 <div style="flex:none;display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 14px;background:#fafafa;border-top:1px solid #e6e6e6">
 <sc-for list="{{chips}}" as="c" hint-placeholder-count="5"><button class="chip" aria-pressed="{{c.on}}" disabled="{{c.disabled}}" style="{{c.style}}" onClick="{{c.toggle}}">{{c.label}}</button></sc-for>
+<sc-if value="{{brandOn}}" hint-placeholder-val="{{true}}"><input class="in" aria-label="品牌文字" maxlength="24" placeholder="留空则不显示品牌" value="{{brandText}}" onInput="{{setBrand}}"></sc-if>
 <span style="flex:1"></span>
 <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#526071">宽度
 <select style="font:inherit;font-size:13px;height:28px;padding:0 8px;border:1px solid #dcdcdc;border-radius:6px;background:#ffffff;color:#20242c" onChange="{{pickWidth}}"><option value="720">手机 720</option><option value="1080" selected="selected">标准 1080</option><option value="1440">宽屏 1440</option></select>
@@ -106,6 +97,7 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
 var THEMES=[
+{id:"original",name:"保持原样式",g:"cur",bg:"#ffffff",card:"#ffffff",tx:"#20242c",sub:"#526071",ac:"#e9c400",r:0},
 {id:"notebook",name:"笔记本",g:"light",bg:"#ffffff",card:"#ffffff",tx:"#20242c",sub:"#5e5d59",ac:"#2563eb",r:12},
 {id:"github-light",name:"GitHub 浅色",g:"light",bg:"#f6f8fa",card:"#ffffff",tx:"#1f2328",sub:"#59636e",ac:"#0969da",r:12},
 {id:"medium",name:"Medium",g:"light",bg:"#faf9f6",card:"#ffffff",tx:"#242424",sub:"#6b6b6b",ac:"#1a8917",r:4},
@@ -133,11 +125,12 @@ var BLOCKS=[
 {k:"q",t:"异步不是少沟通，而是把沟通写下来。"},
 {k:"p",t:"下一步：把站会也试着取消两周，看看会不会漏掉什么。"}];
 var SEL=[4,5,6,7,8];
+function safeRatio(w,h){var r=Math.min(3,16384/w,16384/h,Math.sqrt(16e6/(w*h)));r=Math.floor(r*100)/100;return r<.1?0:r;}
 class Component extends DCLogic {
-constructor(p){super(p);this.state={theme:"notebook",on:BLOCKS.map((b,i)=>i!==3&&i!==9),width:1080,footer:true,brand:true,date:true,time:false,toast:""};}
+constructor(p){super(p);this.state={theme:"notebook",on:BLOCKS.map((b,i)=>i!==3&&i!==9),width:1080,footer:true,brand:true,brandText:"Thinkly",date:true,time:false,toast:""};}
 flash(m){this.setState({toast:m});clearTimeout(this._t);this._t=setTimeout(()=>this.setState({toast:""}),2600);}
 renderVals(){
-var s=this.state,self=this,T=THEMES.find(t=>t.id===s.theme),dark=T.g==="dark";
+var s=this.state,self=this,T=THEMES.find(t=>t.id===s.theme)||THEMES[1],nf=T.id==="kenya-hara";
 var mkDot=function(t){var a=t.id===s.theme;return{name:t.name,on:a,pick:()=>self.setState({theme:t.id}),
 dot:"background:"+t.bg+";box-shadow:inset -13px 0 0 "+t.ac+","+(a?"0 0 0 2px #fafafa,0 0 0 3px #547dd0":"inset 0 0 0 1px rgba(0,0,0,.12)")};};
 var chip=function(k,l,dis){var v=s[k]&&!dis;return{label:l,on:!!s[k],disabled:!!dis,toggle:()=>{if(!dis)self.setState({[k]:!s[k]})},
@@ -148,23 +141,19 @@ toggle:()=>{var n=s.on.slice();n[i]=!n[i];self.setState({on:n})},
 row:on?"":"opacity:.45",
 box:"flex:none;margin-top:2px;width:16px;height:16px;border-radius:4px;display:grid;place-items:center;box-sizing:border-box;"+(on?"background:#547dd0":"border:1.5px solid #b9c0ca"),
 text:"font-size:"+(b.k==="h1"?"15px;font-weight:600":b.k==="h2"?"14px;font-weight:560":"13px")+";line-height:20px;color:"+(b.k==="q"||b.k==="img"?"#526071":"#20242c")+(b.k==="q"?";font-style:italic":"")};});
-var shown=BLOCKS.map((b,i)=>({label:b.t,isH1:b.k==="h1",isH2:b.k==="h2",isP:b.k==="p",isLi:b.k==="li",isQ:b.k==="q",isImg:b.k==="img"})).filter((b,i)=>s.on[i]);
+var hd=s.on[0]?BLOCKS[0].t:"",cb=BLOCKS.map((b,i)=>({k:b.k,t:b.t,on:s.on[i]})).filter(b=>b.on&&b.k!=="h1");
 var n=s.on.filter(Boolean).length;
-var cw=s.width===720?380:s.width===1440?600:480;
+var cw=s.width===720?380:s.width===1440?600:480,w=s.width,h=Math.round((n*150+200)*Math.pow(1080/w,.8)),r=safeRatio(w,h);
+var fmt=function(x){return String(x).replace(/\B(?=(\d{3})+(?!\d))/g,",");};
 var now=new Date(),dd=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
 return{
-blocks:blocks,shown:shown,empty:n===0,summary:n+" / "+BLOCKS.length+" 块 · "+s.width+" px",
+blocks:blocks,empty:n===0,hasCard:n>0,summary:n+" / "+BLOCKS.length+" 块 · "+(r?fmt(Math.ceil(w*r))+" × "+fmt(Math.ceil(h*r))+" px"+(r<3?"（已降至 "+r+"×）":""):"超出单张图片上限"),
+theme:s.theme,cw:cw,heading:hd,cardBlocks:cb,cardOpts:{title:true,footer:s.footer,brand:s.brand,brandText:s.brandText,date:s.date,time:s.time},
 all:()=>this.setState({on:BLOCKS.map(()=>true)}),selOnly:()=>this.setState({on:BLOCKS.map((b,i)=>SEL.indexOf(i)>=0)}),
-lights:THEMES.filter(t=>t.g==="light").map(mkDot),darks:THEMES.filter(t=>t.g==="dark").map(mkDot),themeName:T.name,
-chips:[chip("footer","底部栏"),chip("brand","品牌",!s.footer),chip("date","日期",!s.footer),chip("time","时分秒",!s.footer||!s.date)],
+origs:THEMES.filter(t=>t.g==="cur").map(mkDot),lights:THEMES.filter(t=>t.g==="light").map(mkDot),darks:THEMES.filter(t=>t.g==="dark").map(mkDot),themeName:T.name,
+chips:[chip("footer",nf?"底部栏（此主题不含）":"底部栏",nf),chip("brand","品牌",!s.footer||nf),chip("date","日期",!s.footer||nf),chip("time","时分秒",!s.footer||!s.date||nf)],
+brandOn:s.footer&&s.brand&&!nf,brandText:s.brandText,setBrand:(e)=>this.setState({brandText:e.target.value}),
 pickWidth:(e)=>this.setState({width:Number(e.target.value)}),
-showFooter:s.footer,showBrand:s.brand,showDate:s.date,stamp:s.time?dd+" 14:32:08":dd,
-stage:"width:"+cw+"px;flex:none;align-self:flex-start;background:"+T.bg+";padding:24px;box-sizing:border-box;box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);transition:background-color .2s",
-card:"background:"+T.card+";color:"+T.tx+";border-radius:"+T.r+"px;padding:28px 26px;font-size:14px;line-height:1.7;transition:background-color .2s,color .2s",
-bullet:"flex:none;width:5px;height:5px;border-radius:3px;margin-top:10px;background:"+T.ac,
-quote:"margin:12px 0 8px;padding:2px 0 2px 12px;border-left:3px solid "+T.ac+";color:"+T.sub,
-img:"height:120px;margin:4px 0 12px;border-radius:"+Math.min(T.r,8)+"px;display:grid;place-items:center;font-size:12px;color:"+T.sub+";background:"+(dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.05)"),
-foot:"display:flex;gap:8px;margin-top:20px;padding-top:10px;border-top:1px solid "+(dark?"rgba(255,255,255,.12)":"rgba(0,0,0,.08)")+";font-size:11px;color:"+T.sub,
 copy:()=>this.flash("已复制到剪贴板"),save:()=>this.flash("已保存 把周会改成异步之后.png"),toast:s.toast};
 }
 }
