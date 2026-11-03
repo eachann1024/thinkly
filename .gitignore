@@ -135,7 +135,6 @@ public/fonts/*.otf
 !scripts/release-desktop.mjs
 !scripts/desktop-download-metadata.mjs
 !scripts/desktop-update-files.mjs
-!scripts/desktop-release-template.mjs
 !scripts/repair-desktop-metadata.mjs
 !scripts/collect-release-assets.mjs
 !scripts/distribution/
@@ -146,7 +145,6 @@ public/fonts/*.otf
 __pycache__/
 dist-signpath/
 
-!scripts/macos-install-copy.mjs
 !docs/macos-installation.md
 .goose/
 

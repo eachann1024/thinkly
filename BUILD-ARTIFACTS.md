@@ -49,4 +49,4 @@ node scripts/build-ci-installers.mjs mac arm64
 
 ## macOS 安装引导链路
 
-Actions 的 macOS arm64 通过 `prepare-electron-pack.mjs` 复制 DMG 资源，展示背景与安装指令（帮助文件不再放入 DMG），随后由 `build-ci-installers.mjs` 打包，并在 BUILD.json 写入 `macInstallHelper: 1`。Release 只有在 macOS arm64 声明此能力时才介绍安装指令；下载页读取 Release 中的能力标记，旧版未标记的包仍使用手动授权说明。Release 与下载页共用 `scripts/macos-install-copy.mjs` 文案。Homebrew 只安装应用，单独给出手动授权路径。
+Actions 的 macOS arm64 通过 `prepare-electron-pack.mjs` 复制 DMG 资源，展示背景与安装指令（帮助文件不再放入 DMG），随后由 `build-ci-installers.mjs` 打包，并在 BUILD.json 写入 `macInstallHelper: 1`。Release 正文只放用户可感知的更新日志（`<!-- goose-update-notes -->` 标记之间），不再附下载表、安装说明或升级指引。Homebrew 只安装应用，单独给出手动授权路径。
