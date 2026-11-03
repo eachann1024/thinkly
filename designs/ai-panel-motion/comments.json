@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "threads": [
+    {
+      "id": "c_9b6f187b28",
+      "anchor": "#dc-root > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(2) > dcfx1fmsko2:nth-of-type(1) > dct:nth-of-type(35) > dce1fbba9a2131395014000:nth-of-type(1)",
+      "label": "C1 星轨 · 空闲 › text \"已读取 Mac · 2 段代码\"",
+      "detail": "FieldOrbit.dc.html: #34:1/2/1 text \"已读取 Mac · 2 段代码\"",
+      "location": {
+        "file": "project/FieldOrbit.dc.html",
+        "board": "FieldOrbit.dc.html"
+      },
+      "status": "resolved",
+      "createdAt": "2026-11-03T06:16:48.989Z",
+      "updatedAt": "2026-11-03T06:18:39.545Z",
+      "messages": [
+        {
+          "id": "m_458dc665be",
+          "author": {
+            "kind": "user",
+            "name": "eachann"
+          },
+          "text": "这段文案不需要",
+          "at": "2026-11-03T06:16:48.989Z"
+        },
+        {
+          "id": "m_22783625fe",
+          "author": {
+            "kind": "agent",
+            "name": "agent"
+          },
+          "text": "已删掉这行，标题下面只留空白。",
+          "at": "2026-11-03T06:18:39.545Z"
+        }
+      ],
+      "resolvedAt": "2026-11-03T06:18:39.545Z"
+    }
+  ]
+}
