@@ -52,9 +52,6 @@ const uiText = createTranslator(localMessages);
 import { useSettings } from "@/stores/useSettings";
 import { useEffect, useRef, useState } from "react";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
-import type { CardThemeId, WatermarkConfig } from "@/lib/imageExport";
-import { exportPageToImage, exportSelectionToImage } from "@/lib/imageExport";
-import { getPageTitle } from "@/components/editor/utils/page-title";
 import { getActiveGooseNoteEditor, getEditorSelectedBlocksForExport } from "@/components/editor/utils/selection";
 import { toast } from "@/components/ui/sonner";
 import { closeNotebookAiIfFullscreen } from "@/pages/workspace/components/notebook-ai/useNotebookAiPanel";
@@ -92,10 +89,8 @@ export function usePageMenu() {
     ? notebooks[activeNotebookId]
     : undefined;
   const isLocalFolderNotebook = activeNotebook?.source === "local-folder";
-  const [themeSelectorOpen, setThemeSelectorOpen] = useState(false);
   const [pageMenuOpen, setPageMenuOpen] = useState(false);
   const [selectedBlocks, setSelectedBlocks] = useState<BlockNoteContent>([]);
-  const selectedBlocksRef = useRef<BlockNoteContent>([]);
   const importPending = useRef(false);
   const exportPending = useRef(false);
   const isLocalItem = Boolean(page?.localFilePath);
@@ -110,7 +105,6 @@ export function usePageMenu() {
 
   const captureSelectedBlocks = () => {
     const blocks = captureEditorSelectedBlocks();
-    selectedBlocksRef.current = blocks;
     setSelectedBlocks(blocks);
     return blocks;
   };
@@ -218,31 +212,12 @@ export function usePageMenu() {
       .finally(() => { exportPending.current = false; });
   };
 
-  const handleThemeConfirm = (
-    themeId: CardThemeId,
-    watermarkConfig: WatermarkConfig,
-  ) => {
-    if (!page) return;
-    const blocks = selectedBlocksRef.current;
-    if (blocks.length > 0) {
-      exportSelectionToImage(
-        blocks,
-        getPageTitle(page),
-        themeId,
-        watermarkConfig,
-        page,
-      );
-    } else {
-      exportPageToImage(page, themeId, watermarkConfig);
-    }
-  };
-
   return {
     page, activePageId, viewport,
-    defaultLayout, themeSelectorOpen, setThemeSelectorOpen,
+    defaultLayout,
     pageMenuOpen, setPageMenuOpen, selectedBlocks,
     isLocalItem, activeTab, canOpenInNewWindow,
     captureSelectedBlocks, handleImport, runExport,
-    handleThemeConfirm, updatePage,
+    updatePage,
   };
 }

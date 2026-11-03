@@ -57,6 +57,29 @@ async function waitForImages(container: HTMLElement): Promise<void> {
   return Promise.all(promises).then(() => {});
 }
 
+export class ImageExportLoadError extends Error {
+  readonly count: number;
+  constructor(count: number) {
+    super("image-load");
+    this.name = "ImageExportLoadError";
+    this.count = count;
+  }
+}
+
+export async function captureElementToBlob(element: HTMLElement): Promise<Blob> {
+  await withTimeout(
+    Promise.all([document.fonts.ready, waitForImages(element)]),
+    10_000,
+    uiText("timedOutWaitingForImagesToLoad"),
+  );
+  const broken = [...element.querySelectorAll("img")].filter(
+    (img) => img.complete && img.naturalWidth === 0,
+  ).length;
+  if (broken > 0) throw new ImageExportLoadError(broken);
+  await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+  return renderPngBlobWithFallback(element);
+}
+
 export async function captureElementToPng(element: HTMLElement, filename: string) {
   if (isCapturingImage) {
     toast.info(uiText("generatingImagePleaseWait"));

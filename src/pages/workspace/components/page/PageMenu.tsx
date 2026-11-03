@@ -47,8 +47,9 @@ import * as GooseIcons from "@/components/ui/icons";
 import { Popover, PopoverTrigger, PopoverContent, PopoverAction } from "@/components/ui/popover";
 import { FontSelector } from "@/pages/workspace/components/shared/FontSelector";
 import "./page-menu.css";
-import { ImageExportThemeSelector } from "@/components/ui/image-export-theme-selector";
 import { useHistoryView } from "@/stores/useHistoryView";
+import { useImageExportView } from "@/stores/useImageExportView";
+import { openImageExport } from "../image-export/openImageExport";
 import { deletePageWithUndo } from "@/lib/page-delete-actions";
 import { getPlatformKind } from "@/lib/utils";
 import { createDesktopWindow } from "@/lib/electron/windowContext";
@@ -60,11 +61,11 @@ export function PageMenu() {
   useLocale();
   const {
     page, activePageId, viewport,
-    defaultLayout, themeSelectorOpen, setThemeSelectorOpen,
+    defaultLayout,
     pageMenuOpen, setPageMenuOpen, selectedBlocks,
     isLocalItem, activeTab, canOpenInNewWindow,
     captureSelectedBlocks, handleImport, runExport,
-    handleThemeConfirm, updatePage,
+    updatePage,
   } = usePageMenu();
 
   if (!page || !activePageId) return null;
@@ -194,7 +195,8 @@ export function PageMenu() {
           <PopoverAction
             className="group grid min-h-[32px] grid-cols-[16px_minmax(0,1fr)] gap-x-2 px-2 text-xs"
             onSelect={() => {
-              if (page.localReadState !== "error") setThemeSelectorOpen(true);
+              if (page.localReadState === "error" || !activePageId) return;
+              openImageExport(activePageId, captureSelectedBlocks());
             }}
           >
             <GooseIcons.Image className="h-3.5 w-3.5 text-muted-foreground group-focus:text-[var(--goose-interactive-selected-fg)]" />
@@ -230,6 +232,7 @@ export function PageMenu() {
                   flushEditorContent(true);
                 } catch {
                 }
+                useImageExportView.getState().exit();
                 setTimeout(() => {
                   useHistoryView.getState().enter(pid);
                 }, 80);
@@ -265,14 +268,6 @@ export function PageMenu() {
         </PopoverContent>
       </Popover>
 
-      <ImageExportThemeSelector
-        open={themeSelectorOpen}
-        onOpenChange={setThemeSelectorOpen}
-        onConfirm={handleThemeConfirm}
-        mode={selectedBlocks.length > 0 ? "selection" : "page"}
-        page={page}
-        blocks={selectedBlocks}
-      />
     </>
   );
 }

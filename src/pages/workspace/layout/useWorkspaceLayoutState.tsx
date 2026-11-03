@@ -6,6 +6,7 @@ import { useTabs } from "@/stores/useTabs";
 import { useDesktopWindowTitleSync } from "@/hooks/useDesktopWindowTitle";
 import { useOptionalEditorPaneRegistry } from "../components/editor-split/editorPaneRegistry";
 import { useHistoryView } from "@/stores/useHistoryView";
+import { useImageExportView } from "@/stores/useImageExportView";
 import {
   isFullscreenAiLayout,
   useNotebookAiPanel,
@@ -129,6 +130,15 @@ export function useWorkspaceLayoutState({
   const inHistoryMode =
     !!historyActivePageId && historyActivePageId === activePageId;
 
+  const imageExportPageId = useImageExportView((s) => s.active);
+  const inImageExportMode =
+    !!imageExportPageId && imageExportPageId === activePageId;
+  useEffect(() => {
+    if (imageExportPageId && imageExportPageId !== activePageId) {
+      useImageExportView.getState().exit();
+    }
+  }, [imageExportPageId, activePageId]);
+
   const activeNotebook = activeNotebookId
     ? notebooks[activeNotebookId]
     : undefined;
@@ -195,6 +205,8 @@ export function useWorkspaceLayoutState({
     singleTabMode,
     historyActivePageId,
     inHistoryMode,
+    imageExportPageId,
+    inImageExportMode,
     activeNotebook,
     isLocalFolderRepo,
     showElectronLocalImportHint,
