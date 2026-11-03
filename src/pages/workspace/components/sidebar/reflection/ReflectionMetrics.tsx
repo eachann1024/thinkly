@@ -40,11 +40,11 @@ export function ReflectionMetrics({ stats }: { stats: ReflectionStats }) {
     [uiText("charsAdded"), new Intl.NumberFormat(locale).format(stats.added)],
   ];
   return (
-    <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+    <dl className="m-0 grid grid-cols-2 gap-x-5 gap-y-[18px]">
       {items.map(([label, value]) => (
-        <div key={label} className="min-w-0">
-          <dd className="truncate text-2xl font-semibold tabular-nums text-foreground">{value}</dd>
-          <dt className="mt-1 truncate text-xs text-muted-foreground">{label}</dt>
+        <div key={label} className="flex min-w-0 flex-col-reverse">
+          <dt className="mt-0.5 truncate text-xs text-muted-foreground">{label}</dt>
+          <dd className="m-0 truncate whitespace-nowrap text-[22px] font-semibold tabular-nums text-foreground">{value}</dd>
         </div>
       ))}
     </dl>
