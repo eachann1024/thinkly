@@ -15,12 +15,15 @@ function Dot({ dot }: { dot: OrbitDot }) {
 function OrbitFieldView({ field }: { field: OrbitField }) {
   return (
     <>
+      {field.rings.length > 0 ? <div className="ai-orbit-field" /> : null}
       {field.rings.map((ring) => (
         <div
           key={ring.delay}
           className="ai-orbit-ring"
-          style={{ animationDelay: `${ring.delay}s`, maskImage: ring.mask, WebkitMaskImage: ring.mask }}
-        />
+          style={{ animationDelay: `${ring.delay}s`, ["--ai-orbit-r" as string]: `${ring.radius}px` }}
+        >
+          <i style={{ maskImage: ring.mask, WebkitMaskImage: ring.mask }} />
+        </div>
       ))}
       <div className="ai-orbit-anchor">
         {field.orbits.map((orbit) => (

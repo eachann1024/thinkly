@@ -167,6 +167,12 @@
  font-weight: var(--font-weight-medium);
  line-height: 20px;
  cursor: pointer;
+ transition: background-color var(--goose-control-motion-duration) ease, color var(--goose-control-motion-duration) ease;
+}
+
+.notebook-ai-letter-fold-toggle:is(:hover, :focus-visible) {
+ background: var(--goose-interactive-hover);
+ color: var(--goose-text-primary);
 }
 
 .notebook-ai-letter-chev {

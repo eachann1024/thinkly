@@ -6,6 +6,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
+  contain: strict;
 }
 
 .ai-orbit--run {
@@ -13,6 +14,7 @@
   width: 32px;
   height: 32px;
   flex: none;
+  contain: strict;
 }
 
 .ai-orbit-anchor,
@@ -69,20 +71,44 @@
   background: color-mix(in srgb, var(--goose-accent-solid) 72%, var(--goose-text-primary));
 }
 
-/* Spans [2y - H, H] so its center is the anchor; the dot pattern and ring masks both center on it. */
+/*
+ * Each band is its own small square around the anchor, so the GPU only composites the band's area,
+ * not the whole panel 8 times. Only the wrapper animates opacity; the masked pattern inside is
+ * rasterized once into that layer and never repainted.
+ */
 .ai-orbit-ring {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(2 * var(--ai-orbit-y, 34%) - 100%);
-  bottom: 0;
+  left: calc(50% - var(--ai-orbit-r));
+  top: calc(var(--ai-orbit-y, 34%) - var(--ai-orbit-r));
+  width: calc(2 * var(--ai-orbit-r));
+  height: calc(2 * var(--ai-orbit-r));
+  animation: ai-orbit-wave 6s ease-in-out infinite;
+  will-change: opacity;
+}
+
+.ai-orbit-ring > i,
+.ai-orbit-field {
+  position: absolute;
   background-image: radial-gradient(circle, var(--goose-text-disabled) 0.9px, transparent 1.15px);
   background-size: 20px 20px;
   background-position: center;
   mask-repeat: no-repeat;
   -webkit-mask-repeat: no-repeat;
-  animation: ai-orbit-wave 6s ease-in-out infinite;
-  will-change: opacity;
+}
+
+.ai-orbit-ring > i {
+  inset: 0;
+}
+
+/* Everything past the last band: static, painted once. Spans [2y - H, H] so its center is the anchor. */
+.ai-orbit-field {
+  left: 0;
+  right: 0;
+  top: calc(2 * var(--ai-orbit-y, 34%) - 100%);
+  bottom: 0;
+  opacity: 0.35;
+  mask-image: radial-gradient(circle at center, transparent 534px, rgba(0, 0, 0, 0.3) 534px);
+  -webkit-mask-image: radial-gradient(circle at center, transparent 534px, rgba(0, 0, 0, 0.3) 534px);
 }
 
 .ai-orbit--idle .ai-orbit-star {
