@@ -1,7 +1,6 @@
 import { useLocale, i18nYaml, createTranslator } from "@/i18n";
 import { Copy, Download, FilePlus2, Image, Maximize2 } from "@/components/ui/icons";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import { saveBlobAndReveal } from "@/lib/export/fileSave";
 import { getPreviewActionTooltip } from "@/lib/preview/previewAction";
 import { toast } from "@/components/ui/sonner";
@@ -62,13 +61,13 @@ const t = createTranslator(messages);
 export function ArtifactActions({
   copySource, downloadSource, filename = "artifact.txt", mimeType = "text/plain;charset=utf-8",
   onCopyImage, onDownloadImage, downloadImageFilename = "artifact.png", onPreview, onPreviewImage,
-  previewFilename = "preview.png", previewIdentity, onInsert, imageReady = true, insertReady = true,
+  previewFilename = "preview.png", previewTitle, previewContext, previewIdentity, onInsert, imageReady = true, insertReady = true,
 }: ArtifactActionsProps) {
   useLocale();
   const identity = previewIdentity ?? JSON.stringify([copySource, downloadSource, filename, previewFilename]);
   const { states, run } = useArtifactAction(identity);
-  const { previewing, previewFailed, previewContent, closePreview, previewHandlers } = useArtifactPreview({
-    onPreview, onPreviewImage, previewFilename, identity,
+  const { previewing, previewFailed, previewHandlers } = useArtifactPreview({
+    onPreview, onPreviewImage, previewFilename, previewTitle, previewContext, identity,
   });
   const feedback = (id: string) => states[id] === "busy" ? t("working") :
     states[id] === "success" ? t("succeeded") : states[id] === "error" ? t("failed") : undefined;
@@ -92,7 +91,7 @@ export function ArtifactActions({
           toast.success(t("insertedIntoCurrentNote"));
         })} /> : null}
       {hasPreview ? <ArtifactActionButton icon={Maximize2} label={getPreviewActionTooltip()}
-        {...previewHandlers} active={Boolean(previewContent)} disabled={!imageReady || previewing}
+        {...previewHandlers} disabled={!imageReady || previewing}
         state={previewing ? "busy" : previewFailed ? "error" : "idle"}
         feedback={previewing ? t("working") : previewFailed ? t("failed") : undefined} /> : null}
       {onDownloadImage || hasSourceDownload ? <ArtifactActionButton icon={Download} label={onDownloadImage ? t("downloadImage") : t("download")}
@@ -104,6 +103,5 @@ export function ArtifactActions({
           } else await downloadText(downloadSource!, filename, mimeType);
         })} /> : null}
     </div>
-    <FullscreenPreview open={Boolean(previewContent)} content={previewContent} onClose={closePreview} />
   </TooltipProvider>;
 }

@@ -1,12 +1,15 @@
 import { useLocale } from "@/i18n";
 import { useCallback, useEffect, useReducer, useState, type RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
+import { renderCachedMermaid } from "@/lib/imageExport/mermaidCache";
 import { renderMermaidSvgForExport } from "@/lib/imageExport/mermaid";
 import { svgMarkupToPngBlob } from "@/lib/imageExport/svgToPng";
 import { ArtifactRenderStatus } from "./ArtifactRenderStatus";
 import { ArtifactActions } from "./ArtifactActions";
 import { ArtifactPanZoom } from "./ArtifactPanZoom";
 import { createMermaidArtifactBlocks, insertArtifactBlocks } from "./insertArtifact";
+import { getPageTitle } from "@/components/editor/utils/page-title";
+import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 
@@ -41,6 +44,7 @@ interface DiagramCardProps {
 export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
   useLocale();
   const theme = useSettings((state) => state.theme);
+  const page = usePages((state) => state.activePageId ? state.pages[state.activePageId] : undefined);
   const resolvedTheme = useResolvedTheme(theme);
   const [renderState, dispatch] = useReducer(diagramRenderReducer, { status: "empty" });
   const [revision, setRevision] = useState(0);
@@ -85,21 +89,21 @@ export function DiagramCard({ title, source, editorRef }: DiagramCardProps) {
         <ArtifactActions
           imageReady={Boolean(svg)}
           previewIdentity={key}
+          previewTitle={title?.trim() || t("diagram")}
+          previewContext={page ? getPageTitle(page) : undefined}
           copySource={source}
           onCopyImage={async () => capturePng()}
           onDownloadImage={capturePng}
           downloadImageFilename="diagram.png"
           onPreview={async () => {
-            const markup =
-              svg ||
-              (await renderMermaidSvgForExport(source, resolvedTheme));
+            const markup = svg || (await renderCachedMermaid(source, {
+              mode: resolvedTheme,
+              securityLevel: "loose",
+              fontFamily: "inherit",
+              useMaxWidth: true,
+            }, "editor"));
             if (!markup.trim()) throw new Error(t("theDiagramIsNotReadyYet"));
-            return {
-              kind: "svg",
-              markup,
-              fileName: "diagram.svg",
-              background: resolvedTheme === "dark" ? "#1F1E1C" : "#ffffff",
-            };
+            return { kind: "svg", markup, fileName: "diagram.svg", background: "transparent" };
           }}
           onInsert={() =>
             insertArtifactBlocks(
