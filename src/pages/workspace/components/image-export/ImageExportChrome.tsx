@@ -44,6 +44,7 @@ export function ImageExportActions() {
     <div className="flex shrink-0 items-center gap-2" data-electron-no-drag>
       <SegmentedTrack
         className="w-[168px]"
+        onShell
         label={uiText("scope")}
         value={scope}
         options={[
