@@ -14,7 +14,7 @@ export function ImageExportView({
 }) {
   useImageExportActions(page);
   return (
-    <div className="flex min-h-0 flex-1 overflow-hidden bg-background">
+    <div className="flex min-h-0 flex-1 overflow-hidden bg-[hsl(var(--goose-shell-bg))] px-2 pb-2">
       <ThemeRail themeContext={themeContext} />
       <PreviewStage page={page} themeContext={themeContext} />
       <OptionsRail themeContext={themeContext} />
