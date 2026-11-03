@@ -86,6 +86,13 @@
       "w": 420,
       "h": 780,
       "title": "C3 罗盘 · 空闲"
+    },
+    "ComposerLines.dc.html": {
+      "x": 1500,
+      "y": 3080,
+      "w": 420,
+      "h": 780,
+      "title": "C 输入框 · 一行 / 多行 / 超出上限"
     }
   },
   "order": [
@@ -99,7 +106,8 @@
     "Spark.dc.html",
     "FieldOrbit.dc.html",
     "FieldLens.dc.html",
-    "FieldDial.dc.html"
+    "FieldDial.dc.html",
+    "ComposerLines.dc.html"
   ],
   "notes": {
     "t1": {
@@ -128,7 +136,7 @@
       "y": 2820,
       "text": "C 点场深化：中心更大气、细节更多",
       "kind": "title1",
-      "maxW": 1420
+      "maxW": 1920
     }
   },
   "designSystems": []

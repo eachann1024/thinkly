@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<title>C 输入框 一行 多行 超出上限</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#779de8}a:hover{color:#9db8ef}
+@keyframes caret{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(420px)}}
+@keyframes drop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.cl-box{position:relative;overflow:hidden;border-radius:12px;border:1px solid #333333;background:#1d1d1d}
+.cl-box.on{border-color:#779de8}
+.cl-scan{position:absolute;left:0;bottom:0;width:96px;height:1px;background:linear-gradient(90deg,transparent,#779de8,transparent);animation:scan 4s linear infinite}
+.cl-icon{width:32px;height:32px;flex:none;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:#b4b4b4;cursor:pointer}
+.cl-icon:hover{background:#2c2c2c;color:#ececec}
+.cl-send{width:32px;height:32px;flex:none;border:0;border-radius:8px;display:grid;place-items:center;cursor:pointer}
+.cl-model{font:500 11px/16px 'JetBrains Mono',ui-monospace,Menlo,monospace;color:#8f8e88;padding:0 4px}
+.cl-text{font-size:14px;line-height:20px;color:#ececec}
+.cl-caret{display:inline-block;width:2px;height:18px;margin-left:1px;vertical-align:-4px;background:#779de8;animation:caret 1.1s steps(1) infinite}
+.cl-bar{animation:drop .2s cubic-bezier(.22,.61,.36,1) both}
+.cl-cap{font-size:12px;line-height:16px;color:#8f8e88}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="width:420px;height:780px;box-sizing:border-box;background:#181818;font-family:Inter,-apple-system,'PingFang SC',system-ui,sans-serif;color:#ececec;padding:24px 16px;display:flex;flex-direction:column;gap:28px">
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div class="cl-cap">一行：工具都在同一行，高 44</div>
+<div class="cl-box">
+<div style="display:flex;align-items:center;gap:4px;height:44px;padding:0 6px">
+<button class="cl-icon" aria-label="添加附件"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<label style="flex:1;min-width:0;white-space:nowrap;overflow:hidden" class="cl-text">把这两条命令解释清楚<span class="cl-caret"></span></label>
+<span class="cl-model">Flash</span>
+<button class="cl-send" aria-label="发送" style="background:#ececec;color:#181818"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+</div>
+<div class="cl-scan" aria-hidden="true"></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div class="cl-cap">两行起：文字占满整宽，工具栏落到下面</div>
+<div class="cl-box on">
+<label class="cl-text" style="display:block;padding:12px 14px 4px;white-space:pre-wrap">把这两条命令解释清楚，整理成清单。
+每条写明：做什么、什么时候用、有没有风险。
+最后补一句怎么撤销<span class="cl-caret"></span></label>
+<div class="cl-bar" style="display:flex;align-items:center;gap:4px;height:40px;padding:0 6px 4px">
+<button class="cl-icon" aria-label="添加附件"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<span style="margin-left:auto" class="cl-model">Flash</span>
+<button class="cl-send" aria-label="发送" style="background:#ececec;color:#181818"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+</div>
+<div class="cl-scan" aria-hidden="true"></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div class="cl-cap">超过 8 行：框不再长高，里面滚动，顶部渐隐</div>
+<div class="cl-box on">
+<div style="position:relative">
+<label class="cl-text" style="display:block;height:160px;overflow:hidden;padding:12px 40px 4px 14px;white-space:pre-wrap;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 28px);mask-image:linear-gradient(to bottom,transparent 0,#000 28px)">背景：我在整理 Mac 新机的初始化步骤。
+下面是我记在笔记里的两条命令：
+1. 先禁止修改 HIToolbox.plist
+2. sudo xattr -rd com.apple.quarantine /Applications/.app
+请帮我：
+- 解释每条命令做了什么
+- 说明什么时候需要用
+- 标出有没有安全风险
+- 给出撤销的方法
+最后整理成一份可以直接贴回笔记的清单<span class="cl-caret"></span></label>
+<button class="cl-icon" aria-label="展开编辑" style="position:absolute;top:6px;right:6px;width:28px;height:28px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button>
+<span aria-hidden="true" style="position:absolute;right:4px;bottom:8px;width:3px;height:56px;border-radius:2px;background:#4a4a4a"></span>
+</div>
+<div style="display:flex;align-items:center;gap:4px;height:40px;padding:0 6px 4px">
+<button class="cl-icon" aria-label="添加附件"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<span style="margin-left:auto" class="cl-model">Flash</span>
+<button class="cl-send" aria-label="发送" style="background:#ececec;color:#181818"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+</div>
+<div class="cl-scan" aria-hidden="true"></div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":420,"height":780}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
