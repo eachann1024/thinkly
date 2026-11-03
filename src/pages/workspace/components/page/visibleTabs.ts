@@ -2,6 +2,7 @@ import {
   isUnsavedEditorPage,
   localPageHasPersistableContent,
 } from "@/lib/unsavedLocalPage";
+import { STANDALONE_FILES_WORKSPACE } from "@/lib/standaloneFileCapabilities";
 import type { Page } from "@/types";
 import type { TabItem } from "@/stores/useTabs";
 
@@ -14,6 +15,8 @@ export function isWorkspaceTabVisible(
   if (tab.type === "welcome") return true;
   const tabPage = getPage(tab.pageId);
   const notebookId = tabPage?.workspaceId ?? tab.workspaceId;
+  // Standalone files belong to no notebook, so they stay visible beside any notebook's tabs.
+  if (notebookId === STANDALONE_FILES_WORKSPACE) return !tabPage?.trashedAt;
   return Boolean(activeNotebookId && notebookId === activeNotebookId && !tabPage?.trashedAt);
 }
 
