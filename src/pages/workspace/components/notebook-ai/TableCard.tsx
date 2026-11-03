@@ -1,6 +1,8 @@
 import { useLocale } from "@/i18n";
 import type { RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
+import { getPageTitle } from "@/components/editor/utils/page-title";
+import { usePages } from "@/stores/usePages";
 import { ArtifactActions } from "./ArtifactActions";
 import {
   createTableArtifactBlocks,
@@ -57,6 +59,7 @@ function tableToHtml(columns: string[], rows: string[][]): string {
 
 export function TableCard({ title, columns, rows, editorRef }: TableCardProps) {
   useLocale();
+  const page = usePages((state) => state.activePageId ? state.pages[state.activePageId] : undefined);
   const markdown = tableToMarkdown(columns, rows);
 
   return (
@@ -66,6 +69,8 @@ export function TableCard({ title, columns, rows, editorRef }: TableCardProps) {
         {markdown ? (
           <ArtifactActions
             previewIdentity={JSON.stringify([markdown, title])}
+            previewTitle={title?.trim() || t("table")}
+            previewContext={page ? getPageTitle(page) : undefined}
             copySource={markdown}
             downloadSource={markdown}
             filename={tableFilename(title)}

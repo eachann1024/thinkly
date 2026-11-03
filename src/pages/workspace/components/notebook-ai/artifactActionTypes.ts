@@ -10,9 +10,11 @@ export interface ArtifactActionsProps {
   onCopyImage?: () => Promise<string | Blob>;
   onDownloadImage?: () => Promise<Blob>;
   downloadImageFilename?: string;
-  onPreview?: () => Promise<PreviewContent>;
+  onPreview?: () => Promise<PreviewContent | null>;
   onPreviewImage?: () => Promise<string | Blob>;
   previewFilename?: string;
+  previewTitle?: string;
+  previewContext?: string;
   previewIdentity?: string;
   onInsert?: () => Promise<ArtifactInsertResult> | ArtifactInsertResult;
 }

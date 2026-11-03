@@ -3,21 +3,25 @@ import { localizeNotebookAiDiagnostic } from "@/lib/notebook-ai/localizeDiagnost
 import { useCallback, useLayoutEffect, useReducer, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
 import { openPreviewInSystem, previewPointerHandlers, type PreviewContent } from "@/lib/preview/previewAction";
+import { openFullscreenPreview } from "@/lib/preview/fullscreenPreviewWindow";
 import type { ArtifactActionsProps } from "./artifactActionTypes";
-import { artifactPreviewSnapshot, transitionArtifactPreview, type ArtifactPreviewEvent, type ArtifactPreviewState } from "./artifactPreviewState";
+import { transitionArtifactPreview, type ArtifactPreviewEvent, type ArtifactPreviewState } from "./artifactPreviewState";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/useArtifactPreview.ts#messages:1">`
 zh-Hans:
+  preview: "预览"
   previewUnavailable: "预览不可用"
   unknownError: "未知错误"
   previewError: "预览失败：{{error}}"
   systemPreviewError: "系统预览失败：{{error}}"
 en:
+  preview: "Preview"
   previewUnavailable: "Preview unavailable"
   unknownError: "Unknown error"
   previewError: "Preview failed: {{error}}"
   systemPreviewError: "System preview failed: {{error}}"
 ja:
+  preview: "プレビュー"
   previewUnavailable: "プレビューを利用できません"
   unknownError: "不明なエラー"
   previewError: "プレビューに失敗しました：{{error}}"
@@ -26,8 +30,8 @@ ja:
 const t = createTranslator(messages);
 
 
-type Input = Pick<ArtifactActionsProps, "onPreview" | "onPreviewImage"> & { identity: string; previewFilename: string };
-export function useArtifactPreview({ identity, onPreview, onPreviewImage, previewFilename }: Input) {
+type Input = Pick<ArtifactActionsProps, "onPreview" | "onPreviewImage" | "previewTitle" | "previewContext"> & { identity: string; previewFilename: string };
+export function useArtifactPreview({ identity, onPreview, onPreviewImage, previewFilename, previewTitle, previewContext }: Input) {
   useLocale();
   const [preview, dispatch] = useReducer(transitionArtifactPreview, { phase: "idle" });
   const previewRef = useRef<ArtifactPreviewState>(preview);
@@ -56,16 +60,23 @@ export function useArtifactPreview({ identity, onPreview, onPreviewImage, previe
       previewRef.current.phase === "resolving" && previewRef.current.id === id;
     void (async () => {
       try {
-        let content: PreviewContent;
-        if (onPreview) content = await onPreview();
-        else if (onPreviewImage) content = { kind: "image", data: await onPreviewImage(), fileName: previewFilename };
-        else throw new Error(t("previewUnavailable"));
-        if (!current()) return;
-        if (target === "internal") send({ type: "internal-resolved", id, content });
-        else {
-          await openPreviewInSystem(content);
-          if (current()) send({ type: "system-opened", id });
+        let content: PreviewContent | null;
+        if (target === "system" && onPreviewImage) {
+          content = { kind: "image", data: await onPreviewImage(), fileName: previewFilename };
+        } else if (onPreview) {
+          content = await onPreview();
+        } else if (onPreviewImage) {
+          content = { kind: "image", data: await onPreviewImage(), fileName: previewFilename };
+        } else {
+          throw new Error(t("previewUnavailable"));
         }
+        if (!current()) return;
+        if (content && target === "internal") {
+          await openFullscreenPreview(content, previewTitle?.trim() || content.fileName || t("preview"), previewContext);
+        } else if (content) {
+          await openPreviewInSystem(content);
+        }
+        if (current()) send({ type: "opened", id });
       } catch (error) {
         if (!current()) return;
         const message = error instanceof Error ? localizeNotebookAiDiagnostic(error.message) : t("unknownError");
@@ -74,12 +85,9 @@ export function useArtifactPreview({ identity, onPreview, onPreviewImage, previe
       }
     })();
   };
-  const snapshot = artifactPreviewSnapshot(preview);
   return {
     previewing: preview.phase === "resolving",
     previewFailed: preview.phase === "failed",
-    previewContent: snapshot.phase === "open" ? snapshot.content : null,
-    closePreview: () => send({ type: "closed" }),
     previewHandlers: previewPointerHandlers({ disabled: preview.phase === "resolving",
       onInternal: () => request("internal"), onSystem: () => request("system") }),
   };

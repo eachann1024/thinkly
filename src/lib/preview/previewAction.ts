@@ -151,15 +151,19 @@ export function wrapHtmlDocument(
     title?: string;
     background?: string;
     color?: string;
+    border?: string;
     extraHead?: string;
   },
 ): string {
   if (/^\s*<!doctype html/i.test(body) || /^\s*<html[\s>]/i.test(body)) {
     return body;
   }
-  const theme = readThemeSurfaceSnapshot();
+  const theme = options?.background && options.color && options.border
+    ? { background: options.background, foreground: options.color, border: options.border }
+    : readThemeSurfaceSnapshot();
   const background = options?.background ?? theme.background;
   const color = options?.color ?? theme.foreground;
+  const border = options?.border ?? theme.border;
   const title = escapeHtml(options?.title ?? uiText("preview"));
   const extraHead = options?.extraHead ?? "";
   return `<!DOCTYPE html>
@@ -173,7 +177,7 @@ ${extraHead}
   html, body { margin: 0; min-height: 100%; background: ${background}; color: ${color}; }
   body { padding: 24px; box-sizing: border-box; font-family: Inter, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif; }
   table { border-collapse: collapse; }
-  th, td { border: 1px solid ${theme.border}; padding: 8px 12px; text-align: left; }
+  th, td { border: 1px solid ${border}; padding: 8px 12px; text-align: left; }
   th { background: rgba(127,127,127,0.12); }
 </style>
 </head>

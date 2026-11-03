@@ -3,7 +3,6 @@ import { useLocale } from "@/i18n";
 import { usePages } from "@/stores/usePages";
 import type { Page } from "@/types";
 import type { NotebookAiMessage } from "@/lib/notebook-ai/types";
-import type { PreviewContent } from "@/lib/preview/previewAction";
 import { getPageTitle } from "@/components/editor/utils/page-title";
 import { formatChatMessageTime, shouldShowChatTimeDivider } from "@/lib/notebook-ai/messageTime";
 import type { AssistantToolRenderContextValue } from "./toolRenderContext";
@@ -21,7 +20,7 @@ function pageTitle(page: Page) {
 }
 
 export const ChatMessageRow = memo(function ChatMessageRow({
-  msg, previousAt, first, day, isStreaming, toolRenderBase, setPreviewContent,
+  msg, previousAt, first, day, isStreaming, toolRenderBase, noteTitle,
 }: {
   msg: NotebookAiMessage;
   previousAt: number | undefined;
@@ -29,7 +28,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
   day: string;
   isStreaming: boolean;
   toolRenderBase: Omit<AssistantToolRenderContextValue, "isStreaming">;
-  setPreviewContent: (content: PreviewContent) => void;
+  noteTitle?: string;
 }) {
   const locale = useLocale();
   const references = msg.metadata?.references;
@@ -61,7 +60,7 @@ export const ChatMessageRow = memo(function ChatMessageRow({
         </div>
       ) : null}
       {msg.role === "user" ? (
-        <UserMessage msg={msg} setPreviewContent={setPreviewContent} />
+        <UserMessage msg={msg} noteTitle={noteTitle} />
       ) : (
         <AssistantMessage msg={msg} isStreaming={isStreaming} toolRenderBase={toolRenderBase} />
       )}

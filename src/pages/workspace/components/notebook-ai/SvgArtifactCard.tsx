@@ -5,6 +5,8 @@ import { useCallback, useMemo, type RefObject } from "react";
 import type { EditorRef } from "@/components/editor/core/Editor";
 import { sanitizeSvgMarkup } from "@/lib/notebook-ai/svgSanitizer";
 import { svgMarkupToPngBlob } from "@/lib/imageExport/svgToPng";
+import { getPageTitle } from "@/components/editor/utils/page-title";
+import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import { ArtifactActions } from "./ArtifactActions";
@@ -69,6 +71,7 @@ export function CanvasLoadingCard({ title }: { title?: string }) {
 export function SvgArtifactCard({ title, svg, editorRef }: SvgArtifactCardProps) {
   useLocale();
   const theme = useSettings((state) => state.theme);
+  const page = usePages((state) => state.activePageId ? state.pages[state.activePageId] : undefined);
   const resolvedTheme = useResolvedTheme(theme);
   const isDark = resolvedTheme === "dark";
   const sanitizedSvg = useMemo(() => sanitizeSvgMarkup(svg), [svg]);
@@ -89,6 +92,8 @@ export function SvgArtifactCard({ title, svg, editorRef }: SvgArtifactCardProps)
         {sanitizedSvg ? (
           <ArtifactActions
             previewIdentity={JSON.stringify([sanitizedSvg, isDark, filename])}
+            previewTitle={title?.trim() || t("image")}
+            previewContext={page ? getPageTitle(page) : undefined}
             copySource={sanitizedSvg}
             onCopyImage={async () => capturePng()}
             onDownloadImage={capturePng}

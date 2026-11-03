@@ -1,23 +1,10 @@
 import { cn } from "@/lib/utils";
 import { MathView } from "@/components/editor/blocks/math/MathView";
 import { MermaidView } from "@/components/editor/blocks/mermaid/MermaidView";
-import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import { CodeBlockHeader } from "./CodeBlockHeader";
 import type { CodeBlockViewProps } from "./codeBlockViewTypes";
-import { i18nYaml, createTranslator, useLocale } from "@/i18n";
-const messages = i18nYaml<"src/components/editor/blocks/code/CodeBlockView.tsx#messages:1">`
-zh-Hans:
-  formulaPreview: "公式预览"
-en:
-  formulaPreview: "Formula preview"
-ja:
-  formulaPreview: "数式のプレビュー"
-`;
-const t = createTranslator(messages);
-
 
 export function CodeBlockView(props: CodeBlockViewProps) {
-  useLocale();
   const { language, wrap, contentRef, edit, preview } = props;
   const { rootRef } = edit;
   const {
@@ -30,8 +17,6 @@ export function CodeBlockView(props: CodeBlockViewProps) {
     canPreview,
     handleInternalPreview,
     textContent,
-    previewContent,
-    setPreviewContent,
   } = preview;
   return (
     <div
@@ -90,13 +75,6 @@ export function CodeBlockView(props: CodeBlockViewProps) {
           </div>
         )}
       </div>
-
-      <FullscreenPreview
-        open={Boolean(previewContent)}
-        content={previewContent}
-        title={language === "math" ? t("formulaPreview") : "Mermaid"}
-        onClose={() => setPreviewContent(null)}
-      />
     </div>
   );
 }
