@@ -1,0 +1,18 @@
+html.is-electron.os-mac .standalone-window .electron-titlebar {
+  padding-left: var(--electron-traffic-inset, 96px);
+}
+
+html.is-electron .standalone-window .electron-titlebar :is(select, [role="tab"]) {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+html.is-electron.is-win .electron-win-chrome-controls,
+html.is-electron.os-linux .electron-win-chrome-controls {
+  height: var(--electron-titlebar-height, 2.75rem);
+}
+
+html.is-electron.is-win .electron-win-chrome-btn,
+html.is-electron.os-linux .electron-win-chrome-btn {
+  height: 100%;
+}

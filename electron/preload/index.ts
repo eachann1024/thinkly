@@ -1,5 +1,6 @@
 import "./language";
 import { appearance } from "./appearance";
+import { auxiliary } from "./auxiliary";
 import { invoke, assetMaintenance, gitSync, web } from "./services";
 import { searchWindow } from "./search";
 import { notifications } from "./notifications";
@@ -25,6 +26,7 @@ const gooseDesktop = {
   renderMermaidPreview: (request: import("../../src/lib/preview-renderer/contract").MermaidPreviewRequest) =>
     invoke("desktop:renderMermaidPreview", request) as Promise<string>,
   appearance,
+  auxiliary,
   ...searchWindow,
   ...notifications,
   gitSync,

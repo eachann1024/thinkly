@@ -58,6 +58,7 @@ default.profraw
 !/docs/signpath-application.md
 !/docs/desktop-distribution.md
 !/docs/localization.md
+!/docs/standalone-windows.md
 CHANGELOG.md
 
 skills-lock.json

@@ -62,11 +62,14 @@ export function useWorkspaceSettingsNavigation(
       }
       closeSettings();
     };
+    const closeOnRequest = () => closeSettings();
     window.addEventListener("goose-note:open-ai-panel", closeOnAiOpen);
     window.addEventListener("goose-note:toggle-ai-panel", closeOnAiOpen);
+    window.addEventListener("goose-note:request-close-settings", closeOnRequest);
     return () => {
       window.removeEventListener("goose-note:open-ai-panel", closeOnAiOpen);
       window.removeEventListener("goose-note:toggle-ai-panel", closeOnAiOpen);
+      window.removeEventListener("goose-note:request-close-settings", closeOnRequest);
     };
   }, [closeSettings]);
 
