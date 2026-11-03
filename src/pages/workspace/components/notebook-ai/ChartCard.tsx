@@ -1,6 +1,9 @@
 import { useLocale } from "@/i18n";
 import { useThemeSurfaceSnapshot } from "@/lib/themeSurfaceSnapshot";
 import { useCallback, useMemo, useRef, type RefObject } from "react";
+import { getPageTitle } from "@/components/editor/utils/page-title";
+import { openFullscreenPreviewWindow } from "@/lib/preview/fullscreenPreviewWindow";
+import { usePages } from "@/stores/usePages";
 import { useSettings } from "@/stores/useSettings";
 import { useResolvedTheme } from "@/hooks/useResolvedTheme";
 import type { EditorRef } from "@/components/editor/core/Editor";
@@ -99,6 +102,7 @@ export function ChartCard(props: ChartCardProps) {
   useLocale();
   const themeSurface = useThemeSurfaceSnapshot();
   const theme = useSettings((state) => state.theme);
+  const page = usePages((state) => state.activePageId ? state.pages[state.activePageId] : undefined);
   const resolvedTheme = useResolvedTheme(theme);
   const isDark = resolvedTheme === "dark";
   const containerRef = useRef<HTMLDivElement>(null);
@@ -156,10 +160,24 @@ export function ChartCard(props: ChartCardProps) {
           imageReady={status === "ready"}
           insertReady={status === "ready"}
           previewIdentity={JSON.stringify([props.type, props.categories, props.series, resolvedTheme, themeSurface])}
+          previewTitle={props.title?.trim() || t("chart")}
+          previewContext={page ? getPageTitle(page) : undefined}
           onCopyImage={capturePngDataUrl}
           onDownloadImage={capturePngBlob}
           downloadImageFilename="chart.png"
           onPreviewImage={capturePngDataUrl}
+          onPreview={async () => {
+            await openFullscreenPreviewWindow({
+              kind: "chart",
+              chartType: props.type,
+              categories: props.categories,
+              series: props.series,
+              title: props.title?.trim() || t("chart"),
+              context: page ? getPageTitle(page) : undefined,
+              isDark,
+            });
+            return null;
+          }}
           previewFilename="chart.png"
           onInsert={async () => {
             const dataUrl = await blobToDataUrl(await capturePngBlob());

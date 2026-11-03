@@ -1,11 +1,11 @@
 import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ArrowDown } from "@/components/ui/icons";
 import { ThreadPrimitive } from "@assistant-ui/react";
-import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
-import type { PreviewContent } from "@/lib/preview/previewAction";
+import { getPageTitle } from "@/components/editor/utils/page-title";
+import { usePages } from "@/stores/usePages";
 import { cn } from "@/lib/utils";
 import { AiOrbitMark } from "./orbit/AiOrbitMark";
 import { AssistantUiThreadViewport } from "./AssistantUiThreadViewport";
@@ -56,9 +56,10 @@ export function ChatMessages({
 }: ChatMessagesProps) {
   useLocale();
   const isFullscreen = layout === "fullscreen";
-  const [previewContent, setPreviewContent] = useState<PreviewContent | null>(
-    null,
-  );
+  const noteTitle = usePages((state) => {
+    const page = state.activePageId ? state.pages[state.activePageId] : undefined;
+    return page ? getPageTitle(page) : undefined;
+  });
   const messageIds = JSON.stringify(messages.map((message) => message.id));
   const messagePositions = useMemo(
     () => new Map<string, number>((JSON.parse(messageIds) as string[]).map((id, index) => [id, index])),
@@ -131,7 +132,7 @@ export function ChatMessages({
                     day={day}
                     isStreaming={streamingMessageId === sourceMessage.id}
                     toolRenderBase={toolRenderBase}
-                    setPreviewContent={setPreviewContent}
+                    noteTitle={noteTitle}
                   />
                 );
               }}
@@ -152,12 +153,6 @@ export function ChatMessages({
           </div>
         )}
       </AssistantUiThreadViewport>
-      <FullscreenPreview
-        open={Boolean(previewContent)}
-        content={previewContent}
-        title={previewContent?.fileName}
-        onClose={() => setPreviewContent(null)}
-      />
     </ChatChrome>
   );
 }
