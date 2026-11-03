@@ -29,7 +29,7 @@ function isCaptureRatioWithinLimits(
   );
 }
 
-export function calculateSafePixelRatio(width: number, height: number): number {
+export function exportSafePixelRatio(width: number, height: number): number {
   const safeWidth = Math.max(1, Math.ceil(width));
   const safeHeight = Math.max(1, Math.ceil(height));
   const edgeRatio = Math.min(
@@ -38,17 +38,22 @@ export function calculateSafePixelRatio(width: number, height: number): number {
   );
   const areaRatio = Math.sqrt(MAX_CAPTURE_PIXELS / (safeWidth * safeHeight));
   let ratio = Math.min(MAX_CAPTURE_PIXEL_RATIO, edgeRatio, areaRatio);
-
-  ratio = Math.floor(ratio * 10_000) / 10_000;
+  ratio = Math.floor(ratio * 100) / 100;
+  if (ratio < MIN_CAPTURE_PIXEL_RATIO) return 0;
 
   while (
     ratio >= MIN_CAPTURE_PIXEL_RATIO &&
     !isCaptureRatioWithinLimits(safeWidth, safeHeight, ratio)
   ) {
-    ratio = Math.floor((ratio - 0.0001) * 10_000) / 10_000;
+    ratio = Math.floor((ratio - 0.01) * 100) / 100;
   }
 
-  if (!isCaptureRatioWithinLimits(safeWidth, safeHeight, ratio)) {
+  return isCaptureRatioWithinLimits(safeWidth, safeHeight, ratio) ? ratio : 0;
+}
+
+export function calculateSafePixelRatio(width: number, height: number): number {
+  const ratio = exportSafePixelRatio(width, height);
+  if (ratio === 0) {
     throw new Error(uiText("theContentIsTooLongToExportAsOne"));
   }
   return ratio;
