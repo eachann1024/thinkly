@@ -35,7 +35,7 @@ if (onMain) {
       : null;
     assert.ok(previousSha, `release ${previous.tag_name} target_commitish must be a full commit sha`);
     const auto = planAutoRelease({
-      packageVersion, publishedVersion, previousSha, headSha: process.env.GITHUB_SHA,
+      packageVersion, publishedVersion, previousSha, previousTag: previous.tag_name, headSha: process.env.GITHUB_SHA,
     });
     if (auto.autoBump) {
       version = auto.version;
