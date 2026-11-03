@@ -77,7 +77,7 @@ html.is-electron .electron-titlebar .notebook-ai-header-toolbar [data-goose-cont
   transition: none;
 }
 
-.electron-titlebar button:not(:hover):not([aria-pressed="true"]):not([data-state="open"]) > :is(svg.goose-icon, svg.lucide) {
+.electron-titlebar button:not(.goose-button-surface):not(:hover):not([aria-pressed="true"]):not([data-state="open"]) > :is(svg.goose-icon, svg.lucide) {
   color: hsl(var(--foreground));
 }
 

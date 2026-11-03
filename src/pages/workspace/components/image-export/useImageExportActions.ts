@@ -6,6 +6,7 @@ zh-Hans:
   saved: "已保存 {{name}}"
   revealFinder: "在访达中显示"
   revealFiles: "在文件管理器中显示"
+  revealFailed: "图片已保存，但无法在文件管理器中显示"
   imageFailed: "有 {{count}} 张图片没能载入，已跳过后可重试"
   exportFailed: "生成失败，请重试"
 en:
@@ -13,6 +14,7 @@ en:
   saved: "Saved {{name}}"
   revealFinder: "Show in Finder"
   revealFiles: "Show in file manager"
+  revealFailed: "The image was saved, but couldn’t be shown in the file manager."
   imageFailed: "{{count}} image(s) failed to load. Skipped — you can retry."
   exportFailed: "Couldn’t generate the image. Try again."
 ja:
@@ -20,6 +22,7 @@ ja:
   saved: "{{name}} を保存しました"
   revealFinder: "Finder で表示"
   revealFiles: "ファイルマネージャで表示"
+  revealFailed: "画像は保存されましたが、ファイルマネージャで表示できませんでした"
   imageFailed: "{{count}} 枚の画像を読み込めませんでした。スキップしたので再試行できます"
   exportFailed: "生成に失敗しました。もう一度お試しください"
 `;
@@ -76,8 +79,10 @@ async function perform(action: Parameters<ImageExportRun>[0], page: Page) {
     toast.success(uiText("saved", { name }), {
       action: {
         label: getPlatformKind() === "mac" ? uiText("revealFinder") : uiText("revealFiles"),
-        onClick: () => {
-          void editorPlatform.fs.revealItemInFolder(path);
+        onClick: async () => {
+          if (!(await editorPlatform.shell.showItemInFolder(path))) {
+            toast.error(uiText("revealFailed"));
+          }
         },
       },
     });
