@@ -7,6 +7,7 @@ import {
   type AuxiliaryRelayMessage,
   type AuxiliarySnapshotResponse,
 } from "../../../../src/lib/auxiliary-window/contract";
+import { readNoteLocation, type NoteBlockLocation } from "../../../../src/lib/notebook-ai/noteCitationLocation";
 import { deliverWorkspaceNotification } from "../../notifications";
 import { showOrCreateMainWindow } from "../activation";
 import { openAuxiliaryWindow, releaseAuxiliaryResult } from "./factory";
@@ -44,6 +45,12 @@ function sendCommand(command: AuxiliaryMainCommand): boolean {
   if (win.webContents.isLoading()) win.webContents.once("did-finish-load", send);
   else send();
   return true;
+}
+
+/** `undefined` means no location. `null` means the field was present but invalid. */
+function openPageLocation(value: unknown): NoteBlockLocation | undefined | null {
+  if (value === undefined) return undefined;
+  return readNoteLocation(value) ?? null;
 }
 
 function jsonValue(value: unknown): unknown {
@@ -87,7 +94,9 @@ export function registerAuxiliaryIpc(): void {
     const relay = message as AuxiliaryRelayMessage;
     if (relay.type === "open-page") {
       if (typeof relay.pageId !== "string" || relay.pageId.length < 1 || relay.pageId.length > 200) return false;
-      return sendCommand({ type: "open-page", pageId: relay.pageId });
+      const location = openPageLocation(relay.location);
+      if (location === null) return false;
+      return sendCommand({ type: "open-page", pageId: relay.pageId, ...(location ? { location } : {}) });
     }
     if (relay.type === "open-settings") {
       return deliverWorkspaceNotification({ type: "settings", tab: parseAuxiliarySection(relay.section) });
