@@ -11,6 +11,7 @@ import {
 import { readNoteLocation, type NoteBlockLocation } from "../../../../src/lib/notebook-ai/noteCitationLocation";
 import { deliverWorkspaceNotification } from "../../notifications";
 import { showOrCreateMainWindow } from "../activation";
+import { getMainWindow } from "../registry";
 import { openAuxiliaryWindow, releaseAuxiliaryResult } from "./factory";
 import { parseAuxiliaryOpenRequest, parseAuxiliarySection } from "./kinds";
 import {
@@ -36,8 +37,8 @@ function senderRecord(event: Electron.IpcMainInvokeEvent) {
 }
 
 function sendCommand(command: AuxiliaryMainCommand): boolean {
-  const win = showOrCreateMainWindow();
-  if (win.isDestroyed() || win.webContents.isDestroyed()) return false;
+  const win = command.type === "open-page" ? showOrCreateMainWindow() : getMainWindow();
+  if (!win || win.isDestroyed() || win.webContents.isDestroyed()) return false;
   const send = () => {
     if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
       win.webContents.send(AUXILIARY_CHANNELS.command, command);
@@ -129,8 +130,8 @@ export function registerAuxiliaryIpc(): void {
         return { ok: false };
       }
     }
-    const win = showOrCreateMainWindow();
-    if (win.isDestroyed() || win.webContents.isDestroyed()) return { ok: false };
+    const win = getMainWindow();
+    if (!win || win.isDestroyed() || win.webContents.isDestroyed()) return { ok: false };
     const requestId = randomUUID();
     return new Promise<AuxiliarySnapshotResponse>((resolve) => {
       const timer = setTimeout(() => finish({ ok: false }), 10_000);
