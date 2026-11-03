@@ -20,7 +20,6 @@ import { renderNotebookMenu } from "./notebook-switcher/renderNotebookMenu";
 import * as GooseIcons from "@/components/ui/icons";
 import "./notebook-switcher.css";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { NotebookEditDialog } from "./NotebookEditDialog";
 import { useNotebookSwitcherState } from "./notebook-switcher/useNotebookSwitcherState";
 import { useNotebookSwitcherActions } from "./notebook-switcher/useNotebookSwitcherActions";
 import { renderNotebookIcon } from "./notebookUtils";
@@ -44,16 +43,12 @@ export function NotebookSwitcher(
     setIsOpen,
     isDraggingRef,
     menuRef,
-    editDialog,
-    setEditDialog,
     activeNotebook,
     isRail,
     isHeader,
     active,
     notebookKind,
     activeNotebookLabel,
-    handleSaveEdit,
-    handleDelete,
   } = context;
   const triggerRef = useRef<HTMLButtonElement>(null);
   const restoreTriggerFocus = useRef(false);
@@ -131,26 +126,6 @@ export function NotebookSwitcher(
       {props.triggerContainer
         ? createPortal(switcherPopover, props.triggerContainer)
         : switcherPopover}
-      {editDialog.open && (
-        <NotebookEditDialog
-          open={editDialog.open}
-          notebookId={editDialog.id}
-          name={editDialog.name}
-          icon={editDialog.icon}
-          confirmName={editDialog.confirmName}
-          excludeFromGlobalSearch={editDialog.excludeFromGlobalSearch}
-          openDeleteConfirm={editDialog.openDeleteConfirm}
-          isLocalFolder={editDialog.isLocalFolder}
-          onOpenChange={(open) => setEditDialog({ ...editDialog, open })}
-          onNameChange={(name) => setEditDialog({ ...editDialog, name })}
-          onIconChange={(icon) => setEditDialog({ ...editDialog, icon })}
-          onExcludeFromGlobalSearchChange={(excludeFromGlobalSearch) =>
-            setEditDialog({ ...editDialog, excludeFromGlobalSearch })
-          }
-          onSave={handleSaveEdit}
-          onDelete={handleDelete}
-        />
-      )}
     </>
   );
 }

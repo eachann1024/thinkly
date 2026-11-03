@@ -1,15 +1,4 @@
 import { useLocale } from "@/i18n";
-import { createTranslator, i18nYaml } from "@/i18n";
-
-const localMessages = i18nYaml<"src/pages/workspace/components/sidebar/settings-dialog/useSettingsDialogState.tsx#localMessages:1">`
-zh-Hans:
-  iUnderstandTheRisks_438d: "我已知晓风险"
-en:
-  iUnderstandTheRisks_438d: "I understand the risks"
-ja:
-  iUnderstandTheRisks_438d: "リスクを理解しました"
-`;
-const uiText = createTranslator(localMessages);
 import { useSettingsDataOperation } from "./useSettingsDataOperation";
 import { useShallow } from "zustand/react/shallow";
 import { useNotebooks, sortNotebooksByOrder } from "@/stores/useNotebooks";
@@ -125,19 +114,12 @@ export function useSettingsDialogState({
   const [format, setFormat] = useState<ExportOptions["format"]>("md");
 
   const dataOperation = useSettingsDataOperation();
-  const [resetInput, setResetInput] = useState("");
-  const [clearHistory, setClearHistory] = useState(false);
-  const [clearAiChats, setClearAiChats] = useState(false);
 
   const notebookList = sortNotebooksByOrder(notebooks);
 
   const { createNotebook } = useNotebooks(
     useShallow((s) => ({ createNotebook: s.createNotebook })),
   );
-
-  const resetPhrase = uiText("iUnderstandTheRisks_438d");
-
-  const canReset = resetInput.trim() === resetPhrase;
 
   const toggleNotebook = (id: string) => {
     setSelectedIds((prev) =>
@@ -206,16 +188,8 @@ export function useSettingsDialogState({
     format,
     setFormat,
     ...dataOperation,
-    resetInput,
-    setResetInput,
-    clearHistory,
-    setClearHistory,
-    clearAiChats,
-    setClearAiChats,
     notebookList,
     createNotebook,
-    resetPhrase,
-    canReset,
     toggleNotebook,
     selectAll,
   };
