@@ -6,6 +6,7 @@ import { usePages } from "@/stores/usePages";
 import { useReflection } from "@/stores/useReflection";
 import { useSettings } from "@/stores/useSettings";
 import { applyAuxiliaryAISetup } from "./applyAuxiliaryAISetup";
+import { applyAuxiliaryImageExportSettings } from "./applyImageExportSettings";
 import { readRecoveryDraftEntry, registerRecoveryDraftSnapshot } from "./recoveryDraftSnapshot";
 import { hasMainSnapshot, readRegisteredSnapshot, registerMainSnapshot } from "./mainSnapshot";
 
@@ -77,6 +78,10 @@ export function installAuxiliaryMainBridge(): void {
   bridge.onCommand((command) => {
     if (command.type === "apply-ai-setup") {
       applyAuxiliaryAISetup(command.config);
+      return;
+    }
+    if (command.type === "apply-image-export-settings") {
+      applyAuxiliaryImageExportSettings(command.settings);
       return;
     }
     if (command.type !== "open-page" || !command.pageId) return;

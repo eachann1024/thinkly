@@ -9,6 +9,7 @@ export const AUXILIARY_KINDS = [
   "notebook-edit",
   "confirm",
   "selection-quote",
+  "image-export",
 ] as const;
 
 export type AuxiliaryKind = (typeof AUXILIARY_KINDS)[number];
@@ -74,14 +75,28 @@ export type AuxiliaryAISetupConfig = {
   enabled: boolean;
 };
 
+export type AuxiliaryImageExportSettings = {
+  themeId: string;
+  watermark: {
+    showWatermark: boolean;
+    showBrand: boolean;
+    showDate: boolean;
+    showTime: boolean;
+    showTitle: boolean;
+    brandText: string;
+  };
+};
+
 export type AuxiliaryRelayMessage =
   | { type: "open-page"; pageId: string; location?: NoteBlockLocation }
   | { type: "open-settings"; section: AuxiliarySettingsSection }
-  | { type: "apply-ai-setup"; config: AuxiliaryAISetupConfig };
+  | { type: "apply-ai-setup"; config: AuxiliaryAISetupConfig }
+  | { type: "apply-image-export-settings"; settings: AuxiliaryImageExportSettings };
 
 export type AuxiliaryMainCommand =
   | { type: "open-page"; pageId: string; location?: NoteBlockLocation }
-  | { type: "apply-ai-setup"; config: AuxiliaryAISetupConfig };
+  | { type: "apply-ai-setup"; config: AuxiliaryAISetupConfig }
+  | { type: "apply-image-export-settings"; settings: AuxiliaryImageExportSettings };
 
 export type AuxiliarySnapshotResponse =
   | { ok: true; value: unknown }
@@ -96,6 +111,7 @@ export interface AuxiliaryBridge {
   openPage: (pageId: string, location?: NoteBlockLocation) => Promise<boolean>;
   openSettings: (section: AuxiliarySettingsSection) => Promise<boolean>;
   applyAISetup: (config: AuxiliaryAISetupConfig) => Promise<boolean>;
+  applyImageExportSettings: (settings: AuxiliaryImageExportSettings) => Promise<boolean>;
   requestSnapshot: <T = unknown>(key: string, detail?: unknown) => Promise<AuxiliarySnapshotResponse & { value?: T }>;
   onSnapshotRequest: (cb: (requestId: string, key: string, detail?: unknown) => void) => () => void;
   replySnapshot: (requestId: string, payload: unknown, ok?: boolean) => void;

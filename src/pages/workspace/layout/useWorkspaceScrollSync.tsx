@@ -23,7 +23,7 @@ export function useWorkspaceScrollSync(
   }, Object.is);
   const workspaceStageRef = useWorkspaceSplitSpacing(
     hasVisibleSplit && !input.settingsOpen && !showFullscreenAi &&
-      !input.inHistoryMode && !input.inImageExportMode && !input.isWelcomeTab && Boolean(input.page &&
+      !input.inHistoryMode && !input.isWelcomeTab && Boolean(input.page &&
         !input.page.isFolder && input.activePageId),
   );
 

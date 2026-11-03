@@ -61,15 +61,14 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { IMAGE_EXPORT_WIDTHS } from "@/lib/imageExport";
 import { resolveCardTheme } from "@/lib/imageExport";
-import { notebookThemeContextFromPage } from "@/lib/imageExport/themeContext";
+import type { NotebookCardThemeContext } from "@/lib/imageExport";
 import type { WatermarkConfig } from "@/lib/imageExport";
 import { cn } from "@/lib/utils";
-import { useSettings } from "@/stores/useSettings";
 import {
-  activeImageExportThemeId,
-  useImageExportView,
-} from "@/stores/useImageExportView";
-import type { Page } from "@/types";
+  sessionActiveTheme,
+  sessionBlocks,
+  useImageExportSession,
+} from "@/windows/views/image-export/imageExportSession";
 import { describeExportClarity, type ClarityTone } from "./clarityCopy";
 import { SegmentedTrack } from "./SegmentedTrack";
 
@@ -80,23 +79,21 @@ const TONE: Record<ClarityTone, string> = {
 };
 
 function patchWatermark(partial: Partial<WatermarkConfig>) {
-  const current = useSettings.getState().imageExportWatermark;
-  useSettings.getState().setImageExportWatermark({ ...current, ...partial });
-  useImageExportView.setState({ ratio: null, height: null });
+  useImageExportSession.getState().setWatermark(partial);
 }
 
-export function OptionsRail({ page }: { page: Page }) {
+export function OptionsRail({ themeContext }: { themeContext: NotebookCardThemeContext }) {
   useLocale();
-  const watermark = useSettings((s) => s.imageExportWatermark);
-  const pageTheme = useSettings((s) => s.imageExportThemeId);
-  const scope = useImageExportView((s) => s.scope);
-  const selectionTheme = useImageExportView((s) => s.selectionTheme);
-  const width = useImageExportView((s) => s.width);
-  const ratio = useImageExportView((s) => s.ratio);
-  const height = useImageExportView((s) => s.height);
-  const blocks = useImageExportView((s) => s.blocks);
-  const themeId = activeImageExportThemeId(scope, selectionTheme, pageTheme);
-  const theme = resolveCardTheme(themeId, notebookThemeContextFromPage(page));
+  const watermark = useImageExportSession((s) => s.watermark);
+  const scope = useImageExportSession((s) => s.scope);
+  const selectionTheme = useImageExportSession((s) => s.selectionTheme);
+  const pageTheme = useImageExportSession((s) => s.themeId);
+  const width = useImageExportSession((s) => s.width);
+  const ratio = useImageExportSession((s) => s.ratio);
+  const height = useImageExportSession((s) => s.height);
+  const blocks = useImageExportSession(sessionBlocks);
+  const themeId = sessionActiveTheme({ scope, selectionTheme, themeId: pageTheme });
+  const theme = resolveCardTheme(themeId, themeContext);
   const kenya = !theme.watermarkVisible;
   const empty = scope === "selection" && blocks.length === 0;
   const clarity = describeExportClarity({ empty, width, height, ratio, scope });
@@ -117,7 +114,7 @@ export function OptionsRail({ page }: { page: Page }) {
             value,
             label: value === 720 ? uiText("phone") : value === 1440 ? uiText("wide") : uiText("standard"),
           }))}
-          onChange={(next) => useImageExportView.getState().setWidth(next)}
+          onChange={(next) => useImageExportSession.getState().setWidth(next)}
         />
         <div className="flex flex-col gap-1 rounded-md border border-border bg-[var(--goose-sidebar-surface)] p-2.5">
           <div className="flex items-baseline justify-between gap-2">
@@ -129,7 +126,7 @@ export function OptionsRail({ page }: { page: Page }) {
             <button
               type="button"
               className="self-start text-xs text-foreground"
-              onClick={() => useImageExportView.getState().setScope("selection")}
+              onClick={() => useImageExportSession.getState().setScope("selection")}
             >
               {uiText("exportSelection")}
             </button>

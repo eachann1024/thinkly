@@ -1,16 +1,23 @@
+import type { NotebookCardThemeContext } from "@/lib/imageExport";
 import type { Page } from "@/types";
+import { useImageExportActions } from "./useImageExportActions";
 import { OptionsRail } from "./OptionsRail";
 import { PreviewStage } from "./PreviewStage";
 import { ThemeRail } from "./ThemeRail";
-import { useImageExportActions } from "./useImageExportActions";
 
-export function ImageExportView({ page }: { page: Page }) {
-  useImageExportActions(page.id);
+export function ImageExportView({
+  page,
+  themeContext,
+}: {
+  page: Page;
+  themeContext: NotebookCardThemeContext;
+}) {
+  useImageExportActions(page);
   return (
     <div className="flex min-h-0 flex-1 overflow-hidden bg-background">
-      <ThemeRail page={page} />
-      <PreviewStage page={page} />
-      <OptionsRail page={page} />
+      <ThemeRail themeContext={themeContext} />
+      <PreviewStage page={page} themeContext={themeContext} />
+      <OptionsRail themeContext={themeContext} />
     </div>
   );
 }

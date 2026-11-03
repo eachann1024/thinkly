@@ -1,6 +1,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type {
   AuxiliaryAISetupConfig,
+  AuxiliaryImageExportSettings,
   AuxiliarySettingsSection,
   AuxiliaryWindowState,
 } from "@/lib/auxiliary-window/contract";
@@ -48,4 +49,11 @@ export function openSettingsInMain(section: AuxiliarySettingsSection): Promise<b
 export function applyAISetupInMain(config: AuxiliaryAISetupConfig): Promise<boolean> {
   const apply = window.gooseDesktop?.auxiliary?.applyAISetup;
   return apply ? apply(config) : Promise.resolve(false);
+}
+
+export function applyImageExportSettingsInMain(
+  settings: AuxiliaryImageExportSettings,
+): Promise<boolean> {
+  const apply = window.gooseDesktop?.auxiliary?.applyImageExportSettings;
+  return apply ? apply(settings) : Promise.resolve(false);
 }
