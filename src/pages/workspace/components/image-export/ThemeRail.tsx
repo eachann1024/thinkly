@@ -3,16 +3,19 @@ import { useLocale, createTranslator, i18nYaml } from "@/i18n";
 const localMessages = i18nYaml<"src/pages/workspace/components/image-export/ThemeRail.tsx#localMessages:1">`
 zh-Hans:
   themes: "卡片主题"
+  heading: "主题"
   asIs: "原样"
   light: "浅色"
   dark: "深色"
 en:
   themes: "Card themes"
+  heading: "Themes"
   asIs: "As is"
   light: "Light"
   dark: "Dark"
 ja:
   themes: "カードのテーマ"
+  heading: "テーマ"
   asIs: "そのまま"
   light: "ライト"
   dark: "ダーク"
@@ -60,15 +63,19 @@ export function ThemeRail({ themeContext }: { themeContext: NotebookCardThemeCon
   return (
     <nav
       aria-label={uiText("themes")}
-      className="flex w-[240px] shrink-0 flex-col overflow-y-auto border-y border-l border-border bg-[var(--goose-sidebar-surface)]"
+      className="flex w-[240px] shrink-0 flex-col overflow-hidden rounded-l-[10px] border border-r-0 border-border bg-[var(--goose-sidebar-surface)]"
     >
+      <div className="shrink-0 px-3 pb-1.5 pt-3 text-xs font-medium text-[var(--goose-text-secondary)]">
+        {uiText("heading")}
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-1.5 pb-2">
       {GROUPS.map((group) => {
         const items = CARD_THEMES.filter((theme) => groupOf(theme.id) === group.id);
         return (
-          <div key={group.id} className="flex flex-col py-2">
-            <div className="flex items-baseline justify-between px-3 pb-1 text-xs text-[var(--goose-text-secondary)]">
+          <div key={group.id} className="flex flex-col gap-0.5">
+            <div className="flex gap-1.5 px-2 pb-1 pt-2.5 text-[11px] leading-4 text-[var(--goose-text-secondary)]">
               <span>{group.label()}</span>
-              {group.id === "original" ? null : <span>{items.length}</span>}
+              {group.id === "original" ? null : <span className="tabular-nums">{items.length}</span>}
             </div>
             {items.map((theme) => {
               const resolved = resolveCardTheme(theme.id, ctx);
@@ -80,9 +87,9 @@ export function ThemeRail({ themeContext }: { themeContext: NotebookCardThemeCon
                   type="button"
                   aria-current={selected ? "true" : undefined}
                   className={cn(
-                    "mx-2 flex min-h-9 items-center gap-2.5 rounded-md px-2 py-1 text-left text-[13px]",
+                    "flex min-h-9 w-full items-center gap-2.5 rounded-md px-2 py-1 text-left text-[13px] text-foreground transition-colors",
                     selected
-                      ? "bg-[var(--goose-interactive-selected)] text-[var(--goose-interactive-selected-fg)]"
+                      ? "bg-[var(--goose-interactive-selected)] shadow-[inset_0_0_0_1px_var(--goose-accent-solid)]"
                       : "hover:bg-[var(--goose-interactive-hover)]",
                   )}
                   onClick={() => pickTheme(theme.id)}
@@ -111,13 +118,14 @@ export function ThemeRail({ themeContext }: { themeContext: NotebookCardThemeCon
                       </span>
                     ) : null}
                   </span>
-                  {selected ? <Check className="size-3.5 shrink-0" /> : null}
+                  {selected ? <Check className="size-3.5 shrink-0 text-[var(--goose-accent-solid)]" /> : null}
                 </button>
               );
             })}
           </div>
         );
       })}
+      </div>
     </nav>
   );
 }

@@ -103,10 +103,10 @@ export function OptionsRail({ themeContext }: { themeContext: NotebookCardThemeC
   return (
     <aside
       aria-label={uiText("options")}
-      className="flex w-[264px] shrink-0 flex-col gap-[18px] overflow-y-auto border-y border-r border-border bg-[var(--goose-menu-surface)] px-4 py-3"
+      className="flex w-[264px] shrink-0 flex-col gap-[18px] overflow-y-auto rounded-r-[10px] border border-l-0 border-border bg-[var(--goose-menu-surface)] px-4 py-3"
     >
       <section className="flex flex-col gap-2">
-        <div className="text-xs text-[var(--goose-text-secondary)]">{uiText("imageWidth")}</div>
+        <div className="text-xs font-medium text-[var(--goose-text-secondary)]">{uiText("imageWidth")}</div>
         <SegmentedTrack
           label={uiText("imageWidth")}
           value={width}
@@ -116,7 +116,7 @@ export function OptionsRail({ themeContext }: { themeContext: NotebookCardThemeC
           }))}
           onChange={(next) => useImageExportSession.getState().setWidth(next)}
         />
-        <div className="flex flex-col gap-1 rounded-md border border-border bg-[var(--goose-sidebar-surface)] p-2.5">
+        <div className="flex flex-col gap-1 rounded-lg border border-border bg-[var(--goose-sidebar-surface)] p-2.5">
           <div className="flex items-baseline justify-between gap-2">
             <span className="text-[13px] font-medium tabular-nums">{clarity.dims}</span>
             <span className={cn("text-xs tabular-nums", TONE[clarity.tone])}>{clarity.ratioLabel}</span>
@@ -134,7 +134,7 @@ export function OptionsRail({ themeContext }: { themeContext: NotebookCardThemeC
         </div>
       </section>
       <section className="flex flex-col">
-        <div className="mb-1 text-xs text-[var(--goose-text-secondary)]">{uiText("content")}</div>
+        <div className="mb-1 text-xs font-medium text-[var(--goose-text-secondary)]">{uiText("content")}</div>
         <OptionRow
           label={scope === "selection" ? uiText("noteTitle") : uiText("title")}
           checked={watermark.showTitle}
@@ -206,7 +206,7 @@ function OptionRow({
   return (
     <label
       className={cn(
-        "flex min-h-9 items-center justify-between gap-3 text-[13px]",
+        "flex h-8 items-center justify-between gap-3 text-[13px]",
         indent && "pl-3.5",
         disabled && "text-muted-foreground",
       )}

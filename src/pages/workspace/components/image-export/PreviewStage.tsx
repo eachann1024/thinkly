@@ -142,7 +142,7 @@ export function PreviewStage({
     <main
       ref={canvasRef}
       aria-label={uiText("preview")}
-      className="relative min-w-0 flex-1 overflow-auto bg-muted"
+      className="relative min-w-0 flex-1 overflow-auto border-y border-border bg-[color-mix(in_srgb,hsl(var(--foreground))_4%,hsl(var(--goose-shell-bg)))]"
     >
       {excerpt ? (
         <div role="note" className="pointer-events-none sticky top-0 z-[1] flex justify-center px-3 pt-2.5">
