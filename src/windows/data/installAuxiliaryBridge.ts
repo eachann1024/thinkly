@@ -1,3 +1,4 @@
+import { navigateNotebookAiReference } from "@/lib/notebook-ai/navigateReference";
 import { openPageFromSidebar } from "@/lib/sidebarPageNavigation";
 import { markReflectionSeen, readReflectionAction } from "@/pages/workspace/components/sidebar/reflection/ReflectionHost";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -80,6 +81,8 @@ export function installAuxiliaryMainBridge(): void {
     }
     if (command.type !== "open-page" || !command.pageId) return;
     window.dispatchEvent(new CustomEvent("goose-note:request-close-settings"));
-    openPageFromSidebar(command.pageId, "permanent");
+    navigateNotebookAiReference(command.pageId, (pageId) => {
+      openPageFromSidebar(pageId, "permanent");
+    }, command.location);
   });
 }

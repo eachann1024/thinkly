@@ -1,3 +1,5 @@
+import type { NoteBlockLocation } from "@/lib/notebook-ai/noteCitationLocation";
+
 export const AUXILIARY_KINDS = [
   "reflection",
   "recovery-drafts",
@@ -73,12 +75,12 @@ export type AuxiliaryAISetupConfig = {
 };
 
 export type AuxiliaryRelayMessage =
-  | { type: "open-page"; pageId: string }
+  | { type: "open-page"; pageId: string; location?: NoteBlockLocation }
   | { type: "open-settings"; section: AuxiliarySettingsSection }
   | { type: "apply-ai-setup"; config: AuxiliaryAISetupConfig };
 
 export type AuxiliaryMainCommand =
-  | { type: "open-page"; pageId: string }
+  | { type: "open-page"; pageId: string; location?: NoteBlockLocation }
   | { type: "apply-ai-setup"; config: AuxiliaryAISetupConfig };
 
 export type AuxiliarySnapshotResponse =
@@ -91,7 +93,7 @@ export interface AuxiliaryBridge {
   onPayload: (cb: (state: AuxiliaryWindowState) => void) => () => void;
   complete: (result: { status: "confirmed" | "cancelled"; values?: unknown }) => Promise<void>;
   close: () => Promise<void>;
-  openPage: (pageId: string) => Promise<boolean>;
+  openPage: (pageId: string, location?: NoteBlockLocation) => Promise<boolean>;
   openSettings: (section: AuxiliarySettingsSection) => Promise<boolean>;
   applyAISetup: (config: AuxiliaryAISetupConfig) => Promise<boolean>;
   requestSnapshot: <T = unknown>(key: string, detail?: unknown) => Promise<AuxiliarySnapshotResponse & { value?: T }>;

@@ -26,7 +26,11 @@ export const auxiliary: AuxiliaryBridge = {
   },
   complete: (result) => ipcRenderer.invoke(AUXILIARY_CHANNELS.complete, result),
   close: () => ipcRenderer.invoke(AUXILIARY_CHANNELS.close),
-  openPage: (pageId) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "open-page", pageId }),
+  openPage: (pageId, location) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, {
+    type: "open-page",
+    pageId,
+    ...(location ? { location } : {}),
+  }),
   openSettings: (section) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "open-settings", section }),
   applyAISetup: (config) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "apply-ai-setup", config }),
   requestSnapshot: <T = unknown>(key: string, detail?: unknown) =>

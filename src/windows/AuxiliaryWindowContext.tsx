@@ -4,6 +4,7 @@ import type {
   AuxiliarySettingsSection,
   AuxiliaryWindowState,
 } from "@/lib/auxiliary-window/contract";
+import type { NoteBlockLocation } from "@/lib/notebook-ai/noteCitationLocation";
 
 const AuxiliaryWindowContext = createContext<AuxiliaryWindowState | null>(null);
 
@@ -34,9 +35,9 @@ export function closeAuxiliary(): Promise<void> {
   return window.gooseDesktop?.auxiliary?.close() ?? Promise.resolve();
 }
 
-export function openPageInMain(pageId: string): Promise<boolean> {
+export function openPageInMain(pageId: string, location?: NoteBlockLocation): Promise<boolean> {
   const open = window.gooseDesktop?.auxiliary?.openPage;
-  return open ? open(pageId) : Promise.resolve(false);
+  return open ? open(pageId, location) : Promise.resolve(false);
 }
 
 export function openSettingsInMain(section: AuxiliarySettingsSection): Promise<boolean> {

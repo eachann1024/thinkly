@@ -87,10 +87,11 @@ These leave the standalone window open and bring the main window forward.
 
 ```ts
 await openPageInMain(pageId);
+await openPageInMain(pageId, location);
 await openSettingsInMain("ai");
 ```
 
-`openPageInMain` asks the main window to close settings, then calls `openPageFromSidebar(pageId, "permanent")`. `openSettingsInMain` opens a settings section. Sections: `appearance`, `general`, `shortcuts`, `local-folder`, `git-sync`, `ai`, `data`, `feedback`.
+`openPageInMain` asks the main window to close settings, then opens the page with `openPageFromSidebar(pageId, "permanent")`. An optional `NoteBlockLocation` is the second argument. The main window uses it the same way a note citation does: open the page, then scroll to and highlight that block. Omit it to open the page only. `openSettingsInMain` opens a settings section. Sections: `appearance`, `general`, `shortcuts`, `local-folder`, `git-sync`, `ai`, `data`, `feedback`.
 
 The main window listens for `goose-note:request-close-settings`. Do not dispatch a new close event.
 
