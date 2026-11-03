@@ -17,6 +17,7 @@ import {
   trafficLightPosition,
 } from "../configuration";
 import { showOrCreateMainWindow } from "../activation";
+import { getMainWindow } from "../registry";
 import { clampAuxiliaryBox, readAuxiliaryBounds } from "./bounds";
 import { attachStandaloneFrame, standaloneBackground } from "./frame";
 import { auxiliaryKindConfig, auxiliaryKindTitle } from "./kinds";
@@ -63,13 +64,17 @@ function centerOn(parent: BrowserWindow, size: { width: number; height: number }
   }
 }
 
-function resolvedBox(kind: AuxiliaryKind, request: AuxiliaryOpenRequest, center: boolean) {
+function resolvedBox(
+  kind: AuxiliaryKind,
+  request: AuxiliaryOpenRequest,
+  center: boolean,
+): { parent: BrowserWindow; bounds: Pick<Electron.Rectangle, "width" | "height"> & Partial<Electron.Point> } {
   const config = auxiliaryKindConfig(kind);
   const stored = config.resizable ? readAuxiliaryBounds(kind) : null;
   const width = request.size?.width ?? stored?.width ?? config.width;
   const height = request.size?.height ?? stored?.height ?? config.height;
   const min = { width: config.minWidth, height: config.minHeight };
-  const parent = showOrCreateMainWindow();
+  const parent = getMainWindow() ?? showOrCreateMainWindow();
   if (center || stored == null) return { parent, bounds: centerOn(parent, { width, height }, min) };
   try {
     return {
