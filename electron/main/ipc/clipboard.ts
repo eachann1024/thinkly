@@ -1,55 +1,49 @@
 import { t } from "../i18n/nativeServices";
-import { clipboard, ipcMain, nativeImage } from "electron";
+import { ClipboardItem, clipboard, ipcMain, nativeImage } from "electron";
 import { printHtmlToPdf } from "../printPdf";
 import { isNetFetchAllowed } from "./common";
 
+function pngItem(dataUrl: string, extras?: { html?: string; text?: string }): Electron.ClipboardItem {
+  const match = /^data:image\/[^;]+;base64,(.+)$/i.exec(String(dataUrl ?? "").trim());
+  const bytes = match ? Buffer.from(match[1], "base64") : Buffer.alloc(0);
+  if (!bytes.length) throw new Error(t("invalidPng"));
+  const image = nativeImage.createFromBuffer(bytes);
+  if (image.isEmpty()) throw new Error(t("invalidPng"));
+  const pngBytes = bytes.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex"))
+    ? bytes
+    : image.toPNG();
+  const payload: Record<string, Blob | string> = {
+    "image/png": new Blob([new Uint8Array(pngBytes)], { type: "image/png" }),
+  };
+  if (typeof extras?.html === "string" && extras.html) payload["text/html"] = extras.html;
+  if (typeof extras?.text === "string" && extras.text) payload["text/plain"] = extras.text;
+  return new ClipboardItem(payload);
+}
+
+async function readPngDataUrl(): Promise<string | null> {
+  const items = await clipboard.read();
+  for (const item of items) {
+    if (!item.types.includes("image/png")) continue;
+    const blob = await item.getType("image/png");
+    if (!(blob instanceof Blob) || blob.size === 0) continue;
+    const encoded = Buffer.from(await blob.arrayBuffer()).toString("base64");
+    return encoded ? `data:image/png;base64,${encoded}` : null;
+  }
+  return null;
+}
+
 export function registerClipboardIpc(): void {
-  ipcMain.handle("desktop:writeText", async (_event, t: string) => {
-    clipboard.writeText(t ?? "");
+  ipcMain.handle("desktop:writeText", async (_event, text: string) => {
+    await clipboard.writeText(text ?? "");
   });
 
   ipcMain.handle("desktop:writeImage", async (_event, dataUrl: string, extras?: { html?: string; text?: string }) => {
-    const trimmed = String(dataUrl ?? "").trim();
-    const match = /^data:image\/[^;]+;base64,(.+)$/i.exec(trimmed);
-    if (!match) {
-      throw new Error(t("invalidPng"));
-    }
-    const pngBuffer = Buffer.from(match[1], "base64");
-    if (!pngBuffer.length) {
-      throw new Error(t("invalidPng"));
-    }
-    const image = nativeImage.createFromBuffer(pngBuffer);
-    const html = typeof extras?.html === "string" ? extras.html : "";
-    const text = typeof extras?.text === "string" ? extras.text : "";
-    if (html || text) {
-      clipboard.write({ image, ...(html ? { html } : {}), ...(text ? { text } : {}) });
-      return;
-    }
-    if (process.platform === "darwin") {
-      clipboard.writeBuffer("public.png", pngBuffer);
-      clipboard.writeImage(image);
-    } else {
-      clipboard.writeImage(image);
-    }
+    await clipboard.write([pngItem(dataUrl, extras)]);
   });
 
   ipcMain.handle("desktop:readText", async () => clipboard.readText());
 
-  ipcMain.handle("desktop:readImage", async () => {
-    const toDataUrl = (bytes: Buffer | Uint8Array) =>
-      bytes.length ? `data:image/png;base64,${Buffer.from(bytes).toString("base64")}` : null;
-    for (const format of ["public.png", "image/png", "PNG"]) {
-      try {
-        if (!clipboard.has(format)) continue;
-        const dataUrl = toDataUrl(clipboard.readBuffer(format));
-        if (dataUrl) return dataUrl;
-      } catch {
-      }
-    }
-    const image = clipboard.readImage();
-    if (image.isEmpty()) return null;
-    return toDataUrl(image.toPNG());
-  });
+  ipcMain.handle("desktop:readImage", async () => readPngDataUrl());
 
   ipcMain.handle("desktop:printHtmlToPdf", async (_event, html: string) => {
     return printHtmlToPdf(html);
