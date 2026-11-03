@@ -29,7 +29,7 @@ export function SelectionQuoteWindow() {
   const title = quote.pageTitle || text("windowTitle");
   const openSource = () => {
     if (!quote.sourceAvailable || !quote.pageId) return;
-    void openPageInMain(quote.pageId).finally(() => {
+    void openPageInMain(quote.pageId, quote.location).finally(() => {
       void completeAuxiliary("confirmed");
     });
   };
