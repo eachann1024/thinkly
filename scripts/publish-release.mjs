@@ -1,4 +1,3 @@
-import { MAC_SIGNED, MAC_HELPER_MARKER, MAC_INSTALL_GUIDE, macInstallParagraphs } from "./macos-install-copy.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
@@ -14,45 +13,14 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ensureChangelogSection, setPackageJsonVersion } from "./desktop-auto-release.mjs";
-import { assertPublishVersion, compareVersions, getReleases, gh, publishMetadata, readRepoFile, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
+import { assertPublishVersion, getReleases, gh, publishMetadata, readRepoFile, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
 import { publishedDownloadMetadata, publishedPayloads, releaseAssets } from "./desktop-download-metadata.mjs";
 import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes.mjs";
-import { releaseDownloadTemplate } from "./desktop-release-template.mjs";
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
 
-const MANUAL_UPGRADE_VERSION = "1.7.318";
-
-function manualUpgradeNotes(version) {
-  if (compareVersions(version, MANUAL_UPGRADE_VERSION) < 0) return [];
-  return [
-    "### 从 1.7.317 升级",
-    "",
-    "应用已正式改名为 Thinkly（磁盘上是 Thinkly.app，安装包文件名 Thinkly-*）。",
-    "",
-    "- 1.7.317 及更早版本无法在应用内自动升级，请到官网或 GitHub Release 手动下载安装一次；装好后可以删掉旧的 Goose Note.app。",
-    "- macOS 辅助功能等系统权限需要重新授权。",
-    "- 首次启动会自动把原数据目录迁移过来，笔记和设置不受影响。",
-    "- Homebrew 用户 `brew update && brew upgrade` 会自动迁到 thinkly cask。",
-    "",
-  ];
-}
-
-export function formatReleaseBody({ version, date, releaseNotes, repo, signed, macHelper, windowsSigned }) {
-  const releaseDate = date || new Date().toISOString().slice(0, 10);
-  return [
-    markedReleaseNotes(releaseNotes),
-    "",
-    ...manualUpgradeNotes(version),
-    releaseDownloadTemplate({ version, date: releaseDate, repo }),
-    "",
-    "### macOS 安装说明",
-    "",
-    ...(signed ? [MAC_SIGNED] : macInstallParagraphs(macHelper)),
-    ...(macHelper ? [MAC_HELPER_MARKER] : []),
-    `[完整安装说明（含旧版 DMG、ZIP 与 Homebrew）](${MAC_INSTALL_GUIDE})`,
-    "",
-    windowsSigned ? "Windows 安装包已由 SignPath 签名。" : "Windows 暂未做 Authenticode 签名。",
-  ].join("\n");
+// Release bodies carry only the user-facing changelog; downloads live on the website and in the assets list.
+export function formatReleaseBody({ releaseNotes }) {
+  return markedReleaseNotes(releaseNotes);
 }
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -87,11 +55,7 @@ async function main() {
   const input = join(ROOT, "artifacts");
   const stage = mkdtempSync(join(tmpdir(), "thinkly-release-"));
   try {
-    const builds = verifyBuildRecords(input, version, sha);
-    const macBuild = builds.get("mac-arm64");
-    const signed = macBuild.signed === true && macBuild.notarized === true;
-    const macHelper = macBuild.macInstallHelper === 1;
-    const windowsSigned = builds.get("win-x64").signed === true;
+    verifyBuildRecords(input, version, sha);
     const payloads = publishedPayloads(version);
     const available = readdirSync(input).filter((name) => /\.(exe|dmg|zip|AppImage|deb|rpm|pacman|blockmap|yml)$/.test(name));
     const unexpected = available.filter((name) => !payloads.includes(name));
@@ -104,9 +68,7 @@ async function main() {
     }
     writeFileSync(join(stage, "SHA256SUMS.txt"), payloads.map((name) => `${hashes.get(name)}  ${name}\n`).join(""));
     assert.deepEqual(readdirSync(stage).sort(), releaseAssets(version));
-    const notes = formatReleaseBody({
-      version, date: new Date().toISOString().slice(0, 10), releaseNotes, repo: REPO, signed, macHelper, windowsSigned,
-    });
+    const notes = formatReleaseBody({ releaseNotes });
     const existing = findRelease(tag);
     if (!existing) {
       gh(["release", "create", tag, "--repo", REPO, "--target", sha,
