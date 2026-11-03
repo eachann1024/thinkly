@@ -18,8 +18,14 @@ export type OrbitPath = {
   dots: OrbitComet[];
 };
 
+/** One ring band of the background lattice, drawn as a masked CSS dot pattern so it fills any panel size. */
+export type OrbitRing = {
+  delay: number;
+  mask: string;
+};
+
 export type OrbitField = {
-  rings: { delay: number; dots: OrbitDot[] }[];
+  rings: OrbitRing[];
   orbits: OrbitPath[];
   star: OrbitDot[];
   core: OrbitDot[];
@@ -27,25 +33,21 @@ export type OrbitField = {
 
 const round = (value: number) => Math.round(value * 100) / 100;
 
-function buildRings(): OrbitField["rings"] {
-  const rings = Array.from({ length: 8 }, (_, index) => ({
-    delay: round(index * 0.35),
-    dots: [] as OrbitDot[],
-  }));
-  for (let y = -260; y <= 500; y += 20) {
-    for (let x = -200; x <= 200; x += 20) {
-      const distance = Math.hypot(x, y);
-      if (distance < 170) continue;
-      const index = Math.min(7, Math.floor((distance - 170) / 45));
-      rings[index].dots.push({
-        x,
-        y,
-        size: 2,
-        opacity: round(Math.max(0.3, 1 - (distance - 170) / 520)),
-      });
-    }
-  }
-  return rings;
+const HOLE = 170;
+const BAND = 45;
+const fade = (distance: number) => round(Math.max(0.3, 1 - (distance - HOLE) / 520));
+
+function buildRings(): OrbitRing[] {
+  return Array.from({ length: 8 }, (_, index) => {
+    const r0 = HOLE + index * BAND;
+    const last = index === 7;
+    const r1 = last ? HOLE + 0.7 * 520 : r0 + BAND;
+    const outer = last ? `rgba(0,0,0,0.3) ${r1}px` : `rgba(0,0,0,${fade(r1)}) ${r1}px, transparent ${r1}px`;
+    return {
+      delay: round(index * 0.35),
+      mask: `radial-gradient(circle at center, transparent ${r0}px, rgba(0,0,0,${fade(r0)}) ${r0}px, ${outer})`,
+    };
+  });
 }
 
 /** Lattice is centered on 0. The mockup phase (start at -R) never samples v < 0.3, so the core is empty. */
@@ -91,7 +93,7 @@ export const IDLE_ORBIT_FIELD: OrbitField = {
   orbits: [
     buildOrbit(92, 92 * 0.34, -18, 48, 5, 3),
     buildOrbit(122, 122 * 0.34, 30, 60, 7.5, 3),
-    buildOrbit(150, 150 * 0.34, -64, 72, 10, 3),
+    buildOrbit(150, 150 * 0.34, -40, 72, 10, 3),
   ],
   ...buildStar(44, 5, 0.5, (v) => (v < 0.3 ? 4 : v < 0.65 ? 3 : 2)),
 };
