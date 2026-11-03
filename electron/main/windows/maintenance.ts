@@ -1,21 +1,36 @@
 import { t } from "../i18n/attachments";
-import { appearanceBackgroundColor, bindWindowAppearance } from "../appearance";
 import { BrowserWindow } from "electron";
-import path from "node:path";
 import {
-  __dirname,
-  rendererDevUrl,
+  applyTrafficLightPosition,
   framelessWindowIcon,
+  rendererDevUrl,
+  rendererFile,
   sharedWebPrefs,
+  trafficLightPosition,
 } from "./configuration";
 import { bindCloseTabAccelerator } from "./close";
+import { clampAuxiliaryBox, readAuxiliaryBounds } from "./auxiliary/bounds";
+import { attachStandaloneFrame, standaloneBackground } from "./auxiliary/frame";
 
 export let assetMaintenanceWindow: BrowserWindow | null = null;
+
+const MIN_WIDTH = 760;
+const MIN_HEIGHT = 540;
 
 export function getAssetMaintenanceWindow(): BrowserWindow | null {
   return assetMaintenanceWindow && !assetMaintenanceWindow.isDestroyed()
     ? assetMaintenanceWindow
     : null;
+}
+
+function initialBounds(): { x?: number; y?: number; width: number; height: number } {
+  const stored = readAuxiliaryBounds("asset-maintenance");
+  if (!stored) return { width: 1000, height: 720 };
+  try {
+    return clampAuxiliaryBox(stored, { width: MIN_WIDTH, height: MIN_HEIGHT });
+  } catch {
+    return { width: 1000, height: 720 };
+  }
 }
 
 export function createAssetMaintenanceWindow(): BrowserWindow {
@@ -25,38 +40,39 @@ export function createAssetMaintenanceWindow(): BrowserWindow {
     existing.focus();
     return existing;
   }
+  const isMac = process.platform === "darwin";
+  const bounds = initialBounds();
+  const icon = framelessWindowIcon();
   const win = new BrowserWindow({
     title: t("cleanupTitle"),
-    width: 1000,
-    height: 720,
-    minWidth: 760,
-    minHeight: 540,
+    ...bounds,
+    minWidth: MIN_WIDTH,
+    minHeight: MIN_HEIGHT,
     show: false,
-    backgroundColor: appearanceBackgroundColor(),
+    backgroundColor: standaloneBackground(),
     autoHideMenuBar: true,
-    ...(framelessWindowIcon() ? { icon: framelessWindowIcon() } : {}),
+    frame: isMac,
+    ...(isMac ? { titleBarStyle: "hidden" as const, trafficLightPosition: trafficLightPosition() } : {}),
+    ...(icon ? { icon } : {}),
     webPreferences: { ...sharedWebPrefs(), partition: "asset-maintenance" },
   });
-
-  bindWindowAppearance(win, false, false);
+  if (!isMac) win.setMenuBarVisibility(false);
+  applyTrafficLightPosition(win);
   assetMaintenanceWindow = win;
-  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-  win.webContents.on("will-navigate", (event) => event.preventDefault());
-  win.webContents.on("will-redirect", (event) => event.preventDefault());
-  win.webContents.session.setPermissionRequestHandler(
-    (_contents, _permission, callback) => callback(false),
-  );
-  win.webContents.session.setPermissionCheckHandler(() => false);
+  attachStandaloneFrame(win, {
+    boundsKey: "asset-maintenance",
+    minWidth: MIN_WIDTH,
+    minHeight: MIN_HEIGHT,
+    rememberSize: true,
+    escDismiss: false,
+    externalLinks: false,
+  });
   bindCloseTabAccelerator(win);
-  win.once("ready-to-show", () => win.show());
   win.once("closed", () => {
     assetMaintenanceWindow = null;
   });
   const devUrl = rendererDevUrl();
   if (devUrl) void win.loadURL(`${devUrl}/asset-maintenance.html`);
-  else
-    void win.loadFile(
-      path.join(__dirname, "../renderer/asset-maintenance.html"),
-    );
+  else void win.loadFile(rendererFile("asset-maintenance.html"));
   return win;
 }

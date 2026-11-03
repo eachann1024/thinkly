@@ -114,8 +114,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useSettings } from "@/stores/useSettings";
-import { applyAppearanceSnapshot } from "@/lib/appearanceSync";
+import { installElectronChrome } from "@/windows/chrome";
+import { applyStandaloneAppearance } from "@/windows/appearance";
+import { StandaloneWindowShell } from "@/windows/shell/StandaloneWindowShell";
 import { getLocalAssetKind } from "@/lib/local-folder-asset-maintenance";
 import type { AssetScan } from "@/lib/asset-maintenance-contract";
 import { useAssetMaintenanceState } from "@/hooks/useAssetMaintenanceState";
@@ -149,9 +150,9 @@ function AssetMaintenanceApp() {
   const selectedNotebook = notebooks.find((notebook) => notebook.id === notebookId);
   const allSelected = !!scan?.assets.length && selected.size === scan.assets.length;
   const partiallySelected = selected.size > 0 && !allSelected;
-  return <main className="flex h-screen flex-col gap-4 bg-background p-6 text-foreground">
+  return <StandaloneWindowShell title={assetText("title")} windowTitle={assetText("windowTitle")} inset={false}>
+    <main className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden bg-background p-6 text-foreground">
     <header className="space-y-2">
-      <h1 className="text-xl font-semibold">{assetText("title")}</h1>
       <p className="text-sm text-muted-foreground">{assetText("intro")}</p>
       <p className="text-xs text-muted-foreground">{assetText("safety")}</p>
     </header>
@@ -237,13 +238,15 @@ function AssetMaintenanceApp() {
       </section>
     </div>
     <footer className="flex items-center justify-between gap-4"><p className="text-xs text-muted-foreground">{assetText("selected", { count: selected.size })}</p><Button variant="destructive" disabled={busy || !selected.size} onClick={() => void trash()}><Trash2 />{assetText(/Win/i.test(navigator.platform) ? "recycle" : "trash")}</Button></footer>
-  </main>;
+    </main>
+  </StandaloneWindowShell>;
 }
 
 async function start() {
-  await useSettings.persist.rehydrate();
-  const appearance = await bridge.appearance();
-  applyAppearanceSnapshot(appearance);
+  installElectronChrome();
+  const live = await window.gooseDesktop?.appearance?.get()?.catch(() => null);
+  applyStandaloneAppearance(live ?? await bridge.appearance());
+  window.gooseDesktop?.appearance?.onChanged(applyStandaloneAppearance);
   createRoot(document.getElementById("root")!).render(<AssetMaintenanceApp />);
 }
 void start().catch((error) => { document.getElementById("root")!.textContent = assetText("initFailed", { reason: String(error) }); });
