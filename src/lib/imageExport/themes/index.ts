@@ -6,5 +6,7 @@ export {
   resolveCardTheme,
   buildNotebookCardTheme,
   NOTEBOOK_THEME,
+  buildOriginalCardTheme,
+  ORIGINAL_THEME,
 } from "./presets";
 export type { CardThemeId, NotebookCardThemeContext } from "./presets";

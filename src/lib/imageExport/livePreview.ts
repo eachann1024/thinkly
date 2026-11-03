@@ -100,6 +100,7 @@ export function buildImageExportPreviewHtml(params: {
   theme: CardTheme;
   mode: "page" | "selection";
   watermarkConfig?: WatermarkConfig;
+  contentWidth?: number;
 }): string {
   const wm = normalizeWatermarkConfig(params.watermarkConfig);
   const prepared = cloneExportBlocks(takeBlocksForPreview(params.blocks), {
@@ -119,5 +120,6 @@ export function buildImageExportPreviewHtml(params: {
     watermarkConfig: wm,
     preview: true,
     titleInlineStyle: collectBlockInlineStyles(titleBlock, params.theme),
+    contentWidth: params.contentWidth,
   });
 }

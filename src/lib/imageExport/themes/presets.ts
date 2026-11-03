@@ -7,12 +7,15 @@ import {
   buildNotebookCardTheme,
   type NotebookCardThemeContext,
 } from "./presets/notebook";
+import { ORIGINAL_THEME, buildOriginalCardTheme } from "./presets/original";
 
 export type { NotebookCardThemeContext } from "./presets/notebook";
 export { buildNotebookCardTheme, NOTEBOOK_THEME } from "./presets/notebook";
+export { buildOriginalCardTheme, ORIGINAL_THEME } from "./presets/original";
 
 const findTheme = (id: string): CardTheme => {
   if (id === "notebook") return NOTEBOOK_THEME;
+  if (id === "original") return ORIGINAL_THEME;
   const all = [...TECH_THEMES, ...ARTISTIC_THEMES, ...COLORFUL_THEMES];
   const found = all.find((t) => t.id === id);
   if (!found) throw new Error(`Theme ${id} not found in presets!`);
@@ -20,21 +23,21 @@ const findTheme = (id: string): CardTheme => {
 };
 
 const CARD_THEME_IDS = [
+  "original",
+  "stationery",
+  "mocha-mousse",
+  "brutalist",
   "notebook",
-  "github-light",
   "medium",
   "kenya-hara",
   "typewriter",
-  "stationery",
+  "risograph",
   "poster",
   "github-dark",
   "vercel-dark",
   "tokyo-night",
   "catppuccin",
   "synthwave",
-  "mocha-mousse",
-  "brutalist",
-  "risograph",
 ] as const;
 
 export type CardThemeId = (typeof CARD_THEME_IDS)[number];
@@ -43,10 +46,11 @@ export const CARD_THEMES: Array<CardTheme & { id: CardThemeId }> =
   CARD_THEME_IDS.map((id) => findTheme(id) as CardTheme & { id: CardThemeId });
 
 const REMOVED_THEME_REPLACEMENTS: Record<string, CardThemeId> = {
-  notion: "github-light",
+  notion: "notebook",
   obsidian: "github-dark",
   academic: "medium",
-  linear: "github-light",
+  linear: "notebook",
+  "github-light": "notebook",
   "solarized-light": "typewriter",
   neon: "risograph",
 };
@@ -71,5 +75,6 @@ export function resolveCardTheme(
 ): CardTheme {
   const id = normalizeCardThemeId(themeId);
   if (id === "notebook") return buildNotebookCardTheme(ctx);
+  if (id === "original") return buildOriginalCardTheme(ctx);
   return getCardTheme(id);
 }

@@ -33,8 +33,14 @@ function contentHeadingWeights(theme: CardTheme): {
 }
 
 
-export function buildDocumentCss(t: CardTheme, options: { preview?: boolean; decoStyle: string; headerBorder: string; titleStyle: string }): string {
+export function buildDocumentCss(t: CardTheme, options: { preview?: boolean; decoStyle: string; headerBorder: string; titleStyle: string; contentWidth?: number }): string {
   const { preview, decoStyle, headerBorder, titleStyle } = options;
+  const locked = Number.isFinite(options.contentWidth) && (options.contentWidth ?? 0) > 0
+    ? Math.round(options.contentWidth as number)
+    : 0;
+  const sizeRule = locked
+    ? `width: ${locked}px; min-width: ${locked}px; max-width: ${locked}px;`
+    : "min-width: 680px; max-width: 1200px;";
   const headingSize = contentHeadingSizes(t);
   const headingWeight = contentHeadingWeights(t);
   return `* { margin: 0; padding: 0; box-sizing: border-box; }
@@ -49,8 +55,7 @@ body {
 .gooseshot-container {
   background: ${t.background};
   padding: ${t.containerPaddingY}px ${t.containerPaddingX}px;
-  min-width: 680px;
-  max-width: 1200px;
+  ${sizeRule}
   position: relative;
   overflow: hidden;
   font-family: ${t.bodyFont};
