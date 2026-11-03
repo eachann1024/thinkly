@@ -19,10 +19,14 @@ function startPresence(update: () => void, flush: boolean): void {
     return;
   }
   try {
-    document.startViewTransition(() => {
+    const transition = document.startViewTransition(() => {
       if (flush) flushSync(update);
       else update();
     });
+    // Overlapping transitions reject with "Transition was skipped"; the update still runs.
+    const ignore = () => {};
+    transition.ready.catch(ignore);
+    transition.finished.catch(ignore);
   } catch {
     update();
   }
