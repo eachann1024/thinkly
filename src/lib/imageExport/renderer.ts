@@ -101,9 +101,10 @@ export async function exportPageToImage(
       titleInlineStyle: collectBlockInlineStyles(titleBlock, theme),
       contentWidth,
     });
-    container.innerHTML = html;
+    const root = container.attachShadow({ mode: "open" });
+    root.innerHTML = html;
 
-    const cardElement = container.querySelector(
+    const cardElement = root.querySelector(
       ".gooseshot-container",
     ) as HTMLElement;
     if (!cardElement) throw new Error("Failed to create preview element");
@@ -161,9 +162,10 @@ export async function exportSelectionToImage(
       titleInlineStyle: collectBlockInlineStyles(titleBlock, theme),
       contentWidth,
     });
-    container.innerHTML = html;
+    const root = container.attachShadow({ mode: "open" });
+    root.innerHTML = html;
 
-    const cardElement = container.querySelector(
+    const cardElement = root.querySelector(
       ".gooseshot-container",
     ) as HTMLElement;
     if (!cardElement) throw new Error("Failed to create preview element");

@@ -95,8 +95,9 @@ export async function renderImageExportBlob(params: {
   container.style.zIndex = "-1";
   document.body.appendChild(container);
   try {
-    container.innerHTML = html;
-    const card = container.querySelector(".gooseshot-container");
+    const root = container.attachShadow({ mode: "open" });
+    root.innerHTML = html;
+    const card = root.querySelector(".gooseshot-container");
     if (!(card instanceof HTMLElement)) throw new Error("Failed to create preview element");
     const blob = await captureElementToBlob(card);
     const suffix = params.mode === "selection" ? uiText("selection") : undefined;
