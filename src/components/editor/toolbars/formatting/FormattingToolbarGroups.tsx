@@ -3,7 +3,6 @@ import { MarkGroup } from "./groups/MarkGroup";
 import { InlineGroup } from "./groups/InlineGroup";
 import { LinkButton } from "./groups/LinkButton";
 import { AlignGroup } from "./groups/AlignGroup";
-import { ListTypeGroup } from "./groups/ListTypeGroup";
 import { ClearFormatButton } from "./groups/ClearFormatButton";
 import type { useFormattingToolbarState } from "./useFormattingToolbarState";
 
@@ -12,12 +11,13 @@ export function FormattingToolbarGroups({
 }: {
   state: ReturnType<typeof useFormattingToolbarState>;
 }) {
-  const { caps, bindTooltip, listState, handleSelectionMenuOpen } = state;
-  const showList =
-    listState.show &&
-    caps.mode !== "none" &&
-    caps.mode !== "cellText" &&
-    caps.mode !== "cellGrid";
+  const { caps, bindTooltip, handleSelectionMenuOpen } = state;
+  // Clear formatting rides along with the marks group; when marks are hidden
+  // (protected title), it falls back to the color/link group.
+  const clearButton = caps.showClear ? (
+    <ClearFormatButton onClear={state.clearFormatting} bindTooltip={bindTooltip} />
+  ) : null;
+  const clearInMarks = caps.showMarks;
 
   return (
     <>
@@ -34,9 +34,10 @@ export function FormattingToolbarGroups({
             isCode={state.isCode}
             bindTooltip={bindTooltip}
           />
+          {clearButton}
         </div>
       )}
-      {(caps.showColors || caps.showLink) && (
+      {(caps.showColors || caps.showLink || (!clearInMarks && clearButton)) && (
         <div className="goose-formatting-toolbar-group">
           {caps.showColors && (
             <FormattingToolbarColorPicker onOpenChange={state.setColorPickerOpen} />
@@ -49,6 +50,7 @@ export function FormattingToolbarGroups({
               onOpenChange={handleSelectionMenuOpen}
             />
           )}
+          {!clearInMarks && clearButton}
         </div>
       )}
       {caps.showAlign && (
@@ -58,14 +60,6 @@ export function FormattingToolbarGroups({
             setTextAlignment={state.setTextAlignment}
             bindTooltip={bindTooltip}
           />
-        </div>
-      )}
-      {(showList || caps.showClear) && (
-        <div className="goose-formatting-toolbar-group">
-          {showList && <ListTypeGroup bindTooltip={bindTooltip} />}
-          {caps.showClear && (
-            <ClearFormatButton onClear={state.clearFormatting} bindTooltip={bindTooltip} />
-          )}
         </div>
       )}
     </>

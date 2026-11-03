@@ -50,8 +50,7 @@ export function FormattingToolbarLayout({
     caps.showColors ||
     caps.showLink ||
     caps.showAlign ||
-    caps.showClear ||
-    (state.listState.show && caps.mode !== "none")
+    caps.showClear
   ) {
     sections.push(
       <FormattingToolbarGroups key="formatting" state={state} />,
