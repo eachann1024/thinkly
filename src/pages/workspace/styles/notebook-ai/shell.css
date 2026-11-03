@@ -59,33 +59,31 @@
 }
 
 .notebook-ai-empty-state {
- display: flex;
- flex-direction: column;
- align-items: center;
+ --ai-orbit-y: clamp(120px, 34%, 280px);
+ position: relative;
+ flex: 1 1 auto;
  align-self: stretch;
- justify-content: center;
- max-width: 100%;
- padding: 24px 16px 28px;
+ width: 100%;
+ max-width: none;
+ min-height: 0;
+ padding: 0;
+ overflow: hidden;
  text-align: center;
  overflow-wrap: anywhere;
 }
 
-.notebook-ai-empty-state-fullscreen {
- align-items: flex-start;
- align-self: flex-start;
- max-width: 720px;
- padding: 2rem 0 0;
- text-align: left;
-}
-
-.notebook-ai-empty-mark {
- display: flex;
- margin-bottom: 12px;
- color: var(--goose-color-success);
-}
-
 .notebook-ai-empty-title {
+ position: absolute;
+ left: 50%;
+ top: min(calc(var(--ai-orbit-y) + 152px), calc(100% - 108px));
+ z-index: 1;
+ width: max-content;
+ max-width: calc(100% - 32px);
  margin: 0;
+ transform: translateX(-50%);
+ border-radius: 8px;
+ padding: 0 10px;
+ background: var(--workspace-main-surface);
  font-family: var(--font-default);
  font-size: 1.075rem;
  font-weight: 550;
@@ -94,34 +92,56 @@
  -webkit-font-smoothing: auto;
 }
 
+[data-ai-panel-layout="side-panel"] .notebook-ai-empty-title {
+ background: var(--workspace-sidebar-surface);
+}
+
 .notebook-ai-empty-suggestions {
+ position: absolute;
+ left: 16px;
+ right: 16px;
+ bottom: 12px;
+ z-index: 1;
  display: flex;
  flex-wrap: wrap;
  justify-content: center;
- max-width: 100%;
+ max-width: none;
  gap: 6px;
- margin-top: 14px;
-}
-
-.notebook-ai-empty-state-fullscreen .notebook-ai-empty-suggestions {
- justify-content: flex-start;
+ margin-top: 0;
 }
 
 .notebook-ai-empty-suggestion {
  display: inline-flex;
  min-width: 0;
  max-width: 100%;
- min-height: 2.5rem;
+ min-height: 2.25rem;
  align-items: center;
+ gap: 10px;
  border: 1px solid hsl(var(--input));
  border-radius: var(--goose-control-radius);
- padding: 0.5rem 0.75rem;
+ padding: 0 12px 0 6px;
  background: var(--goose-input-surface);
  color: hsl(var(--muted-foreground));
  text-align: left;
  font-family: var(--font-default);
  font-size: 0.95rem;
  line-height: 1.5;
+}
+
+.notebook-ai-empty-suggestion-index {
+ display: inline-flex;
+ flex: none;
+ align-items: center;
+ justify-content: center;
+ width: 22px;
+ height: 22px;
+ border-radius: 6px;
+ background: var(--goose-interactive-hover);
+ color: var(--goose-text-disabled);
+ font-family: var(--font-mono);
+ font-size: 11px;
+ font-weight: var(--font-weight-medium);
+ line-height: 1;
 }
 
 
