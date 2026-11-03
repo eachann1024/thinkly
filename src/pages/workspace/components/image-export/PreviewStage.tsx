@@ -72,7 +72,7 @@ export function PreviewStage({
   const width = useImageExportSession((s) => s.width);
   const ratio = useImageExportSession((s) => s.ratio);
   const height = useImageExportSession((s) => s.height);
-  const canvasRef = useRef<HTMLElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
   const [canvasWidth, setCanvasWidth] = useState(0);
   const [zoom, setZoom] = useState<number | null>(null);
   const [previewHeight, setPreviewHeight] = useState(0);
@@ -126,7 +126,8 @@ export function PreviewStage({
     setCanvasWidth(node.clientWidth);
     return () => observer.disconnect();
   }, []);
-  const fit = canvasWidth > 80 ? Math.min(1, (canvasWidth - 80) / width) : 1;
+  const displayWidth = width === 720 ? 420 : width === 1440 ? 600 : 520;
+  const fit = Math.min(displayWidth, Math.max(1, canvasWidth - 64)) / width;
   const scale = zoom ?? fit;
   const clarity = describeExportClarity({ empty, width, height, ratio, scope });
   const excerpt =
@@ -140,50 +141,51 @@ export function PreviewStage({
 
   return (
     <main
-      ref={canvasRef}
       aria-label={uiText("preview")}
-      className="relative min-w-0 flex-1 overflow-auto border-y border-border bg-[color-mix(in_srgb,hsl(var(--foreground))_4%,hsl(var(--goose-shell-bg)))]"
+      className="relative min-w-0 flex-1 overflow-hidden border-y border-border bg-[color-mix(in_srgb,hsl(var(--foreground))_4%,hsl(var(--goose-shell-bg)))]"
     >
-      {excerpt ? (
-        <div role="note" className="pointer-events-none sticky top-0 z-[1] flex justify-center px-3 pt-2.5">
-          <span className="rounded-md border border-border bg-[var(--goose-menu-surface)] px-2.5 py-1 text-xs text-foreground">
-            {excerpt}
-          </span>
-        </div>
-      ) : null}
-      <div className={cn("flex min-h-full items-start justify-center px-8 pb-[72px] pt-10", empty && "items-center")}>
-        {empty ? (
-          <div className="flex w-[300px] flex-col items-center gap-2.5 rounded-[10px] border border-dashed border-border bg-[var(--goose-menu-surface)] px-6 py-7 text-center">
-            <Image className="size-[22px] text-[var(--goose-text-secondary)]" />
-            <span className="text-sm font-medium">{uiText("emptyTitle")}</span>
-            <span className="text-xs leading-[18px] text-[var(--goose-text-secondary)]">{uiText("emptyBody")}</span>
-            <div className="mt-1 flex gap-2">
-              <Button type="button" variant="secondary" size="sm" onClick={() => void closeAuxiliary()}>
-                {uiText("back")}
-              </Button>
-              <Button type="button" size="sm" onClick={() => useImageExportSession.getState().setScope("page")}>
-                {uiText("wholePage")}
-              </Button>
+      <div ref={canvasRef} className="h-full overflow-auto">
+        {excerpt ? (
+          <div role="note" className="pointer-events-none sticky top-0 z-[1] flex justify-center px-3 pt-2.5">
+            <span className="rounded-md border border-border bg-[var(--goose-menu-surface)] px-2.5 py-1 text-xs text-foreground">
+              {excerpt}
+            </span>
+          </div>
+        ) : null}
+        <div className={cn("flex min-h-full w-max min-w-full items-start justify-center px-8 pb-[72px] pt-10", empty && "items-center")}>
+          {empty ? (
+            <div className="flex w-[300px] flex-col items-center gap-2.5 rounded-[10px] border border-dashed border-border bg-[var(--goose-menu-surface)] px-6 py-7 text-center">
+              <Image className="size-[22px] text-[var(--goose-text-secondary)]" />
+              <span className="text-sm font-medium">{uiText("emptyTitle")}</span>
+              <span className="text-xs leading-[18px] text-[var(--goose-text-secondary)]">{uiText("emptyBody")}</span>
+              <div className="mt-1 flex gap-2">
+                <Button type="button" variant="secondary" size="sm" onClick={() => void closeAuxiliary()}>
+                  {uiText("back")}
+                </Button>
+                <Button type="button" size="sm" onClick={() => useImageExportSession.getState().setScope("page")}>
+                  {uiText("wholePage")}
+                </Button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div
-            className="shrink-0 overflow-hidden shadow-md"
-            style={{ width: Math.round(width * scale), height: previewHeight > 0 ? Math.round(previewHeight * scale) : undefined }}
-          >
-            <PreviewFrame
-              html={html}
-              title={getPageTitle(page)}
-              onHeightChange={onHeight}
-              style={{ width, transform: `scale(${scale})`, transformOrigin: "top left" }}
-            />
-          </div>
-        )}
+          ) : (
+            <div
+              className="shrink-0 overflow-hidden shadow-md"
+              style={{ width: Math.round(width * scale), height: previewHeight > 0 ? Math.round(previewHeight * scale) : undefined }}
+            >
+              <PreviewFrame
+                html={html}
+                title={getPageTitle(page)}
+                onHeightChange={onHeight}
+                style={{ width, transform: `scale(${scale})`, transformOrigin: "top left" }}
+              />
+            </div>
+          )}
+        </div>
       </div>
-      <div className="pointer-events-none sticky bottom-3 mx-3 -mt-12 flex items-center justify-between">
+      <div className="pointer-events-none absolute inset-x-3 bottom-3 flex items-center justify-between gap-2">
         <span
           className={cn(
-            "rounded-md px-2 py-1 text-xs tabular-nums",
+            "min-w-0 truncate rounded-md px-2 py-1 text-xs tabular-nums",
             clarity.tone === "danger" && !empty
               ? "bg-[var(--goose-color-danger-subtle-bg)] text-[var(--goose-color-danger)]"
               : "bg-[var(--goose-menu-surface)] text-[var(--goose-text-secondary)]",
@@ -191,14 +193,14 @@ export function PreviewStage({
         >
           {clarity.chip}
         </span>
-        <div className="pointer-events-auto flex items-center gap-0.5 rounded-md border border-border bg-[var(--goose-menu-surface)] p-0.5">
-          <IconButton type="button" size="icon" tone="muted" aria-label={uiText("zoomOut")} onClick={() => setZoom(step(scale, -0.1))}>
+        <div className="pointer-events-auto flex shrink-0 items-center gap-0.5 rounded-lg border border-border bg-[var(--goose-menu-surface)] p-0.5">
+          <IconButton type="button" size="sm" tone="muted" aria-label={uiText("zoomOut")} onClick={() => setZoom(step(scale, -0.1))}>
             <Minus className="size-3.5" />
           </IconButton>
           <button type="button" className="w-11 text-center text-xs tabular-nums" onClick={() => setZoom(null)}>
             {zoom == null ? uiText("fit") : `${Math.round(scale * 100)}%`}
           </button>
-          <IconButton type="button" size="icon" tone="muted" aria-label={uiText("zoomIn")} onClick={() => setZoom(step(scale, 0.1))}>
+          <IconButton type="button" size="sm" tone="muted" aria-label={uiText("zoomIn")} onClick={() => setZoom(step(scale, 0.1))}>
             <Plus className="size-3.5" />
           </IconButton>
         </div>

@@ -11,6 +11,8 @@ const INTERACTIVE = "button, input, textarea, a, select, [role='button'], [role=
 export type StandaloneWindowShellProps = {
   title: string;
   context?: string;
+  titleLayout?: "stacked" | "inline";
+  className?: string;
   /** OS window title. Defaults to the title, with the context after an em dash. */
   windowTitle?: string;
   actions?: ReactNode;
@@ -28,6 +30,8 @@ function isInteractive(target: EventTarget | null): boolean {
 export function StandaloneWindowShell({
   title,
   context,
+  titleLayout = "stacked",
+  className,
   windowTitle,
   actions,
   children,
@@ -70,16 +74,16 @@ export function StandaloneWindowShell({
   };
 
   return (
-    <div className="standalone-window relative flex h-full min-h-0 flex-col bg-background text-foreground">
+    <div className={cn("standalone-window relative flex h-full min-h-0 flex-col bg-background text-foreground", className)}>
       <div
         ref={barRef}
         className={cn("electron-titlebar flex w-full shrink-0 items-center", frameless ? "pr-0" : "pr-3")}
         onPointerDown={onPointerDown}
         onDoubleClick={onDoubleClick}
       >
-        <div className="min-w-0 flex-1 px-3">
-          <div className="truncate text-sm font-medium text-foreground">{title}</div>
-          {context ? <div className="truncate text-xs text-muted-foreground">{context}</div> : null}
+        <div className={cn("min-w-0 flex-1 px-3", titleLayout === "inline" && "flex items-baseline gap-2")}>
+          <div className={cn("truncate text-sm font-medium text-foreground", titleLayout === "inline" && "shrink-0 font-semibold")}>{title}</div>
+          {context ? <div className={cn("truncate text-xs text-muted-foreground", titleLayout === "inline" && "text-[13px]")}>{context}</div> : null}
         </div>
         {actions ? (
           <div data-electron-no-drag className="flex shrink-0 items-center gap-1 pr-2">

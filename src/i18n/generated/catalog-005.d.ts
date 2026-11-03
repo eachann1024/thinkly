@@ -41,5 +41,6 @@ declare module "../types" {
     "src/stores/tabs/specialActions.ts#block1:1": { "blankTabFailed": {  } };
     "src/stores/useEditorSplit.ts#block1:1": { "paneMissing": {  } };
     "src/stores/useQuickNote.ts#block1:1": { "quicknoteDraftSeparate": {  }; "quicknoteNewer": {  }; "quicknoteRecovered": {  }; "quicknoteRecoveredDetail": {  } };
+    "src/windows/views/ImageExportWindow.tsx#messages:1": { "title": {  }; "unavailable": {  } };
   }
 }
