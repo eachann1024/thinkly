@@ -1,0 +1,8 @@
+{"v":3,"createdOnFiles":{"v":1,"at":"2026-11-03T10:00:00Z"},"title":"生成图片 · 独立界面三方案","launch":{"view":"canvas"},"pages":[],
+"boards":{
+"Main.dc.html":{"x":0,"y":0,"w":1280,"h":800,"title":"A 工作台 · 三栏","expand":"fill","is_interactive":true},
+"Stage.dc.html":{"x":1360,"y":0,"w":1280,"h":800,"title":"B 沉浸画布 · 底部主题条","expand":"fill","is_interactive":true},
+"Compose.dc.html":{"x":2720,"y":0,"w":1280,"h":800,"title":"C 内容取舍 · 左稿右图","expand":"fill","is_interactive":true}},
+"order":["Main.dc.html","Stage.dc.html","Compose.dc.html"],
+"notes":{"t1":{"x":0,"y":-260,"text":"生成图片：从弹窗改为独立界面","kind":"title1","maxW":4000}},
+"designSystems":[]}
