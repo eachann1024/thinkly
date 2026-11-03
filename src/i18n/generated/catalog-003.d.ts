@@ -53,7 +53,7 @@ declare module "../types" {
     "src/pages/workspace/components/notebook-ai/AssistantUiRuntimeProvider.tsx#messages:1": { "compactedSummary": {  }; "detailImage": { "value1": string | number } };
     "src/pages/workspace/components/notebook-ai/ChartCard.tsx#messages:1": { "chart": {  }; "chartDataIsIncomplete": {  }; "chartExportFailed": {  }; "chartExportIsEmpty": {  }; "imageEncodingFailed": {  }; "theChartIsNotReadyYet": {  } };
     "src/pages/workspace/components/notebook-ai/ChatMessages.tsx#messages:1": { "detailSendSuggestion": { "value1": string | number }; "extractKeyPoints": {  }; "howWouldYouLikeToEditThisNote": {  }; "polishThisText": {  }; "scrollToBottom": {  }; "turnIntoAChecklist": {  } };
-    "src/pages/workspace/components/notebook-ai/Composer.tsx#messages:1": { "askAiUseForCommandsOrSkillsOr": {  }; "sendMessage": {  }; "stopGenerating": {  }; "uploadImage": {  } };
+    "src/pages/workspace/components/notebook-ai/Composer.tsx#messages:1": { "askAFollowUp": {  }; "askAiUseForCommandsOrSkillsOr": {  }; "sendMessage": {  }; "stopGenerating": {  }; "uploadImage": {  } };
     "src/pages/workspace/components/notebook-ai/ConversationHistoryPopover.tsx#messages:1": { "conversationHistory": {  }; "deleteConversation": {  }; "noPreviousConversations": {  } };
     "src/pages/workspace/components/notebook-ai/ConversationTitle.tsx#messages:1": { "detailConversationTitle": { "value1": string | number }; "newConversation": {  } };
     "src/pages/workspace/components/notebook-ai/DiagramCard.tsx#messages:1": { "diagram": {  }; "diagramGenerationFailed": {  }; "generatingDiagram": {  }; "theDiagramIsNotReadyYet": {  } };

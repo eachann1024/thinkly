@@ -1,0 +1,61 @@
+[data-ai-composer-editor="true"] {
+ font-size: 12px;
+ line-height: 20px;
+}
+
+[data-ai-composer-editor="true"] .ai-composer-chip {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ box-sizing: border-box;
+ height: 20px;
+ min-height: 20px;
+ max-height: 20px;
+ line-height: 20px;
+ font-size: 11px;
+ max-width: 100%;
+ margin-left: 3px;
+ margin-right: 3px;
+ margin-top: 0;
+ margin-bottom: 0;
+ padding-top: 0;
+ padding-bottom: 0;
+ padding-left: 5px;
+ padding-right: 5px;
+ border-radius: 5px;
+ position: static;
+ top: auto;
+ vertical-align: bottom;
+ min-width: 0;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+}
+
+[data-ai-composer-editor="true"][data-ai-composer-variant="panel"]
+ .ai-composer-chip {
+ height: var(--ai-composer-line-height);
+ min-height: var(--ai-composer-line-height);
+ max-height: var(--ai-composer-line-height);
+ line-height: var(--ai-composer-line-height);
+ font-size: calc(var(--ai-composer-font-size) * 0.78);
+}
+
+@keyframes goose-selection-quote-enter {
+ from {
+  opacity: 0;
+ }
+ to {
+  opacity: 1;
+ }
+}
+
+.ai-composer-chip[data-ai-selection-quote-enter] {
+ animation: goose-selection-quote-enter 140ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+ .ai-composer-chip[data-ai-selection-quote-enter] {
+  animation: none;
+ }
+}

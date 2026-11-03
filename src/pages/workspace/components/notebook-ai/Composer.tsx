@@ -1,6 +1,6 @@
 import { useLocale } from "@/i18n";
 import { IconButton } from "@/components/ui/icon-button";
-import { forwardRef, useCallback } from "react";
+import { forwardRef, useCallback, useRef } from "react";
 import { ArrowUp, Plus } from "@/components/ui/icons";
 import { ComposerPrimitive } from "@assistant-ui/react";
 import { toast } from "@/components/ui/sonner";
@@ -15,6 +15,7 @@ import { useComposerPlaceholder } from "./composer/useComposerPlaceholder";
 import { useComposerSubmission } from "./composer/useComposerSubmission";
 import { useComposerAttachments } from "./composer/useComposerAttachments";
 import { useComposerSelectionHandle } from "./composer/useComposerSelectionHandle";
+import { useComposerAutoGrow } from "./composer/useComposerAutoGrow";
 import type { ComposerHandle, ComposerProps } from "./composer/types";
 import { i18nYaml, createTranslator } from "@/i18n";
 const messages = i18nYaml<"src/pages/workspace/components/notebook-ai/Composer.tsx#messages:1">`
@@ -23,16 +24,19 @@ zh-Hans:
   uploadImage: "上传图片"
   stopGenerating: "停止生成"
   sendMessage: "发送消息"
+  askAFollowUp: "继续追问…"
 en:
   askAiUseForCommandsOrSkillsOr: "Ask AI, use / for commands or skills, or @ to reference notes or local files…"
   uploadImage: "Upload image"
   stopGenerating: "Stop generating"
   sendMessage: "Send message"
+  askAFollowUp: "Ask a follow-up…"
 ja:
   askAiUseForCommandsOrSkillsOr: "AI に質問、/ でコマンドやスキルを呼び出し、@ でノートやローカルファイルを参照…"
   uploadImage: "画像をアップロード"
   stopGenerating: "生成を停止"
   sendMessage: "メッセージを送信"
+  askAFollowUp: "続けて質問…"
 `;
 const t = createTranslator(messages);
 
@@ -66,6 +70,8 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
       isEmpty,
       setIsEmpty,
     } = surface;
+    const shellRef = useRef<HTMLDivElement>(null);
+    useComposerAutoGrow(shellRef, inputRef);
     const placeholder = useComposerPlaceholder({
       placeholder: customPlaceholder,
       fallback: t("askAiUseForCommandsOrSkillsOr"),
@@ -73,6 +79,8 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
       isStreaming,
       isEmpty,
     });
+    const fieldPlaceholder =
+      isStreaming && !disabled ? t("askAFollowUp") : placeholder;
     const { cancelPendingDraftPersist, handleContentChange } =
       useComposerDraft(notebookId);
     const handleEscape = useCallback(() => {
@@ -114,6 +122,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
         >
           <PromptBar streaming={isStreaming}>
             <div
+              ref={shellRef}
               className={cn(
                 "notebook-ai-composer-shell bui-root",
                 dropActive &&
@@ -136,16 +145,28 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 onChange={handleImageInput}
                 disabled={disabled || isStreaming}
               />
+              <div className="notebook-ai-composer-lead">
+                <IconButton size="icon" tone="muted"
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={disabled || isStreaming}
+                  className="text-muted-foreground disabled:cursor-not-allowed disabled:text-disabled"
+                  aria-label={t("uploadImage")}
+                  title={t("uploadImage")}
+                >
+                  <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
+                </IconButton>
+              </div>
               <AiComposerInput
                 ref={inputRef}
-                placeholder={placeholder}
+                placeholder={fieldPlaceholder}
                 autoFocusToken={autoFocusToken}
                 initialContent={seedContent}
                 onContentChange={handleContentChange}
                 onSubmit={handleSubmit}
                 onEscape={handleEscape}
                 onIsEmptyChange={setIsEmpty}
-                className="notebook-ai-composer-input order-first col-span-full w-full"
+                className="notebook-ai-composer-input"
                 searchPages={searchPages}
                 referencePlacement="inline"
                 variant="panel"
@@ -156,33 +177,10 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                 onImageRejected={(message) => toast.error(message)}
                 onSlashCommand={onSlashCommand}
               />
-
-              <div className="notebook-ai-composer-tools flex min-w-0 items-center">
-                <span className="flex shrink-0 items-center">
-                  <IconButton size="sm" tone="muted"
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={disabled || isStreaming}
-                    className={cn(
-                      "flex shrink-0 items-center justify-center ",
-                      "text-muted-foreground",
-                      "disabled:cursor-not-allowed disabled:text-disabled",
-                    )}
-                    aria-label={t("uploadImage")}
-                    title={t("uploadImage")}
-                  >
-                    <Plus className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  </IconButton>
-                </span>
-
-                <span className="flex min-w-0 items-center">
-                  <ModelSelectorPopover disabled={disabled} />
-                </span>
-              </div>
-
-              <span className="flex shrink-0 items-center justify-self-end">
+              <div className="notebook-ai-composer-trail">
+                <ModelSelectorPopover disabled={disabled} />
                 {isStreaming ? (
-                  <ComposerPrimitive.Cancel render={<IconButton size="sm" tone="muted" />}
+                  <ComposerPrimitive.Cancel render={<IconButton size="icon" tone="muted" />}
                     className="bui-composer-send goose-interactive-primary"
                     aria-label={t("stopGenerating")}
                     title={t("stopGenerating")}
@@ -190,7 +188,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                     <span className="notebook-ai-stop-square" aria-hidden="true" />
                   </ComposerPrimitive.Cancel>
                 ) : (
-                  <IconButton size="sm" tone="muted"
+                  <IconButton size="icon" tone="muted"
                     type="button"
                     onClick={handleSubmit}
                     disabled={!sendLooksReady}
@@ -202,7 +200,8 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(
                     <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.2} />
                   </IconButton>
                 )}
-              </span>
+              </div>
+              <div className="notebook-ai-composer-scan" aria-hidden="true" />
             </div>
           </PromptBar>
         </div>
