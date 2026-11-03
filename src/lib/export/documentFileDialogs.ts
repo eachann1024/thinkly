@@ -43,10 +43,10 @@ export async function pickImportFile(filters: FileFilters): Promise<File | null>
   });
 }
 
-export async function saveDocumentBlobAndReveal(
+export async function saveDocumentBlob(
   blob: Blob,
   filename: string,
-): Promise<boolean> {
+): Promise<string | null> {
   const desktop = getGooseDesktop();
   if (!desktop) throw new Error(uiText("couldnTOpenTheSaveDialogRestartTheDesktop"));
   const suffix = filename.match(/(\.[a-z0-9]{1,12})$/i)?.[1] || "";
@@ -57,11 +57,20 @@ export async function saveDocumentBlobAndReveal(
     defaultPath: safeName,
     filters: extension ? [{ name: extension.toUpperCase(), extensions: [extension] }] : undefined,
   });
-  if (!path) return false;
-
+  if (!path) return null;
   await desktop.fsWrite(path, new Uint8Array(await blob.arrayBuffer()));
+  return path;
+}
+
+export async function saveDocumentBlobAndReveal(
+  blob: Blob,
+  filename: string,
+): Promise<boolean> {
+  const path = await saveDocumentBlob(blob, filename);
+  if (!path) return false;
+  const desktop = getGooseDesktop();
   try {
-    await desktop.showItemInFolder(path);
+    await desktop?.showItemInFolder(path);
   } catch (error) {
     console.warn("[export] 文件已保存，但无法在文件管理器中显示:", error);
   }

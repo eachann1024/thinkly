@@ -9,6 +9,7 @@ export interface DesktopTitleBarProps {
   onToggleSidebar?: () => void;
   isWelcomeTab: boolean;
   inHistoryMode: boolean;
+  inImageExportMode?: boolean;
   onOpenSearch: () => void;
   onBeforeActivateTab?: () => void;
   onRestore?: () => void;

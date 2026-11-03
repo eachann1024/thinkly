@@ -47,7 +47,6 @@ export const autoImportEntries = [
   "src/components/ui/dropdown-menu.tsx",
   "src/components/ui/floating-menu-motion.ts",
   "src/components/ui/icon-button.tsx",
-  "src/components/ui/image-export-theme-selector.tsx",
   "src/components/ui/input.tsx",
   "src/components/ui/kbd.tsx",
   "src/components/ui/label.tsx",
