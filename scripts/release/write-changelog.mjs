@@ -12,7 +12,7 @@ import { fallbackNotice, polishChangelog } from "./polish-changelog.mjs";
 //   node scripts/release/write-changelog.mjs            预览下一版日志（从最新正式版起算）
 //   node scripts/release/write-changelog.mjs --write    写入 CHANGELOG.md，提交推送后 CI 发版会沿用
 //   --from <提交> [--to <提交>] --version <x.y.z>        指定范围试跑
-// 需要环境变量 MAGPIE_BASE_URL（以及网关要求时的 MAGPIE_API_KEY），可选 CHANGELOG_MODEL。
+// 需要环境变量 MAGPIE_BASE_URL（以及网关要求时的 MAGPIE_API_KEY），可选 CHANGELOG_MODEL、MAGPIE_CA_CERT（自签网关证书）。
 const { values } = parseArgs({
   options: {
     from: { type: "string" }, to: { type: "string", default: "HEAD" },
