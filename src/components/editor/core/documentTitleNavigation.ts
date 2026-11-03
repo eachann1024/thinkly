@@ -5,14 +5,17 @@ import { DocumentTitleStep } from "./documentTitleHistory";
 import { normalizeNewFileName } from "@/lib/new-page-name";
 import { sanitizeFilenameSegment } from "@/lib/local-title-binding";
 import type { DocumentTitleSplit } from "@/lib/document-title-keyboard";
+import { duplicateTitleBlockId } from "../extensions/duplicateFileTitleExtension";
 
 type Editor = BlockNoteEditor<any, any, any>;
 
 function bodyStart(editor: Editor) {
   const blocks = editor.document;
-  const first = blocks[0];
-  const header = first?.type === "codeBlock" && first.props.language === "yaml-frontmatter" ? first : undefined;
-  return { header, first: blocks[header ? 1 : 0] };
+  const header = blocks[0]?.type === "codeBlock" && blocks[0].props.language === "yaml-frontmatter" ? blocks[0] : undefined;
+  const index = header ? 1 : 0;
+  const candidate = blocks[index];
+  const hidden = candidate?.id && candidate.id === duplicateTitleBlockId(editor.prosemirrorState) ? candidate : undefined;
+  return { header, hidden, first: blocks[index + (hidden ? 1 : 0)] };
 }
 
 export function isFirstBodyTextStart(selection: Selection, firstBlockId: string): boolean {
@@ -27,8 +30,8 @@ export function isFirstBodyTextStart(selection: Selection, firstBlockId: string)
 }
 
 export function enterFirstBodyParagraph(editor: Editor, split?: DocumentTitleSplit): boolean {
-  const { first, header } = bodyStart(editor);
-  if (!first && !header) return false;
+  const { first, header, hidden } = bodyStart(editor);
+  if (!first && !header && !hidden) return false;
   const reusable = first?.type === "paragraph" && Array.isArray(first.content) &&
     first.content.length === 0 && !first.children?.length;
   editor.transact((tr) => {
@@ -36,7 +39,8 @@ export function enterFirstBodyParagraph(editor: Editor, split?: DocumentTitleSpl
     let target = first;
     const content = split?.body ?? "";
     if (!reusable) {
-      [target] = editor.insertBlocks([{ type: "paragraph", content }], first ?? header!, first ? "before" : "after");
+      const anchor = first ?? hidden ?? header!;
+      [target] = editor.insertBlocks([{ type: "paragraph", content }], anchor, first ? "before" : "after");
     } else if (content) {
       editor.updateBlock(first, { content });
     }
@@ -52,6 +56,24 @@ export function canReturnToDocumentTitle(editor: Editor): boolean {
   return Boolean(first && first.type !== "codeBlock" &&
     editor.schema.blockSpecs[first.type]?.config.content === "inline" &&
     isFirstBodyTextStart(editor.prosemirrorState.selection, first.id));
+}
+
+export function shouldReturnToDocumentTitle(editor: Editor, key: "ArrowUp" | "ArrowLeft"): boolean {
+  if (canReturnToDocumentTitle(editor)) return true;
+  if (key !== "ArrowUp") return false;
+  const { first, hidden } = bodyStart(editor);
+  if (!hidden || !first) return false;
+  const selection = editor.prosemirrorState.selection;
+  if (!(selection instanceof TextSelection) || !selection.empty) return false;
+  let inFirst = false;
+  for (let depth = selection.$from.depth; depth > 0; depth -= 1) {
+    const node = selection.$from.node(depth);
+    if (node.type.name === "blockContainer") {
+      inFirst = node.attrs.id === first.id;
+      break;
+    }
+  }
+  return inFirst && editor.prosemirrorView.endOfTextblock("up");
 }
 
 function paragraphHasInlineContent(block: { content?: unknown }): boolean {

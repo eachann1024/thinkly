@@ -26,6 +26,7 @@ import { createGooseNumberedListStartNormalizationExtension } from "@/components
 import { createGooseTableSequenceExtension } from "@/components/editor/extensions/tableSequenceExtension";
 import { createGooseBodyParagraphGuardExtension } from "@/components/editor/extensions/bodyParagraphGuardExtension";
 import { createGooseFirstTitleGuardExtension } from "@/components/editor/inputrules/firstTitleGuard";
+import { createDuplicateFileTitleExtension } from "@/components/editor/extensions/duplicateFileTitleExtension";
 import { gooseMarkdownInputRulesExtension } from "@/components/editor/inputrules/markdownInputRules";
 import { gooseDividerInputRuleExtension } from "@/components/editor/inputrules/dividerInputRule";
 import { gooseSuppressMarkdownInSpecialBlocksExtension } from "@/components/editor/inputrules/suppressMarkdownInSpecialBlocks";
@@ -109,6 +110,7 @@ export function useEditorExtensions(session: EditorSession) {
   return [
     goosePlaceholderExtension(),
     createGooseFirstTitleGuardExtension(usesRawEditorContentRef),
+    createDuplicateFileTitleExtension(() => session.pageRef.current),
     createGooseBodyParagraphGuardExtension(usesRawEditorContentRef),
     gooseSuppressMarkdownInSpecialBlocksExtension,
     gooseHeadingMarkSuppressExtension,
