@@ -15,6 +15,7 @@ body{margin:0}
 </helmet>
 <div style="{{frame}}">
 <sc-for list="{{fd}}" as="d" hint-placeholder-count="0"><span aria-hidden="true" style="{{d.s}}"></span></sc-for>
+<sc-for list="{{fields}}" as="f" hint-placeholder-count="0"><span aria-hidden="true" style="{{f.s}}"><sc-for list="{{f.cells}}" as="c" hint-placeholder-count="0"><span style="{{c.s}}"></span></sc-for></span></sc-for>
 <article style="{{card}}">
 <sc-for list="{{cd}}" as="d" hint-placeholder-count="0"><span aria-hidden="true" style="{{d.s}}"></span></sc-for>
 <sc-if value="{{titlePre}}" hint-placeholder-val="{{false}}"><div aria-hidden="true" style="{{titlePreS}}">· · ·</div></sc-if>
@@ -34,13 +35,13 @@ body{margin:0}
 <sc-if value="{{brand}}" hint-placeholder-val="{{true}}"><span style="{{brandS}}">{{brand}}</span></sc-if>
 <sc-if value="{{stamp}}" hint-placeholder-val="{{true}}"><span style="font-variant-numeric:tabular-nums">{{stamp}}</span></sc-if>
 </div>
-<sc-if value="{{qr}}" hint-placeholder-val="{{false}}"><span role="img" aria-label="贡献图样式的二维码，扫码打开 note.cooool.top" style="{{qrBox}}"><sc-for list="{{cells}}" as="c" hint-placeholder-count="0"><span style="{{c.s}}"></span></sc-for></span></sc-if>
 </footer>
 </sc-if>
 </article>
+<sc-if value="{{qr}}" hint-placeholder-val="{{false}}"><div role="img" aria-label="贡献图点阵，暗含二维码，扫码打开 note.cooool.top" style="{{bandS}}"><sc-for list="{{band}}" as="c" hint-placeholder-count="0"><span style="{{c.s}}"></span></sc-for></div></sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["original","notebook","github-light","medium","kenya-hara","typewriter","stationery","mocha-mousse","brutalist","risograph","poster","github-dark","vercel-dark","tokyo-night","catppuccin","synthwave"],"default":"github-light"},"w":{"editor":"int","default":520,"min":280,"max":900},"opts":{"editor":null},"blocks":{"editor":null},"heading":{"editor":null},"$preview":{"width":520,"height":800}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["original","stationery","mocha-mousse","brutalist","notebook","github-light","medium","kenya-hara","typewriter","risograph","poster","github-dark","vercel-dark","tokyo-night","catppuccin","synthwave"],"default":"github-light"},"w":{"editor":"int","default":520,"min":280,"max":900},"opts":{"editor":null},"blocks":{"editor":null},"heading":{"editor":null},"$preview":{"width":520,"height":800}}'>
 var F={sys:"-apple-system,'PingFang SC',system-ui,sans-serif",inter:"Inter,-apple-system,'PingFang SC',sans-serif",serif:"'Noto Serif SC',Georgia,serif",mono:"'Courier Prime','Courier New',monospace",hand:"'Ma Shan Zheng','Kaiti SC',cursive",fr:"Fraunces,Georgia,'Noto Serif SC',serif",sg:"'Space Grotesk',Inter,sans-serif"};
 var LT="#1f1e1d",LS="#5e5d59",DT="#f0efec",DS="#c3c2b7";
 // g bg card tx sub ac | outer pad, card pad, radius, border, shadow | title size weight align | body font, title font, footer visible
@@ -63,14 +64,18 @@ var T0={
 "synthwave":["dark","#170a2e","#1c0d38",DT,DS,"#ff2a6d",56,42,18,"1px solid rgba(255,42,109,.25)","none",32,700,"left","inter","sg",1]};
 var QR="1111111000110100001100111111110000010011110111110101000001101110100110100100010010111011011101001001001110010101110110111010111000110001001011101100000100100000001111010000011111111010101010101010111111100000000110000000111000000000001100111011100010001110100001010110101000101101111111000101011011000010001010001011010100100000001010111101001100011011011110111111100101010011110011100001100111001001101101111011101111111111110101110111111000010110000010111001101100101111111001110101100111011010000011001110100101001001001000111011111101110000110110000000001001100111000011011100011110101001001010011111111000000000010100100101010001101111111110100010110101101010100100000100000111001001000100111011101001110111011011111110010111010100001011111000011010101110101111000000001001001011000001001110101111110101101011111110011111010101101100010";
 var SAMPLE=[{k:"p",t:"试了六周，周会从每周一小时缩成十五分钟的站会，其余全部放进共享文档。最明显的变化是：",m:"讨论变少了，但决定变快了",t2:"。"},{k:"h2",t:"保留下来的三件事"},{k:"li",t:"周一前写好本周目标，一句话即可"},{k:"li",t:"阻塞问题直接在文档里 @ 负责人"},{k:"li",t:"周五回看，只记录偏差"},{k:"q",t:"异步不是少沟通，而是把沟通写下来。"}];
-var QC={};
-function qrCells(dark,cell){var key=(dark?"d":"l")+cell;if(QC[key])return QC[key];var seed=20260517,out=[],S=37,M=4;
+// Contribution-graph dot fields. With qr=1 the rightmost 37 columns hold the QR (29 modules + 4-cell quiet zone);
+// light: dark-green modules on pale cells; dark: inverted (bright modules on dark cells), like GitHub's own graph.
+var PL=["#ebedf0","#aceebb","#4ac26b","#2da44e","#116329"],PD=["#161b22","#0e4429","#006d32","#26a641","#39d353"],FC={};
+function dots(dark,cell,rows,cols,ramp,qr,seed){var key=[dark?1:0,cell,rows,cols,ramp,qr,seed].join("|");if(FC[key])return FC[key];
+var P=dark?PD:PL,out=[],q0=qr?cols-37:cols,rad=";border-radius:"+(cell>2?1:.5)+"px";
 function r(){seed=(seed*1103515245+12345)%2147483648;return seed/2147483648;}
-for(var y=0;y<S;y++)for(var x=0;x<S;x++){var inQ=x>=M&&x<S-M&&y>=M&&y<S-M,bit=inQ&&QR.charAt((y-M)*29+(x-M))==="1",v=r(),c;
-if(dark)c=bit?(v<.7?"#161b22":"#0e4429"):(v<.55?"#39d353":"#26a641");
-else c=bit?(v<.5?"#116329":"#1a7f37"):(inQ&&v<.14?"#aceebb":"#ebedf0");
-out.push({s:"background:"+c+";border-radius:"+(cell>2?1:.5)+"px"});}
-return QC[key]=out;}
+for(var y=0;y<rows;y++)for(var x=0;x<cols;x++){var v=r(),u=r(),c;
+if(x>=q0){var qx=x-q0-4,qy=y-4,bit=qx>=0&&qx<29&&qy>=0&&qy<29&&QR.charAt(qy*29+qx)==="1";
+c=bit?(u<.6?P[4]:dark?P[3]:"#1a7f37"):(v<.14?P[1]:P[0]);}
+else{var d=ramp?.03+.37*Math.pow(x/Math.max(1,q0),1.6):.2;c=v<d?P[1+Math.floor(u*4)]:P[0];}
+out.push({s:"background:"+c+rad});}
+return FC[key]=out;}
 function rgba(h,a){if(h.length===4)h="#"+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];return"rgba("+parseInt(h.substr(1,2),16)+","+parseInt(h.substr(3,2),16)+","+parseInt(h.substr(5,2),16)+","+a+")";}
 function grain(c,a,k){return{img:"repeating-radial-gradient(circle at 17% 23%,"+rgba(c,a)+" 0 .6px,transparent .6px 3px),repeating-radial-gradient(circle at 71% 63%,"+rgba(c,a)+" 0 .5px,transparent .5px 4px)",size:"auto"};}
 class Component extends DCLogic {
@@ -101,11 +106,17 @@ var now=new Date(),dd=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,
 var stamp=footOn&&o.date!==false?(o.time!==false?dd+" 14:32:08":dd):"";
 var heading=this.props.heading==null?"把周会改成异步之后":this.props.heading,showTitle=o.title!==false&&!!heading;
 var blocks=(this.props.blocks||SAMPLE).map(function(b){return{t:b.t,m:b.m||"",t2:b.t2||"",isP:b.k==="p",isH2:b.k==="h2",isLi:b.k==="li",isQ:b.k==="q",isImg:b.k==="img"};});
-var cell=Math.max(2,Math.round(3*k));
+var cell=Math.max(2,Math.round(3*k)),fields=[],band=[],bandS="";
+if(qr){var mxPx=Math.round(T.mx*k*10)/10,pitch=cell+1,cols=Math.floor((w-2*mxPx+1)/pitch),ed=Math.max(4,Math.round((mxPx-2*pitch)/2)),tc=Math.round(cols*.7);
+var gs=function(c,n){return"display:grid;grid-template-columns:repeat("+c+","+cell+"px);grid-auto-rows:"+cell+"px;gap:1px";},mask=function(m){return";-webkit-mask-image:"+m+";mask-image:"+m;};
+fields.push({s:abs+"top:"+ed+"px;right:"+mxPx+"px;"+gs(tc)+mask("linear-gradient(90deg,transparent,#000 75%)"),cells:dots(dark,cell,2,tc,0,0,11)});
+fields.push({s:abs+"top:"+mxPx+"px;right:"+ed+"px;"+gs(2)+mask("linear-gradient(#000 25%,transparent)"),cells:dots(dark,cell,48,2,0,0,23)});
+bandS="position:relative;z-index:1;margin-top:"+p(24)+";"+gs(cols)+";justify-content:end"+mask("linear-gradient(90deg,transparent,#000 "+Math.round((cols-37)/cols*100)+"%)");
+band=dots(dark,cell,37,cols,1,1,20260517);}
 var body="font-size:"+p(16)+";line-height:1.75"+textX;
 return{
 frame:"position:relative;isolation:isolate;overflow:hidden;width:"+w+"px;box-sizing:border-box;background:"+T.bg+";padding:"+p(T.mx)+";font-family:"+T.bf+";color:"+T.tx+";transition:background-color .2s",
-fd:fd,cd:cd,
+fd:fd,cd:cd,fields:fields,band:band,bandS:bandS,
 card:"position:relative;z-index:1;box-sizing:border-box;background-color:"+T.card+(bgImg?";background-image:"+bgImg+";background-size:"+bgSize:"")+";border:"+T.bd+";border-radius:"+p(T.r)+";box-shadow:"+T.sh+";padding:"+p(T.cp)+";transition:background-color .2s",
 titlePre:titlePre,titlePreS:"text-align:center;color:"+T.sub+";letter-spacing:.5em;margin:"+p(10)+" 0 "+p(14)+";font-size:"+p(16),
 showTitle:showTitle,heading:heading,
@@ -120,11 +131,9 @@ bullet:"flex:none;width:"+p(5)+";height:"+p(5)+";border-radius:50%;margin-top:"+
 q:"position:relative;margin:"+p(18)+" 0 0;padding:"+p(2)+" 0 "+p(2)+" "+p(14)+";border-left:"+p(3)+" solid "+(orig?"#d6dbe3":T.ac)+";color:"+T.sub+";"+body+(quoteX?";"+quoteX:""),
 quoteMark:quoteMark,quoteMarkS:"display:block;height:"+p(26)+";font-family:Georgia,serif;font-size:"+p(54)+";line-height:1;color:"+T.ac,
 img:"height:"+p(150)+";margin:0 0 "+p(14)+";border-radius:"+p(Math.min(T.r,8))+";display:grid;place-items:center;font-size:"+p(13)+";color:"+T.sub+";background:"+(dark?"rgba(255,255,255,.06)":"rgba(0,0,0,.05)"),
-showFoot:(footOn&&(!!brandTxt||!!stamp))||qr,brand:brandTxt,stamp:stamp,qr:qr,
+showFoot:footOn&&(!!brandTxt||!!stamp),brand:brandTxt,stamp:stamp,qr:qr,
 foot:"display:flex;align-items:flex-end;gap:"+p(16)+";margin-top:"+p(28)+";"+(footOn&&(brandTxt||stamp)?"padding-top:"+p(18)+";border-top:1px "+(mono?"dashed ":"solid ")+dv+";":"")+"font-size:"+p(11)+";line-height:1.5;color:"+T.sub+(mono?";font-family:"+F.mono:""),
-brandS:"font-size:"+p(12)+";font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
-qrBox:"flex:none;display:grid;grid-template-columns:repeat(37,"+cell+"px);grid-auto-rows:"+cell+"px;gap:1px",
-cells:qr?qrCells(dark,cell):[]};
+brandS:"font-size:"+p(12)+";font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"};
 }
 }
 </script>
