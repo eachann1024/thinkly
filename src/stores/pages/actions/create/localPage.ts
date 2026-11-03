@@ -8,7 +8,7 @@ import type { JSONContent, Page } from "@/types";
 import { useSettings } from "@/stores/useSettings";
 import { pickRandomPageIcon } from "@/lib/randomPageIcon";
 import { allocateLocalMarkdownFilePath, generateLocalPageId } from "./localPaths";
-import { queueLocalPageCreation } from "./localCreationQueue";
+import { queueLocalPageCreation, withLocalCreationTimeout } from "./localCreationQueue";
 import {
   syncLocalPageMetadataCache,
   persistPageSnapshot,
@@ -75,8 +75,10 @@ export const createLocalPageRecordAction = async (
     parentPage?.localFilePath && !parentPage.isFolder
       ? parentPage.parentId
       : parentId;
-  const filePath = await allocateLocalMarkdownFilePath(
-    get, workspaceId, parentId, title, requestedFilePath,
+  const filePath = await withLocalCreationTimeout(
+    allocateLocalMarkdownFilePath(get, workspaceId, parentId, title, requestedFilePath),
+    null,
+    "allocate file path",
   );
   if (!filePath) return null;
 
@@ -105,10 +107,14 @@ export const createLocalPageRecordAction = async (
   markSelfWrite(filePath);
   let saved: boolean;
   try {
-    saved = await get().saveLocalPageContent(
-      id,
-      cloneLocalPageContent(newPage.content),
-      { force: true, createOnly: true },
+    saved = await withLocalCreationTimeout(
+      get().saveLocalPageContent(
+        id,
+        cloneLocalPageContent(newPage.content),
+        { force: true, createOnly: true },
+      ),
+      false,
+      "initial save",
     );
   } catch {
     saved = false;
