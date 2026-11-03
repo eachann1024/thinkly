@@ -8,6 +8,7 @@ import { useSettings } from "@/stores/useSettings";
 import { applyAuxiliaryAISetup } from "./applyAuxiliaryAISetup";
 import { applyAuxiliaryImageExportSettings } from "./applyImageExportSettings";
 import { readRecoveryDraftEntry, registerRecoveryDraftSnapshot } from "./recoveryDraftSnapshot";
+import { readReflectionRecord } from "./reflectionRecordSnapshot";
 import { hasMainSnapshot, readRegisteredSnapshot, registerMainSnapshot } from "./mainSnapshot";
 
 let installed = false;
@@ -59,9 +60,16 @@ export function installAuxiliaryMainBridge(): void {
   const bridge = window.gooseDesktop?.auxiliary;
   if (!bridge) return;
   bridge.onSnapshotRequest((requestId, key, detail) => {
-    const dynamic = key === "recovery-draft-entry" || key === "reflection-action" || key === "reflection-seen";
+    const dynamic = key === "recovery-draft-entry" || key === "reflection-action" || key === "reflection-seen" || key === "reflection-record";
     if (!hasMainSnapshot(key) && !dynamic) {
       bridge.replySnapshot(requestId, null, false);
+      return;
+    }
+    if (key === "reflection-record") {
+      void readReflectionRecord(detail).then(
+        (value) => bridge.replySnapshot(requestId, value, value != null),
+        () => bridge.replySnapshot(requestId, null, false),
+      );
       return;
     }
     try {

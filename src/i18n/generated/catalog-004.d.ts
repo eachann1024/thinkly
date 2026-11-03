@@ -51,13 +51,14 @@ declare module "../types" {
     "src/pages/workspace/components/sidebar/notebook-switcher/shared.tsx#localMessages:1": { "editNotebook_ed4e": {  }; "pathUnavailable_ddd1": {  }; "removeLocalFolder_505d": {  } };
     "src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherActions.tsx#localMessages:1": { "enterANotebookName_648e": {  }; "pickerUnavailable": {  }; "renameFailed_37ba": {  } };
     "src/pages/workspace/components/sidebar/notebook-switcher/useNotebookSwitcherState.tsx#localMessages:1": { "folder": {  }; "openFolder": {  } };
-    "src/pages/workspace/components/sidebar/reflection/ReflectionBody.tsx#localMessages:1": { "daily": {  }; "empty": {  }; "emptyHint": {  }; "lookFurther": {  }; "report": {  }; "stats": {  }; "weekly": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionBody.tsx#localMessages:1": { "daily": {  }; "report": {  }; "stats": {  }; "weekly": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionButton.tsx#localMessages:1": { "reflection": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionHeader.tsx#localMessages:1": { "range": {  }; "refresh": {  }; "scope30d": {  }; "scope7d": {  }; "scope90d": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionMetrics.tsx#localMessages:1": { "busiestDay": {  }; "charsAdded": {  }; "notesEdited": {  }; "peakHour": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionNarrative.tsx#localMessages:1": { "consent": {  }; "enable": {  }; "failed": { "message": string | number }; "generating": {  }; "nextStep": {  }; "notConfigured": {  }; "openSettings": {  }; "retry": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionNoteList.tsx#localMessages:1": { "edits": { "edits": string | number }; "idle": { "days": string | number }; "lastEdit": { "date": string | number }; "stalled": {  }; "topNotes": {  }; "words": { "added": string | number } };
-    "src/pages/workspace/components/sidebar/reflection/ReflectionScheduleTag.tsx#localMessages:1": { "next": { "time": string | number }; "paused": {  }; "schedule30d": {  }; "schedule7d": {  }; "schedule90d": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionRecordState.tsx#localMessages:1": { "empty": {  }; "emptyHint": {  }; "failed": {  }; "failedHint": {  }; "loading": {  }; "look30": {  }; "look90": {  }; "reread": {  }; "rereadRecords": {  } };
+    "src/pages/workspace/components/sidebar/reflection/ReflectionScheduleTag.tsx#localMessages:1": { "next": { "time": string | number }; "paused": {  }; "prefix": {  }; "schedule30d": {  }; "schedule7d": {  }; "schedule90d": {  } };
     "src/pages/workspace/components/sidebar/reflection/ReflectionTopics.tsx#localMessages:1": { "topics": {  } };
     "src/pages/workspace/components/sidebar/settings-ai/renderAIConnectionTestSection.tsx#localMessages:1": { "cancelCheck_ca80": {  }; "checkConnection_69e7": {  }; "checkingConnection_3d70": {  }; "checking_2ff3": {  }; "connectionCheck_58bb": {  }; "enableTheAiAssistantSaveA_9011": {  }; "readyToCheckTheConnection_542d": {  }; "saveTheConfigurationAndFetchAvailable_11da": {  }; "saveTheCurrentProviderConfigurationFirst_3c68": {  }; "thisCheckDoesNotReadNotes_a76b": {  } };
     "src/pages/workspace/components/sidebar/settings-ai/renderAIContextSection.tsx#localMessages:1": { "promptsAndSkills_aace": {  }; "readGlobalPrompts_1b07": {  }; "readLocalSkills_b400": {  }; "whenEnabledRelevantLocalContentIs_8628": {  } };
@@ -121,6 +122,5 @@ declare module "../types" {
     "src/stores/localFolderOrder.ts#block1:1": { "saveOrderDetail": {  }; "saveOrderFailed": {  } };
     "src/stores/pages/actions/create/duplicate.ts#block1:1": { "invalidFrontmatterCopy": {  } };
     "src/stores/pages/actions/create/recovery.ts#block1:1": { "draftDescription": {  }; "draftPreserved": {  } };
-    "src/stores/pages/actions/create/validateEditorDraftTarget.ts#block1:1": { "draftFolderChanged": {  }; "draftFolderMissing": {  }; "draftFolderUnavailable": {  }; "draftNotebookUnavailable": {  } };
   }
 }

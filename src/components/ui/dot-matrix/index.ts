@@ -9,6 +9,7 @@ export { DotFrameBox } from "./illustrations/DotFrameBox";
 export { BookArt } from "./illustrations/BookArt";
 export { FolderEmptyArt } from "./illustrations/FolderEmptyArt";
 export { FlatlineArt } from "./illustrations/FlatlineArt";
+export { ReflectionReviewArt } from "./illustrations/ReflectionReviewArt";
 export { TreeFadeArt, TreeTrailArt } from "./illustrations/TreeEmptyArt";
 export { WorkspaceDotIcon, type WorkspaceDotIconMotion } from "./illustrations/WorkspaceDotIcon";
 export { DotIconArt, DotIconBody, buildDotIconArt, type DotIconArtSpec, type DotIconMotion } from "./illustrations/DotIconArt";
