@@ -213,7 +213,7 @@ function OptionRow({
     >
       <span>{label}</span>
       <Switch
-        controlSize="small"
+        controlSize="compact"
         aria-label={label}
         checked={checked}
         disabled={disabled}

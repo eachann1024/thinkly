@@ -1,3 +1,4 @@
+import "./image-export/image-export-window.css";
 import { useEffect, useMemo } from "react";
 import { useLocale, createTranslator, i18nYaml } from "@/i18n";
 import { Toaster } from "@/components/ui/sonner";
@@ -60,6 +61,8 @@ export function ImageExportWindow() {
     <StandaloneWindowShell
       title={t("title")}
       context={source?.title}
+      titleLayout="inline"
+      className="image-export-window"
       inset={false}
       maximizable={resizable}
       actions={source && page ? <ImageExportActions /> : null}

@@ -53,7 +53,7 @@ export function ImageExportActions() {
         ]}
         onChange={(next) => useImageExportSession.getState().setScope(next)}
       />
-      <Button type="button" variant="secondary" size="sm" className="gap-1.5" disabled={blocked} onClick={() => run?.("copy")}>
+      <Button type="button" variant="outline" size="sm" className="gap-1.5" disabled={blocked} onClick={() => run?.("copy")}>
         <Copy className="size-3.5" />
         {uiText("copy")}
       </Button>
