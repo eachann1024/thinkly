@@ -3,11 +3,11 @@ import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
 import { ArrowDown } from "@/components/ui/icons";
-import { DotDecor, EmptyStateArt } from "@/components/ui/dot-matrix";
 import { ThreadPrimitive } from "@assistant-ui/react";
 import { FullscreenPreview } from "@/components/preview/FullscreenPreview";
 import type { PreviewContent } from "@/lib/preview/previewAction";
 import { cn } from "@/lib/utils";
+import { AiOrbitMark } from "./orbit/AiOrbitMark";
 import { AssistantUiThreadViewport } from "./AssistantUiThreadViewport";
 import { ChatChrome } from "./beautiful-ui/ChatChrome";
 import type { ChatMessagesProps } from "./messages/types";
@@ -81,10 +81,7 @@ export function ChatMessages({
         className={cn(
           "notebook-ai-messages min-w-0 flex-1 overflow-x-hidden overflow-y-scroll [scrollbar-width:thin]",
           messages.length === 0
-            ? cn(
-                "flex items-start justify-center pb-[var(--ai-composer-float-pad,7.5rem)]",
-                isFullscreen ? "px-6 pt-5" : "p-0",
-              )
+            ? "relative flex min-h-0 flex-col pb-[var(--ai-composer-float-pad,7.5rem)]"
             : undefined,
           messages.length > 0
             ? isFullscreen
@@ -94,21 +91,13 @@ export function ChatMessages({
         )}
       >
         {messages.length === 0 ? (
-          <div
-            className={cn(
-              "notebook-ai-empty-state relative w-full min-w-0",
-              isFullscreen && "notebook-ai-empty-state-fullscreen",
-            )}
-          >
-            <DotDecor preset="aiChat" compact />
-            <div className="notebook-ai-empty-mark" aria-hidden="true">
-              <EmptyStateArt kind="emptyChat" />
-            </div>
+          <div className="notebook-ai-empty-state relative min-h-0 w-full min-w-0">
+            <AiOrbitMark variant="idle" />
             <h2 className="notebook-ai-empty-title text-foreground">
               {t("howWouldYouLikeToEditThisNote")}
             </h2>
             <div className="notebook-ai-empty-suggestions">
-              {[{ label: t("polishThisText"), prompt: "润色这段文字" }, { label: t("turnIntoAChecklist"), prompt: "整理成清单" }, { label: t("extractKeyPoints"), prompt: "提炼要点" }].map(({ label: text, prompt }) => (
+              {[{ label: t("polishThisText"), prompt: "润色这段文字" }, { label: t("turnIntoAChecklist"), prompt: "整理成清单" }, { label: t("extractKeyPoints"), prompt: "提炼要点" }].map(({ label: text, prompt }, index) => (
                 <Button contentStyle="preserve" variant="ghost" size={null}
                   key={text}
                   type="button"
@@ -116,6 +105,7 @@ export function ChatMessages({
                   onClick={() => onEmptySuggestion?.(prompt)}
                   aria-label={t("detailSendSuggestion", { value1: text })}
                 >
+                  <span className="notebook-ai-empty-suggestion-index" aria-hidden="true">{index + 1}</span>
                   <span>{text}</span>
                 </Button>
               ))}

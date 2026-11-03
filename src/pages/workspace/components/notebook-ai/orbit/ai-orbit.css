@@ -1,0 +1,197 @@
+.ai-orbit {
+  pointer-events: none;
+}
+
+.ai-orbit--idle {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.ai-orbit--run {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex: none;
+}
+
+.ai-orbit-anchor,
+.ai-orbit-ring,
+.ai-orbit-path,
+.ai-orbit-star,
+.ai-orbit-core {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+
+.ai-orbit--idle .ai-orbit-anchor {
+  left: 50%;
+  top: var(--ai-orbit-y, 34%);
+}
+
+.ai-orbit--run .ai-orbit-anchor {
+  left: 16px;
+  top: 16px;
+}
+
+.ai-orbit-dot,
+.ai-orbit-comet-wrap,
+.ai-orbit-comet {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.ai-orbit-dot,
+.ai-orbit-comet-wrap {
+  transform: translate(-50%, -50%);
+}
+
+.ai-orbit-dot {
+  background: var(--goose-text-disabled);
+}
+
+.ai-orbit-star .ai-orbit-dot,
+.ai-orbit-comet {
+  background: var(--goose-accent-solid);
+}
+
+.ai-orbit-core .ai-orbit-dot {
+  background: color-mix(in srgb, var(--goose-accent-solid) 55%, hsl(var(--goose-editor-bg)));
+}
+
+:root[data-theme="dark"] .ai-orbit-core .ai-orbit-dot {
+  background: color-mix(in srgb, var(--goose-accent-solid) 32%, var(--goose-text-primary));
+}
+
+.ai-orbit--run .ai-orbit-comet {
+  background: color-mix(in srgb, var(--goose-accent-solid) 72%, var(--goose-text-primary));
+}
+
+.ai-orbit-ring {
+  animation: ai-orbit-wave 6s ease-in-out infinite;
+  will-change: opacity;
+}
+
+.ai-orbit--idle .ai-orbit-star {
+  transform-origin: 0 0;
+  animation: ai-orbit-breathe 8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.ai-orbit--run .ai-orbit-star {
+  transform-origin: 0 0;
+  animation: ai-orbit-breathe-run 1.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.ai-orbit--idle .ai-orbit-core {
+  animation: ai-orbit-twinkle 3.2s ease-in-out infinite;
+  will-change: opacity;
+}
+
+.ai-orbit-comet {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: ai-orbit-trail var(--ai-orbit-dur, 1.4s) linear infinite;
+  will-change: transform, opacity;
+}
+
+.ai-orbit--run .ai-orbit-comet {
+  animation-name: ai-orbit-trail-run;
+}
+
+.ai-orbit[data-paused] .ai-orbit-ring,
+.ai-orbit[data-paused] .ai-orbit-star,
+.ai-orbit[data-paused] .ai-orbit-core,
+.ai-orbit[data-paused] .ai-orbit-comet {
+  animation-play-state: paused;
+}
+
+@keyframes ai-orbit-wave {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  12% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes ai-orbit-breathe {
+  0%,
+  100% {
+    transform: scale(0.97);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes ai-orbit-breathe-run {
+  0%,
+  100% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes ai-orbit-twinkle {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes ai-orbit-trail {
+  0% {
+    opacity: 1;
+    transform: scale(2.2);
+  }
+  6% {
+    opacity: 0.95;
+    transform: scale(1.6);
+  }
+  22%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+@keyframes ai-orbit-trail-run {
+  0% {
+    opacity: 1;
+    transform: scale(2);
+  }
+  8% {
+    opacity: 0.9;
+    transform: scale(1.5);
+  }
+  30%,
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-orbit-ring,
+  .ai-orbit-star,
+  .ai-orbit-core,
+  .ai-orbit-comet {
+    animation: none;
+    will-change: auto;
+  }
+}
