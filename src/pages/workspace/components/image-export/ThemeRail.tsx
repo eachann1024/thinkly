@@ -6,19 +6,16 @@ zh-Hans:
   asIs: "原样"
   light: "浅色"
   dark: "深色"
-  qrHint: "背景点阵暗含官网二维码"
 en:
   themes: "Card themes"
   asIs: "As is"
   light: "Light"
   dark: "Dark"
-  qrHint: "The dot field hides the site QR code"
 ja:
   themes: "カードのテーマ"
   asIs: "そのまま"
   light: "ライト"
   dark: "ダーク"
-  qrHint: "背景の点にサイトの QR を隠しています"
 `;
 const uiText = createTranslator(localMessages);
 import { Check } from "@/components/ui/icons";
@@ -79,12 +76,7 @@ export function ThemeRail({ page }: { page: Page }) {
             {items.map((theme) => {
               const resolved = resolveCardTheme(theme.id, ctx);
               const selected = theme.id === active;
-              const hint =
-                theme.id === "original"
-                  ? resolved.description
-                  : theme.id === "github-dark"
-                    ? uiText("qrHint")
-                    : "";
+              const hint = theme.id === "original" ? resolved.description : "";
               return (
                 <button
                   key={theme.id}
