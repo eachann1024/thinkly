@@ -1,21 +1,12 @@
 .goose-launch-root {
-  --goose-launch-titlebar-height: var(--electron-titlebar-height, 2.75rem);
-  --goose-launch-rail-width: var(--workspace-rail-width, 4rem);
-  --goose-launch-stage-left: var(--workspace-stage-pad-left, 8px);
-  --goose-launch-stage-right: var(--workspace-stage-pad-right, 4px);
-  --goose-launch-stage-bottom: var(--workspace-stage-pad-bottom, 4px);
-  --goose-launch-panel-left: calc(var(--goose-launch-stage-left) + var(--goose-launch-rail-width));
-  --goose-launch-radius: var(--radius-lg, var(--radius, 0.75rem));
-  --goose-launch-divider-color: var(--workspace-divider, hsl(var(--foreground) / 0.06));
-  --goose-launch-traffic-inset: var(--electron-traffic-inset, 96px);
-  --goose-launch-navigation-width: calc(4 * var(--goose-icon-button-height, 2rem) + 0.75rem);
   position: fixed;
   inset: 0;
   z-index: 70000;
-  overflow: hidden;
   pointer-events: none;
-  background: var(--goose-shell-surface);
 }
+
+/* 无同步缓存时只保留外壳，等正常恢复并同步外观后再显示结构。 */
+.goose-launch-root:not([data-launch-ready]) > * { visibility: hidden; }
 
 .goose-launch-host {
   position: fixed;
@@ -23,75 +14,29 @@
   z-index: 70000;
   pointer-events: none;
   background: var(--goose-shell-surface);
-  /* Keeps the fixed trace inside this layer so the exit fade covers it. */
+  /* 固定骨架归属于宿主图层，退出时随宿主一起淡出。 */
   transform: translate(0);
 }
 
-.dark .goose-launch-root {
-  --goose-launch-divider-color: var(--workspace-divider, hsl(var(--foreground) / 0.12));
+.goose-launch-navigation-slot {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--goose-icon-button-height, 2rem);
+  height: var(--goose-icon-button-height, 2rem);
 }
-
-.goose-launch-root[data-platform="windows"] {
-  --goose-launch-traffic-inset: var(--electron-traffic-inset, 12px);
-}
-
-.goose-launch-titlebar {
-  position: absolute;
-  inset: 0 0 auto;
-  height: var(--goose-launch-titlebar-height);
-}
-
-.goose-launch-navigation {
-  position: absolute;
-  left: var(--goose-launch-traffic-inset);
-  height: 100%;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.goose-launch-navigation > span {
+.goose-launch-navigation-slot > .goose-launch-bar {
   width: 14px;
   height: 14px;
   border-radius: 4px;
 }
-
-.goose-launch-tab {
-  position: absolute;
-  left: calc(max(
-    var(--goose-launch-panel-left) + var(--goose-launch-sidebar-width),
-    var(--goose-launch-traffic-inset) + var(--goose-launch-navigation-width) + 8px
-  ) + 8px);
-  top: calc(50% - 4px);
-  width: 64px;
-}
-
-.goose-launch-rail {
-  position: absolute;
-  left: var(--goose-launch-stage-left);
-  top: var(--goose-launch-titlebar-height);
-  bottom: var(--goose-launch-stage-bottom);
-  width: var(--goose-launch-rail-width);
-  box-sizing: border-box;
-  padding: 8px 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
+.goose-launch-tab { width: 64px; }
 
 .goose-launch-icon {
-  width: calc(var(--goose-launch-rail-width) - 0.571429rem);
-  height: 40px;
-  flex: none;
-  border-radius: 0.571429rem;
   display: grid;
+  flex: none;
   place-items: center;
 }
-
-.goose-launch-icon:nth-child(4) { margin-top: auto; }
-.goose-launch-icon:nth-child(n + 4) { height: calc(var(--goose-launch-rail-width) - 0.571429rem); }
-.goose-launch-icon[data-selected] { background: var(--goose-interactive-selected); }
 .goose-launch-icon::after {
   content: "";
   width: 15px;
@@ -100,68 +45,13 @@
   border: 1.5px solid color-mix(in srgb, var(--goose-text-primary) 50%, transparent);
 }
 
-.goose-launch-panel {
-  position: absolute;
-  top: var(--goose-launch-titlebar-height);
-  left: var(--goose-launch-panel-left);
-  right: var(--goose-launch-stage-right);
-  bottom: var(--goose-launch-stage-bottom);
-}
-
-.goose-launch-fill {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--goose-launch-radius);
-  overflow: hidden;
-  background: hsl(var(--goose-editor-bg));
-  box-shadow: 0 0 0 1px var(--goose-launch-divider-color);
-  animation: goose-launch-in 360ms ease-out 560ms both;
-}
-
-.goose-launch-sidebar {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--goose-launch-sidebar-width);
-  box-sizing: border-box;
-  background: var(--goose-sidebar-surface);
-  border-right: 1px solid var(--goose-launch-divider-color);
-  padding: 20px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
-
-.goose-launch-sidebar > .goose-launch-bar:not(:first-child) { margin-left: 18px; }
-.goose-launch-selected {
+.goose-launch-sidebar-row {
   display: flex;
   align-items: center;
-  height: 36px;
-  margin: -10px -2px 0;
-  padding: 0 12px;
-  border-radius: 8px;
-  box-shadow: inset 0 0 0 1.5px var(--goose-accent-solid);
+  height: var(--main-tree-row-height);
+  padding-inline: 8px;
 }
-.goose-launch-selected > span { width: 60px; }
-
-.goose-launch-content {
-  position: absolute;
-  inset: 0 0 0 var(--goose-launch-sidebar-width);
-}
-
-/* 与标准正文的外框、把手留白和顶部起点保持一致。 */
-.goose-launch-document {
-  width: 100%;
-  max-width: var(--page-layout-width, 912px);
-  box-sizing: border-box;
-  margin-inline: auto;
-  padding: var(--page-layout-top, 24px)
-    max(
-      var(--handle-gutter, calc(56px * var(--editor-scale, 1))),
-      clamp(24px, calc((100% - 720px) / 2), var(--page-layout-gutter, 96px))
-    )
-    0;
-}
-
+.goose-launch-sidebar-row > .goose-launch-bar { max-width: 100%; }
 .goose-launch-column { display: flex; flex-direction: column; gap: 16px; }
 .goose-launch-bar {
   display: block;
@@ -171,104 +61,39 @@
   background: color-mix(in srgb, var(--goose-text-primary) 10%, transparent);
 }
 .goose-launch-bar[data-kind="title"] {
-  height: 22px;
+  height: calc(22px * var(--editor-scale, 1));
   border-radius: 6px;
   background: color-mix(in srgb, var(--goose-text-primary) 16%, transparent);
 }
 .goose-launch-bar[data-kind="heading"] { height: 12px; margin-top: 10px; }
-
 .goose-launch-in { animation: goose-launch-in 300ms ease-out var(--goose-launch-delay) both; }
-.goose-launch-pop { animation: goose-launch-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--goose-launch-delay) both; }
 .goose-launch-line {
   transform-origin: left center;
   animation: goose-launch-line 440ms cubic-bezier(0.22, 1, 0.36, 1) var(--goose-launch-delay) both;
 }
 
-.goose-launch-caret {
-  width: 2px;
-  height: 20px;
-  border-radius: 1px;
-  background: var(--goose-accent-solid);
-  animation: goose-launch-caret 1060ms steps(1) 1500ms infinite both;
-}
-
-.goose-launch-divider {
-  position: absolute;
-  left: calc(var(--goose-launch-sidebar-width) - 1px);
-  top: 0;
-  bottom: 0;
-  width: 1.25px;
-  background: var(--goose-accent-solid);
-  transform-origin: top;
-  animation: goose-launch-grow 320ms cubic-bezier(0.22, 1, 0.36, 1) 480ms both,
-    goose-launch-out 260ms ease-out 980ms both;
-}
-
-.goose-launch-frame { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.goose-launch-trace {
-  width: calc(100% - 1px);
-  height: calc(100% - 1px);
-  rx: var(--goose-launch-radius);
-  fill: none;
-  stroke: var(--goose-accent-solid);
-  stroke-width: 1.25;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  /* 描边绘制是唯一的非 transform／opacity 动画。 */
-  animation: goose-launch-draw 620ms cubic-bezier(0.65, 0, 0.35, 1) both,
-    goose-launch-out 260ms ease-out 980ms both;
-}
-
-@keyframes goose-launch-draw { to { stroke-dashoffset: 0; } }
-@keyframes goose-launch-out { from { opacity: 1; } to { opacity: 0; } }
 @keyframes goose-launch-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes goose-launch-grow { from { transform: scaleY(0); } to { transform: none; } }
-@keyframes goose-launch-pop { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
 @keyframes goose-launch-line { from { opacity: 0; transform: scaleX(0.35); } to { opacity: 1; transform: none; } }
-@keyframes goose-launch-caret { 0% { opacity: 1; } 50% { opacity: 0; } }
-
-@media (max-width: 768px) {
-  .goose-launch-root {
-    --goose-launch-sidebar-width: 0px !important;
-    --goose-launch-stage-right: 0px;
-    --goose-launch-stage-bottom: 0px;
-    --goose-launch-radius: 0px;
-  }
-  .goose-launch-sidebar, .goose-launch-divider { display: none; }
-  .goose-launch-document { padding-inline: 24px; }
-}
-
-@media (max-width: 719px) {
-  .goose-launch-root { --goose-launch-navigation-width: var(--goose-icon-button-height, 2rem); }
-  .goose-launch-root[data-platform="mac"] { --goose-launch-traffic-inset: 78px; }
-  .goose-launch-navigation > span:not(:first-child) { display: none; }
-}
+@keyframes goose-launch-out { from { opacity: 1; } to { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
   .goose-launch-root *, .goose-launch-root *::after { animation: none; }
-  .goose-launch-trace, .goose-launch-divider { display: none; }
 }
 
-/* Bars leave first, then the shell fades and the workspace shows through. */
+/* 先淡出占位，再淡出外壳，保持现有退出节奏。 */
 .goose-launch-host[data-exiting] .goose-launch-bar,
-.goose-launch-host[data-exiting] .goose-launch-icon,
-.goose-launch-host[data-exiting] .goose-launch-caret,
-.goose-launch-host[data-exiting] .goose-launch-selected {
+.goose-launch-host[data-exiting] .goose-launch-icon {
   animation: goose-launch-out 120ms ease-out both;
 }
-
 .goose-launch-host[data-exiting] {
   animation: goose-launch-out 120ms ease-out 120ms both;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .goose-launch-host[data-exiting] .goose-launch-bar,
-  .goose-launch-host[data-exiting] .goose-launch-icon,
-  .goose-launch-host[data-exiting] .goose-launch-caret,
-  .goose-launch-host[data-exiting] .goose-launch-selected {
+  .goose-launch-host[data-exiting] .goose-launch-icon {
     animation: none;
   }
-
   .goose-launch-host[data-exiting] {
     animation: goose-launch-out 120ms ease-out both;
   }
