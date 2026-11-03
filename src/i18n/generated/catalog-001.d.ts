@@ -97,7 +97,6 @@ declare module "../types" {
     "src/components/editor/toolbars/formatting/groups/ClearFormatButton.tsx#messages:1": { "clearFormatting": {  } };
     "src/components/editor/toolbars/formatting/groups/InlineGroup.tsx#messages:1": { "inlineCode": {  }; "inlineCodeMixedFormatting": {  }; "underline": {  }; "underlineMixedFormatting": {  } };
     "src/components/editor/toolbars/formatting/groups/LinkButton.tsx#messages:1": { "addLink": {  }; "cancel": {  }; "confirm": {  }; "linkUrl": {  }; "removeLink": {  } };
-    "src/components/editor/toolbars/formatting/groups/ListTypeGroup.tsx#messages:1": { "bulletedList": {  }; "checklist": {  }; "numberedList": {  } };
     "src/components/editor/toolbars/formatting/groups/MarkGroup.tsx#messages:1": { "bold": {  }; "italic": {  }; "mixedFormatting": { "label": string | number }; "strikethrough": {  } };
     "src/components/editor/toolbars/formatting/groups/SelectionActions.tsx#messages:1": { "clearSelection": {  }; "copySelection": {  }; "copying": {  }; "couldNotCopyPleaseTryAgain": {  } };
     "src/components/editor/toolbars/formatting/useFormattingToolbarAiActivate.ts#messages:1": { "enableTheAiAssistantInSettingsFirst": {  }; "noApiKeyIsConfiguredCheckSettingsAi": {  }; "openSettings": {  }; "saveTheAiServiceSettingsAndLoadThe": {  }; "theSelectionCouldNotBeLocatedSelectThe": {  }; "thisPageCannotBeEdited": {  }; "thisSelectionDoesNotSupportInlineRewritingSelect": {  } };

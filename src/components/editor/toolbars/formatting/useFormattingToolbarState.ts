@@ -24,7 +24,6 @@ import {
   useSelectionMarkStates,
 } from "./helpers";
 import type { BindTooltip } from "./ToolbarTooltip";
-import { getListTypeToolbarState } from "./listType";
 import { getSelectedImageUrl } from "@/components/editor/utils/selection";
 import { isQuickNoteEditorPage } from "@/pages/workspace/components/editor-host/editorContentMode";
 import { useFormattingToolbarAiActivate } from "./useFormattingToolbarAiActivate";
@@ -140,10 +139,6 @@ export function useFormattingToolbarState() {
   const isCode = markStates.code;
 
   const textAlignment = caps.textAlignment;
-  const listState = useEditorState({
-    editor,
-    selector: ({ editor }) => getListTypeToolbarState(editor),
-  });
 
   const linkUrl = caps.showLink ? editor.getSelectedLinkUrl() : undefined;
   const isLinkActive = !!linkUrl;
@@ -193,7 +188,6 @@ export function useFormattingToolbarState() {
     isUnderline,
     isCode,
     textAlignment,
-    listState,
     linkUrl,
     isLinkActive,
     setTextAlignment,
