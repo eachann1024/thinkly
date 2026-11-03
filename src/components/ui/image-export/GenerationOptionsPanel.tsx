@@ -48,8 +48,9 @@ export function GenerationOptionsPanel({
   const labelPrefix = useId();
   const [open, setOpen] = useState(false);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  type WatermarkFlag = Exclude<keyof WatermarkConfig, "brandText">;
   const rows: Array<{
-    key: keyof WatermarkConfig;
+    key: WatermarkFlag;
     label: string;
     disabled?: boolean;
   }> = [
@@ -57,7 +58,7 @@ export function GenerationOptionsPanel({
     { key: "showDate", label: uiText("date"), disabled: !wm.showWatermark },
     { key: "showTime", label: uiText("time"), disabled: !wm.showWatermark || !wm.showDate },
   ];
-  const renderRow = (key: keyof WatermarkConfig, label: string, disabled = false, child = false) => (
+  const renderRow = (key: WatermarkFlag, label: string, disabled = false, child = false) => (
     <label
       key={key}
       style={child ? { paddingInlineStart: 24 } : undefined}

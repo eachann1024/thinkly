@@ -10,7 +10,7 @@ ja:
 `;
 const uiText = createTranslator(localMessages);
 import type { CardTheme } from "./themes";
-
+import { escapeHtml } from "./serializer/utils";
 
 export interface WatermarkConfig {
   showWatermark: boolean;
@@ -18,6 +18,7 @@ export interface WatermarkConfig {
   showDate: boolean;
   showTime: boolean;
   showTitle: boolean;
+  brandText: string;
 }
 
 export const DEFAULT_WATERMARK_CONFIG: WatermarkConfig = {
@@ -26,12 +27,16 @@ export const DEFAULT_WATERMARK_CONFIG: WatermarkConfig = {
   showDate: true,
   showTime: true,
   showTitle: true,
+  brandText: "",
 };
 
 export function normalizeWatermarkConfig(
   config?: Partial<WatermarkConfig> | null,
 ): WatermarkConfig {
-  return { ...DEFAULT_WATERMARK_CONFIG, ...(config ?? {}) };
+  const source = config ?? {};
+  const brandText =
+    typeof source.brandText === "string" ? source.brandText : uiText("gooseNotes");
+  return { ...DEFAULT_WATERMARK_CONFIG, ...source, brandText };
 }
 
 export function getWatermarkHTML(
@@ -41,7 +46,8 @@ export function getWatermarkHTML(
   if (!theme.watermarkVisible || !config.showWatermark) return "";
 
   const brandParts: string[] = [];
-  if (config.showBrand) brandParts.push(uiText("gooseNotes"));
+  const brandText = config.brandText.trim();
+  if (config.showBrand && brandText) brandParts.push(escapeHtml(brandText));
   const brandHtml = brandParts.length > 0
     ? `<span class="gooseshot-watermark-brand">${brandParts.join(" · ")}</span>`
     : "";

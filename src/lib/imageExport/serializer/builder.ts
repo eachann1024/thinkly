@@ -17,6 +17,8 @@ import type { CardTheme } from "../themes";
 import type { WatermarkConfig } from "../watermark";
 import { getWatermarkHTML, normalizeWatermarkConfig } from "../watermark";
 import { escapeHtml } from "./utils";
+import { IMAGE_EXPORT_DEFAULT_WIDTH } from "../contentWidth";
+import { buildGithubDarkContributionQr } from "./styles/decorations/contributionQr";
 
 function getGoogleFontsUrl(): string {
   const families = [
@@ -42,6 +44,7 @@ export function buildStyledHTML(params: {
   watermarkConfig?: WatermarkConfig;
   preview?: boolean;
   titleInlineStyle?: string;
+  contentWidth?: number;
 }): string {
   const { title, blocksHtml, theme } = params;
   const wm = normalizeWatermarkConfig(params.watermarkConfig);
@@ -84,6 +87,11 @@ export function buildStyledHTML(params: {
 
   const headerBorder =
     "margin-bottom: 24px; padding-bottom: 0; border-bottom: none;";
+  const qrWidth = params.contentWidth ?? IMAGE_EXPORT_DEFAULT_WIDTH;
+  const contribution =
+    t.id === "github-dark"
+      ? buildGithubDarkContributionQr(qrWidth, t.containerPaddingX)
+      : null;
 
   return `<!DOCTYPE html>
 <html>
@@ -91,7 +99,7 @@ export function buildStyledHTML(params: {
 <meta charset="UTF-8">
 ${params.preview ? "" : `<link rel="stylesheet" href="${getGoogleFontsUrl()}">`}
 <style>
-${buildDocumentCss(t, { preview: params.preview, decoStyle, headerBorder, titleStyle })}${buildBlockCss(t)}${buildFooterCss(t)}${buildDecorationCss(t)}
+${buildDocumentCss(t, { preview: params.preview, decoStyle, headerBorder, titleStyle, contentWidth: params.contentWidth })}${buildBlockCss(t)}${buildFooterCss(t)}${buildDecorationCss(t)}${contribution?.css ?? ""}
 </style>
 </head>
 <body>
@@ -109,6 +117,7 @@ ${buildDocumentCss(t, { preview: params.preview, decoStyle, headerBorder, titleS
     </div>
     ${getWatermarkHTML(theme, wm)}
   </div>
+  ${contribution?.html ?? ""}
 </div>
 </body>
 </html>`;

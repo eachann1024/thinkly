@@ -34,7 +34,10 @@ import { splitImageExportTitle } from "./titleLift";
 export { getSelectionBlocksToRender } from "./titleLift";
 
 import { captureElementToPng } from "./capture/captureElement";
-export { calculateSafePixelRatio, getCapturePixelRatios } from "./capture/pixelRatio";
+import { IMAGE_EXPORT_DEFAULT_WIDTH } from "./contentWidth";
+export { calculateSafePixelRatio, exportSafePixelRatio, getCapturePixelRatios } from "./capture/pixelRatio";
+export { IMAGE_EXPORT_DEFAULT_WIDTH, IMAGE_EXPORT_WIDTHS } from "./contentWidth";
+export type { ImageExportWidth } from "./contentWidth";
 
 function sanitizeFileName(name: string): string {
   return name.replace(/[\\/:*?"<>|]/g, "_") || "untitled";
@@ -83,6 +86,7 @@ export async function exportPageToImage(
   page: Page,
   themeId: CardThemeId = "notebook",
   watermarkConfig?: WatermarkConfig,
+  contentWidth: number = IMAGE_EXPORT_DEFAULT_WIDTH,
 ) {
   const theme = resolveCardTheme(themeId, notebookThemeContextFromPage(page));
   const wm = normalizeWatermarkConfig(watermarkConfig);
@@ -115,6 +119,7 @@ export async function exportPageToImage(
       theme,
       watermarkConfig: wm,
       titleInlineStyle: collectBlockInlineStyles(titleBlock, theme),
+      contentWidth,
     });
     container.innerHTML = html;
 
@@ -135,6 +140,7 @@ export async function exportSelectionToImage(
   themeId: CardThemeId = "notebook",
   watermarkConfig?: WatermarkConfig,
   page?: Pick<Page, "content" | "fontFamily" | "isFolder" | "localFilePath"> | null,
+  contentWidth: number = IMAGE_EXPORT_DEFAULT_WIDTH,
 ) {
   if (!Array.isArray(selectionBlocks) || selectionBlocks.length === 0) return;
 
@@ -173,6 +179,7 @@ export async function exportSelectionToImage(
       theme,
       watermarkConfig: wm,
       titleInlineStyle: collectBlockInlineStyles(titleBlock, theme),
+      contentWidth,
     });
     container.innerHTML = html;
 

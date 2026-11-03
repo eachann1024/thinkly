@@ -10,9 +10,6 @@ zh-Hans:
   aDarkThemeWithACodeEditorFeel: "深色模式，代码感"
   dark: "深色"
   technical: "技术"
-  githubLight: "GitHub 浅"
-  githubInspiredLightTheme: "GitHub 官方浅色，开发者友好"
-  light: "浅色"
   development: "开发"
   githubDark: "GitHub 深"
   githubInspiredDarkThemeForFocusedReading: "GitHub 官方深色，平静专注"
@@ -25,9 +22,6 @@ en:
   aDarkThemeWithACodeEditorFeel: "A dark theme with a code-editor feel"
   dark: "Dark"
   technical: "Technical"
-  githubLight: "GitHub Light"
-  githubInspiredLightTheme: "GitHub-inspired light theme"
-  light: "Light"
   development: "Development"
   githubDark: "GitHub Dark"
   githubInspiredDarkThemeForFocusedReading: "GitHub-inspired dark theme for focused reading"
@@ -40,9 +34,6 @@ ja:
   aDarkThemeWithACodeEditorFeel: "コードエディタのようなダークテーマ"
   dark: "ダーク"
   technical: "テクニカル"
-  githubLight: "GitHub ライト"
-  githubInspiredLightTheme: "GitHub 風のライトテーマ、開発者向け"
-  light: "ライト"
   development: "開発"
   githubDark: "GitHub ダーク"
   githubInspiredDarkThemeForFocusedReading: "GitHub 風のダークテーマ、集中して読むのに最適"
@@ -135,51 +126,6 @@ export const TECH_DOCUMENT: CardTheme[] = [
   },
 
   {
-    id: "github-light",
-    get name() { return uiText("githubLight"); },
-    nameEn: "GitHub Light",
-    get description() { return uiText("githubInspiredLightTheme"); },
-    tags: [uiText("light"), uiText("development")],
-    mode: "light",
-    titleFont: "'Inter', -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif",
-    bodyFont: "'Inter', -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif",
-    codeFont: "'JetBrains Mono', 'SF Mono', 'Monaco', monospace",
-    titleFontSize: 26,
-    titleFontWeight: 600,
-    titleLineHeight: 1.3,
-    titleLetterSpacing: "-0.005em",
-    titleAlign: "left",
-    bodyFontSize: 15,
-    bodyLineHeight: 1.7,
-    bodyLetterSpacing: "0",
-    background: "#ffffff",
-    cardBg: "#ffffff",
-    textColor: TEXT_COLORS.light.primary,
-    secondaryText: TEXT_COLORS.light.secondary,
-    accent: "#0969da",
-    codeBg: "#f6f8fa",
-    quoteBorder: "#d1d9e0",
-    calloutBg: "#f6f8fa",
-    tableBorder: "#d1d9e0",
-    divider: "#d1d9e0",
-    watermark: TEXT_COLORS.light.secondary,
-    containerPaddingX: 56,
-    containerPaddingY: 56,
-    cardPaddingX: 40,
-    cardPaddingY: 36,
-    cardRadius: 12,
-    cardBorder: "1px solid #d1d9e0",
-    cardShadow: "none",
-    showDecorations: false,
-    decorationColor: "transparent",
-    watermarkVisible: true,
-    decorations: [
-      { kind: "title-rule", color: "#d1d9e0", thickness: 1, gap: 10 },
-      { kind: "contribution-graph", colors: ["#eff2f5", "#aceebb", "#4ac26b", "#2da44e", "#116329"] },
-    ],
-  },
-
-  {
     id: "github-dark",
     get name() { return uiText("githubDark"); },
     nameEn: "GitHub Dark",
@@ -220,7 +166,6 @@ export const TECH_DOCUMENT: CardTheme[] = [
     watermarkVisible: true,
     decorations: [
       { kind: "title-rule", color: "#30363d", thickness: 1, gap: 10 },
-      { kind: "contribution-graph", colors: ["#151b23", "#033a16", "#196c2e", "#2ea043", "#56d364"] },
     ],
   },
 
