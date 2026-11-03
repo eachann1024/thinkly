@@ -150,7 +150,7 @@ export function planAutoRelease({ packageVersion, publishedVersion, previousSha,
   const commits = listCommitsSince(root, base, headSha);
   const user = userFacingCommits(commits);
   if (user.length === 0) {
-    return { autoBump: false, version: packageVersion, bullets: [], subjects: [], skipped: true };
+    return { autoBump: false, version: packageVersion, bullets: [], subjects: [], commits: [], skipped: true };
   }
   const version = nextAutoVersion(packageVersion, publishedVersion);
   const subjects = user.map((commit) => commit.releaseNote || commit.subject);
@@ -160,6 +160,7 @@ export function planAutoRelease({ packageVersion, publishedVersion, previousSha,
     autoBump: true,
     version,
     subjects,
+    commits: user.map(({ subject, releaseNote }) => ({ subject, releaseNote })),
     bullets: formatChangelogBullets(subjects),
     skipped: false,
   };

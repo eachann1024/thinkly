@@ -5,6 +5,7 @@ import { applyReleasePlan, planAutoRelease, writeReleasePlan } from "./desktop-a
 import { assertPublishVersion, compareVersions, getReleases, ROOT, versionFromTag } from "./desktop-release-support.mjs";
 import { publishedDownloadMetadata } from "./desktop-download-metadata.mjs";
 import { versionReleaseNotes } from "./desktop-release-notes.mjs";
+import { chooseReleaseBullets } from "./release/release-notes-plan.mjs";
 
 const expectedSha = process.env.EXPECTED_SHA;
 assert.ok(!expectedSha || expectedSha === process.env.GITHUB_SHA, "main changed after release preflight; retry from the pushed revision");
@@ -40,7 +41,9 @@ if (onMain) {
     if (auto.autoBump) {
       version = auto.version;
       autoBump = true;
-      plan = { version, autoBump: true, bullets: auto.bullets, subjects: auto.subjects };
+      const changelog = readFileSync(resolve(ROOT, "CHANGELOG.md"), "utf8");
+      const notes = await chooseReleaseBullets({ version, auto, changelog });
+      plan = { version, autoBump: true, subjects: auto.subjects, ...notes };
       applyReleasePlan(ROOT, plan);
       console.log(`自动升版本 ${packageVersion} → ${version}（自 ${previous.tag_name} 起有 ${auto.subjects.length} 条面向用户提交）`);
     } else {
