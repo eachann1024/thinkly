@@ -5,20 +5,27 @@ import { warmPinyinMatcher } from "@/lib/pinyin-search";
 import { scheduleIdleTask } from "@/lib/scheduleIdleTask";
 import { notebookAiPanel, notebookAiSession } from "@/pages/workspace/components/notebook-ai/notebookAiLoader";
 import { settingsDialog } from "@/pages/workspace/components/sidebar/settingsDialogLoader";
-import { loadSearchSheet } from "@/pages/workspace/components/search-sheet/searchSheetLoader";
+import { preloadSearchSheet } from "@/pages/workspace/components/search-sheet/searchSheetLoader";
+
+// First screen and the first search. The BlockNote editor is statically
+// imported by the workspace graph, so there is no lazy editor chunk to preload.
+// Module imports only: no network, no hidden panels.
+export function warmLaunchScreen(): void {
+  void warmPinyinMatcher();
+  preloadSearchSheet();
+}
 
 export function scheduleBackgroundWarmup(rootElement: HTMLElement) {
   if (rootElement.dataset.entry === "quicknote") return;
 
   // Only import modules: never mount hidden panels, create conversations, or
-  // start model requests just to warm a surface.
+  // start model requests just to warm a surface. Runs after the launch overlay
+  // is gone so these scans don't compete with the reveal.
   if (useSettings.getState().ai.enabled) {
     scheduleIdleTask(() => notebookAiSession.load(), "AI session preload");
     scheduleIdleTask(() => notebookAiPanel.load(), "AI panel preload");
   }
   scheduleIdleTask(() => settingsDialog.load(), "Settings preload");
-  scheduleIdleTask(() => loadSearchSheet(), "Search preload");
-  scheduleIdleTask(warmPinyinMatcher, "Pinyin preload");
 
   for (const notebook of Object.values(useNotebooks.getState().notebooks)) {
     if (notebook.source !== "local-folder" || !notebook.localPath || notebook.localPathMissing) continue;

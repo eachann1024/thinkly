@@ -27,7 +27,7 @@ export function markAssociatedMarkdownOpened(): void {
 
 type WorkspaceStartupGateOptions = {
   prepare: () => Promise<unknown> | unknown;
-  render: () => void;
+  render: () => Promise<void> | void;
   renderError: (error: unknown) => void;
 };
 
@@ -38,7 +38,7 @@ export async function renderWorkspaceAfterStartup({
 }: WorkspaceStartupGateOptions): Promise<"rendered" | "error"> {
   try {
     await prepare();
-    render();
+    await render();
     return "rendered";
   } catch (error) {
     renderError(error);

@@ -26,6 +26,16 @@ import { FileText } from "@/components/ui/icons";
 import { ReviewedStateArt } from "@/components/ui/dot-matrix/illustrations/ReviewedStateArt";
 import { StateArtBackdrop } from "@/components/ui/dot-matrix/illustrations/StateArtBackdrop";
 
+export function LaunchOverlay() {
+  useLocale();
+  return (
+    <>
+      <LaunchTrace />
+      <span className="sr-only">{uiText("opening")}</span>
+    </>
+  );
+}
+
 export function BootstrapScreen({ lean, error }: { lean: boolean; error?: unknown }) {
   useLocale();
   if (!error) {
