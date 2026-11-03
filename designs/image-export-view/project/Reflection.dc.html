@@ -138,11 +138,24 @@ a{color:#547dd0}a:hover{color:#3f66b8}
 </section>
 <section aria-label="投入最多的笔记">
 <h3 class="h3" style="margin-bottom:4px">投入最多的笔记</h3>
-<sc-for list="{{top}}" as="n" hint-placeholder-count="5"><button class="note" onClick="{{n.open}}"><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{n.title}}</span><span class="goose-tabular" style="font-size:12px;color:#526071;white-space:nowrap">{{n.meta}}</span></button></sc-for>
+<ol style="margin:0;padding:0;list-style:none">
+<sc-for list="{{top}}" as="n" hint-placeholder-count="5"><li><button class="note" style="align-items:flex-start;padding:8px" onClick="{{n.open}}">
+<span class="goose-tabular" aria-hidden="true" style="{{n.rankS}}">{{n.rank}}</span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+<span style="display:flex;align-items:baseline;gap:10px"><span style="flex:1;min-width:0;font-weight:460;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{n.title}}</span><span class="goose-tabular" style="font-size:12px;font-weight:560;color:#2f5aa8;white-space:nowrap">{{n.edits}}</span></span>
+<span style="display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="flex:1;height:4px;border-radius:2px;background:#eef1f6;overflow:hidden"><span style="{{n.bar}}"></span></span><span class="goose-tabular" style="font-size:12px;color:#526071;white-space:nowrap;min-width:64px;text-align:right">{{n.words}}</span></span>
+</span>
+</button></li></sc-for>
+</ol>
 </section>
 <section aria-label="可能搁置的笔记">
 <h3 class="h3" style="margin-bottom:4px">可能搁置的笔记</h3>
-<sc-for list="{{stalled}}" as="n" hint-placeholder-count="3"><button class="note" onClick="{{n.open}}"><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{n.title}}</span><span class="goose-tabular" style="font-size:12px;color:#526071;white-space:nowrap">{{n.meta}}</span></button></sc-for>
+<ul style="margin:0;padding:0;list-style:none">
+<sc-for list="{{stalled}}" as="n" hint-placeholder-count="3"><li><button class="note" style="padding:8px" onClick="{{n.open}}">
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-weight:460;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{n.title}}</span><span class="goose-tabular" style="font-size:12px;color:#526071">{{n.meta}}</span></span>
+<span class="goose-tabular" style="font-size:12px;font-weight:460;color:#855600;background:#fbf0de;border-radius:6px;padding:2px 8px;white-space:nowrap">{{n.idle}}</span>
+</button></li></sc-for>
+</ul>
 </section>
 </aside>
 </div>
@@ -162,8 +175,8 @@ var SCOPES=[["7d","7 天","10月27日 – 11月2日","下次生成 11月10日 �
 var REPORT={title:"这周的精力集中在把会议搬到文档里",themes:[{name:"异步协作",point:"连续四天都在改《把周会改成异步之后》，从规则写到模板，说明这件事已经从想法进入落地。"},{name:"读书笔记",point:"《深度工作》的摘录只在周二动过一次，新增内容不多，更像是被打断了。"},{name:"产品想法",point:"导出图片的方案改了三版，每次都在收窄范围，取舍越来越清楚。"}],suggestion:"把异步周会的模板发给一位同事试用一周，再回来补“哪些问题仍然需要开会”。"};
 var TOPICS=[["异步协作","会议规则、周报模板、阻塞问题的处理方式",46],["产品想法","导出图片、独立窗口和主题",31],["读书笔记","《深度工作》摘录",15],["生活","周末计划与采购清单",8]];
 var OP=[100,72,48,28];
-var TOP=[["把周会改成异步之后","23 次编辑 · +4,120 字"],["导出图片：三个方案","14 次编辑 · +2,380 字"],["独立窗口的标题栏","9 次编辑 · +1,050 字"],["《深度工作》摘录","4 次编辑 · +610 字"],["周末计划","3 次编辑 · +180 字"]];
-var STALL=[["季度目标草稿","最后编辑于 10月9日"],["家里网络重新布线","最后编辑于 9月28日"],["读《设计中的设计》","最后编辑于 9月21日"]];
+var TOP=[["把周会改成异步之后",23,"+4,120 字"],["导出图片：三个方案",14,"+2,380 字"],["独立窗口的标题栏",9,"+1,050 字"],["《深度工作》摘录",4,"+610 字"],["周末计划",3,"+180 字"]];
+var STALL=[["季度目标草稿","最后编辑于 10月9日","24 天未动"],["家里网络重新布线","最后编辑于 9月28日","35 天未动"],["读《设计中的设计》","最后编辑于 9月21日","42 天未动"]];
 var MET={"7d":[["10月29日","最活跃的一天"],["21:00–22:00","高峰时段"],["12","编辑过的笔记"],["8,340","新增字数"]],"30d":[["10月16日","最活跃的一天"],["21:00–22:00","高峰时段"],["31","编辑过的笔记"],["27,905","新增字数"]],"90d":[["9月12日","最活跃的一天"],["10:00–11:00","高峰时段"],["64","编辑过的笔记"],["71,460","新增字数"]]};
 function series(n,seed){var out=[],x=seed;for(var i=0;i<n;i++){x=(x*9301+49297)%233280;var v=x/233280;out.push(Math.round(8+v*64*(0.55+0.45*Math.sin(i/2.3+seed))));}return out;}
 class Component extends DCLogic {
@@ -196,8 +209,8 @@ metrics:(MET[s.scope]).map(m=>({value:m[0],label:m[1]})),
 trendTitle:s.scope==="90d"?"每周编辑":"每日编辑",
 trend:vals.map(v=>({style:"flex:1;min-width:2px;height:"+Math.max(4,Math.round(v/mx*68))+"px;background:"+(v===mx?"#547dd0":"#c9d6ef")+";border-radius:2px 2px 0 0"})),
 trendStart:S[2].split(" – ")[0],trendEnd:S[2].split(" – ")[1],
-top:TOP.map(x=>({title:x[0],meta:x[1],open:open(x[0])})),
-stalled:STALL.map(x=>({title:x[0],meta:x[1],open:open(x[0])})),
+top:TOP.map((x,i)=>({rank:i+1,rankS:"width:18px;flex:none;font-size:12px;font-weight:600;line-height:20px;color:"+(i===0?"#547dd0":"#526071"),title:x[0],edits:x[1]+" 次编辑",words:x[2],bar:"display:block;height:100%;border-radius:2px;width:"+Math.round(x[1]/TOP[0][1]*100)+"%;background:"+(i===0?"#547dd0":"#9db4e3"),open:open(x[0])})),
+stalled:STALL.map(x=>({title:x[0],meta:x[1],idle:x[2],open:open(x[0])})),
 toast:s.toast};
 }
 }
