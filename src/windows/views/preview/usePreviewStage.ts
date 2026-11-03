@@ -91,13 +91,14 @@ export function usePreviewStage(contentKey: string, pannable: boolean) {
   const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (!pannable || event.button !== 0) return;
     if ((event.target as HTMLElement | null)?.closest("button, a, input, iframe")) return;
-    const start = { x: event.clientX, y: event.clientY, ...stageRef.current };
+    const start = stageRef.current;
+    const origin = { x: event.clientX, y: event.clientY };
     const move = (next: PointerEvent) => {
       const sizes = readSizes();
       if (!sizes) return;
       const offset = panOffset(
         start,
-        { x: next.clientX - start.x, y: next.clientY - start.y },
+        { x: next.clientX - origin.x, y: next.clientY - origin.y },
         sizes.viewport,
         sizes.content,
         start.percent,
