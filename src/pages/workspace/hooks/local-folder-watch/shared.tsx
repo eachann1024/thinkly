@@ -34,8 +34,10 @@ import {
   type LocalMdFileStat,
 } from "@/lib/local-md-snapshot";
 import {
+  beginRecoveredLocalSave,
   confirmRecoveredLocalSave,
   discardPendingLocalSave,
+  getPendingLocalSaveContent,
 } from "@/stores/pages/folderSync";
 import { wasRecentlyInteracting } from "@/lib/editor-interaction-signal";
 import { useNotebooks } from "@/stores/useNotebooks";
@@ -146,8 +148,16 @@ function conflictHandlers(filePath: string, pageId: string) {
           } }));
           updateSnapshotAfterWrite(filePath, read.content);
           if (read.stat) updateSnapshotStat(filePath, read.stat);
-          const saved = await usePages.getState().saveLocalPageContent(pageId, pg.content as any, { force: true });
-          if (saved) confirmRecoveredLocalSave(pageId);
+          const restorePending = beginRecoveredLocalSave(pageId);
+          try {
+            const saved = await usePages.getState().saveLocalPageContent(pageId, pg.content, { force: true });
+            if (saved && !usePages.getState().dirtyLocalPageIds[pageId] &&
+                getPendingLocalSaveContent(pageId) === undefined) {
+              confirmRecoveredLocalSave(pageId);
+            }
+          } finally {
+            restorePending();
+          }
         } catch (error) {
           toast.error(noteMetadataErrorMessage(error));
           console.error("[local-folder] conflict force-save failed", error);
