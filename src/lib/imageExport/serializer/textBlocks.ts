@@ -18,6 +18,28 @@ function extractCodeText(content: unknown): string {
 }
 
 
+const LIST_TYPES = new Set(["bulletListItem", "numberedListItem", "bulletList", "orderedList"]);
+
+function renderListChildren(
+  children: any[],
+  theme: CardTheme,
+  renderBlocks: (blocks: any[], theme: CardTheme) => string,
+): string {
+  if (!Array.isArray(children) || children.length === 0) return "";
+  const parts: string[] = [];
+  let start = 0;
+  while (start < children.length) {
+    const isList = LIST_TYPES.has(children[start]?.type);
+    let end = start + 1;
+    while (end < children.length && LIST_TYPES.has(children[end]?.type) === isList) end += 1;
+    const html = renderBlocks(children.slice(start, end), theme);
+    // 列表自带缩进；只有连续的非列表子内容需要额外的容器。
+    if (html) parts.push(isList ? html : `<div class="nested-children">${html}</div>`);
+    start = end;
+  }
+  return parts.join("");
+}
+
 export function renderTextBlock(
   block: any, theme: CardTheme,
   renderBlock: (block: any, theme: CardTheme) => string,
@@ -43,26 +65,12 @@ export function renderTextBlock(
     }
 
     case "bulletListItem": {
-      const children = block.children?.length
-        ? renderBlocks(block.children, theme)
-        : "";
-      const childHtml = children
-        ? children.trimStart().startsWith("<ul") || children.trimStart().startsWith("<ol")
-          ? children
-          : `<div class="nested-children">${children}</div>`
-        : "";
+      const childHtml = renderListChildren(block.children, theme, renderBlocks);
       return `<li${styleAttr}>${inlineHtml || ""}${childHtml}</li>`;
     }
 
     case "numberedListItem": {
-      const children = block.children?.length
-        ? renderBlocks(block.children, theme)
-        : "";
-      const childHtml = children
-        ? children.trimStart().startsWith("<ul") || children.trimStart().startsWith("<ol")
-          ? children
-          : `<div class="nested-children">${children}</div>`
-        : "";
+      const childHtml = renderListChildren(block.children, theme, renderBlocks);
       const value = Number(block.props?.start);
       const valueAttr =
         Number.isInteger(value) && value > 0 ? ` value="${value}"` : "";

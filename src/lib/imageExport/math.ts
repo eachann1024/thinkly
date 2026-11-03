@@ -103,6 +103,7 @@ async function renderMathBlockAsImage(block: any, theme: CardTheme): Promise<voi
       url: dataUrl,
       caption: uiText("equation"),
       textAlignment: "center",
+      exportKind: "diagram",
     };
   } catch (error) {
     console.error("[imageExport] math render failed:", error);

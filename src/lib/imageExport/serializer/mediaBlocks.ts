@@ -35,7 +35,7 @@ function getImageAltForExport(props: Record<string, unknown>) {
 }
 
 
-export function renderMediaBlock(block: any, theme: CardTheme, styleAttr: string): string {
+export function renderMediaBlock(block: any, _theme: CardTheme, styleAttr: string): string {
   switch (block.type) {
     case "image":
     case "imageResize": {
@@ -54,7 +54,8 @@ export function renderMediaBlock(block: any, theme: CardTheme, styleAttr: string
         Number.isFinite(previewWidth) && previewWidth > 0
           ? `max-width:${previewWidth}px;`
           : "";
-      const img = `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" style="${imgAlignStyle}${widthStyle}" />`;
+      const diagramClass = block.props?.exportKind === "diagram" ? ` class="export-diagram"` : "";
+      const img = `<img${diagramClass} src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" style="${imgAlignStyle}${widthStyle}" />`;
       return img;
     }
 

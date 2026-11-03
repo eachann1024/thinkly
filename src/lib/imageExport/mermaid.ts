@@ -112,6 +112,7 @@ async function renderMermaidBlockAsImage(block: any, theme: CardTheme): Promise<
       url: mermaidSvgToDataUrl(svg),
       caption: "Mermaid",
       textAlignment: "center",
+      exportKind: "diagram",
     };
   } catch (error) {
     console.error("[imageExport] mermaid render failed:", error);

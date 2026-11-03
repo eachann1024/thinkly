@@ -75,6 +75,12 @@ export function buildBlockCss(t: CardTheme): string {
   border-radius: 10px;
   margin: 16px 0;
 }
+.gooseshot-content img.export-diagram {
+  display: block;
+  margin: 0 auto;
+  border-radius: 0;
+  background: transparent;
+}
 .gooseshot-content .export-figure { margin: 16px 0; }
 .gooseshot-content .export-figure img {
   display: block;
