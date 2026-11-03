@@ -2,7 +2,7 @@
 
 Shared Electron windows for features that used to be in-app dialogs.
 
-Read this file, then the modules it names. The HTML mockups under `designs/image-export-view/project/` are the layout source for the image export window. They are not imported by the app.
+Read this file, then the modules it names.
 
 ## Kinds
 

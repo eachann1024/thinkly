@@ -148,8 +148,13 @@ dist-signpath/
 !docs/macos-installation.md
 .goose/
 
-# 本地设计草稿
+/designs/
 /design-drafts/
+/docs/mockups/
+/design-qa.md
+.artifact-server.json
+.artifact-server.log
+comments.json
 
 # 视频工程与成片素材（Remotion 工程、成片、配音）不进代码库
 /video/
