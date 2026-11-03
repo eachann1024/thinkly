@@ -1,5 +1,5 @@
-import { PlaceholderWindow } from "./PlaceholderWindow";
+import { AppUpdateBody } from "./app-update/AppUpdateBody";
 
 export function AppUpdateWindow() {
-  return <PlaceholderWindow kind="app-update" />;
+  return <AppUpdateBody />;
 }

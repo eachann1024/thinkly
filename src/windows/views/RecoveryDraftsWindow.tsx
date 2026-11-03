@@ -1,5 +1,11 @@
-import { PlaceholderWindow } from "./PlaceholderWindow";
+import { Toaster } from "@/components/ui/sonner";
+import { RecoveryDraftsBody } from "./recovery/RecoveryDraftsBody";
 
 export function RecoveryDraftsWindow() {
-  return <PlaceholderWindow kind="recovery-drafts" />;
+  return (
+    <>
+      <RecoveryDraftsBody />
+      <Toaster placement="center" />
+    </>
+  );
 }

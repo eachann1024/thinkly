@@ -1,9 +1,11 @@
 import { openPageFromSidebar } from "@/lib/sidebarPageNavigation";
+import { markReflectionSeen, readReflectionAction } from "@/pages/workspace/components/sidebar/reflection/ReflectionHost";
 import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { useReflection } from "@/stores/useReflection";
 import { useSettings } from "@/stores/useSettings";
 import { applyAuxiliaryAISetup } from "./applyAuxiliaryAISetup";
+import { readRecoveryDraftEntry, registerRecoveryDraftSnapshot } from "./recoveryDraftSnapshot";
 import { hasMainSnapshot, readRegisteredSnapshot, registerMainSnapshot } from "./mainSnapshot";
 
 let installed = false;
@@ -28,6 +30,24 @@ function installDefaults(): void {
     };
   });
   registerMainSnapshot("pages", () => usePages.getState().pages);
+  registerMainSnapshot("reflection-action", () => null);
+  registerMainSnapshot("reflection-seen", () => null);
+  registerRecoveryDraftSnapshot();
+}
+
+function recoveryEntryQuery(detail: unknown): unknown {
+  if (!detail || typeof detail !== "object" || Array.isArray(detail)) return undefined;
+  const query = detail as { source?: unknown; id?: unknown };
+  if (query.source !== "internal-page" && query.source !== "local-file" && query.source !== "quicknote") return undefined;
+  if (typeof query.id !== "string" || query.id.length < 1 || query.id.length > 400) return undefined;
+  return readRecoveryDraftEntry(query.source, query.id);
+}
+
+function snapshotValue(key: string, detail?: unknown): unknown {
+  if (key === "recovery-draft-entry") return recoveryEntryQuery(detail);
+  if (key === "reflection-action") return readReflectionAction(detail);
+  if (key === "reflection-seen") return markReflectionSeen(detail);
+  return readRegisteredSnapshot(key);
 }
 
 export function installAuxiliaryMainBridge(): void {
@@ -36,13 +56,14 @@ export function installAuxiliaryMainBridge(): void {
   installDefaults();
   const bridge = window.gooseDesktop?.auxiliary;
   if (!bridge) return;
-  bridge.onSnapshotRequest((requestId, key) => {
-    if (!hasMainSnapshot(key)) {
+  bridge.onSnapshotRequest((requestId, key, detail) => {
+    const dynamic = key === "recovery-draft-entry" || key === "reflection-action" || key === "reflection-seen";
+    if (!hasMainSnapshot(key) && !dynamic) {
       bridge.replySnapshot(requestId, null, false);
       return;
     }
     try {
-      const raw = JSON.stringify(readRegisteredSnapshot(key) ?? null);
+      const raw = JSON.stringify(snapshotValue(key, detail) ?? null);
       if (!raw) {
         bridge.replySnapshot(requestId, null, false);
         return;

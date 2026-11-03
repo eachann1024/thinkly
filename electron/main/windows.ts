@@ -42,6 +42,7 @@ export {
 export {
   toggleWindow,
   toggleQuicknoteWindow,
+  showQuicknoteWindow,
   closeQuicknote,
   showAndFocusMainWindow,
   showOrCreateMainWindow,

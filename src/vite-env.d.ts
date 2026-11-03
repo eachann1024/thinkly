@@ -129,6 +129,8 @@ declare global {
     showMainWindow: (action?: "none" | "search" | "settings" | "ai-panel" | "new-note") => Promise<void>
     revealSavedNote: (filePath: string) => Promise<boolean>
     toggleQuicknote: () => Promise<void>
+    showQuicknote: (slot: number) => Promise<boolean>
+    onQuicknoteSlot: (cb: (slot: number) => void) => () => void
     closeQuicknote: () => Promise<void>
     registerHotkeys: (k: { wake: string; quicknote: string; search: string }) => Promise<{ wakeOk: boolean; quicknoteOk: boolean; searchOk: boolean; paused?: boolean }>
     pauseHotkeys: () => Promise<void>

@@ -1,4 +1,3 @@
-import { hasNewAppUpdate } from "@/lib/appUpdateAvailability";
 import { appUpdateTransition } from "@/lib/appUpdateState";
 import type { AppUpdateState, AppUpdateTarget } from "@/lib/appUpdateTypes";
 export type UpdateUiOperation =
@@ -6,13 +5,11 @@ export type UpdateUiOperation =
   | { status: "installing"; id: number }
   | { status: "failed"; message: string };
 export type AppUpdateUiState = {
-  open: boolean;
   currentVersion: string;
   state: AppUpdateState;
   operation: UpdateUiOperation;
 };
 export type AppUpdateUiEvent =
-  | { type: "open.changed"; open: boolean }
   | { type: "version.received"; version: string }
   | { type: "state.received"; state: AppUpdateState }
   | { type: "download.started"; target: AppUpdateTarget }
@@ -25,16 +22,10 @@ export function appUpdateUiTransition(
   event: AppUpdateUiEvent,
 ): AppUpdateUiState {
   switch (event.type) {
-    case "open.changed":
-      return { ...ui, open: event.open };
     case "version.received":
       return { ...ui, currentVersion: event.version };
     case "state.received":
-      return {
-        ...ui,
-        state: event.state,
-        open: ui.open && hasNewAppUpdate(ui.currentVersion, event.state),
-      };
+      return { ...ui, state: event.state };
     case "download.started":
       return {
         ...ui,

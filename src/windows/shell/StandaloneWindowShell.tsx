@@ -70,7 +70,7 @@ export function StandaloneWindowShell({
   };
 
   return (
-    <div className="standalone-window flex h-full min-h-0 flex-col bg-background text-foreground">
+    <div className="standalone-window relative flex h-full min-h-0 flex-col bg-background text-foreground">
       <div
         ref={barRef}
         className={cn("electron-titlebar flex w-full shrink-0 items-center", frameless ? "pr-0" : "pr-3")}
