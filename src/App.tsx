@@ -20,8 +20,6 @@ import {
 } from "@/lib/appearance";
 import { shouldPreserveStartupSelection } from "@/lib/workspaceStartup";
 import { PencilIconDefinitions } from "@/components/theme/PencilIconDefinitions";
-import { AppUpdateDialog } from "@/components/app-update/AppUpdateDialog";
-import { RecoveryDraftsHost } from "@/components/recovery/RecoveryDraftsHost";
 
 function AppearanceSync() {
   const {
@@ -142,9 +140,7 @@ function App() {
         </div>
       )}
       {surface === "setup" && <SetupGuide />}
-      <AppUpdateDialog />
       <Toaster />
-      <RecoveryDraftsHost />
     </>
   );
 }

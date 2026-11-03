@@ -12,7 +12,6 @@ import { useSearchSession } from "@/pages/workspace/components/sidebar/useSearch
 import { readOnlySearchFolderSource } from "@/pages/workspace/components/sidebar/readOnlySearchFolderSource";
 import { useCommandSearchIndexWarmup } from "@/pages/workspace/components/command/useCommandSearchIndexWarmup";
 import { Toaster } from "@/components/ui/sonner";
-import { RecoveryDraftsHost } from "@/components/recovery/RecoveryDraftsHost";
 import "./search-window.css";
 
 const SETTINGS_KEY = "thinkly-settings";
@@ -148,7 +147,6 @@ export function SearchWindowApp() {
       />
       { }
       <Toaster placement="center" />
-      <RecoveryDraftsHost />
     </div>
   );
 }

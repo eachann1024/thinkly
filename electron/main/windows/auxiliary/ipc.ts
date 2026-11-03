@@ -100,9 +100,17 @@ export function registerAuxiliaryIpc(): void {
     return false;
   });
 
-  ipcMain.handle(AUXILIARY_CHANNELS.snapshot, (event, key: unknown) => {
+  ipcMain.handle(AUXILIARY_CHANNELS.snapshot, (event, key: unknown, detail: unknown) => {
     if (!senderRecord(event)) return { ok: false } satisfies AuxiliarySnapshotResponse;
     if (typeof key !== "string" || key.length < 1 || key.length > 80) return { ok: false };
+    let query: unknown;
+    if (detail !== undefined) {
+      try {
+        query = jsonValue(detail);
+      } catch {
+        return { ok: false };
+      }
+    }
     const win = showOrCreateMainWindow();
     if (win.isDestroyed() || win.webContents.isDestroyed()) return { ok: false };
     const requestId = randomUUID();
@@ -116,7 +124,7 @@ export function registerAuxiliaryIpc(): void {
       snapshotWaiters.set(requestId, { senderId: win.webContents.id, resolve: finish });
       const send = () => {
         if (win.isDestroyed() || win.webContents.isDestroyed()) finish({ ok: false });
-        else win.webContents.send(AUXILIARY_CHANNELS.snapshotRequest, requestId, key);
+        else win.webContents.send(AUXILIARY_CHANNELS.snapshotRequest, requestId, key, query);
       };
       if (win.webContents.isLoading()) win.webContents.once("did-finish-load", send);
       else send();

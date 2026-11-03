@@ -29,10 +29,10 @@ export const auxiliary: AuxiliaryBridge = {
   openPage: (pageId) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "open-page", pageId }),
   openSettings: (section) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "open-settings", section }),
   applyAISetup: (config) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "apply-ai-setup", config }),
-  requestSnapshot: <T = unknown>(key: string) =>
-    ipcRenderer.invoke(AUXILIARY_CHANNELS.snapshot, key) as Promise<AuxiliarySnapshotResponse & { value?: T }>,
+  requestSnapshot: <T = unknown>(key: string, detail?: unknown) =>
+    ipcRenderer.invoke(AUXILIARY_CHANNELS.snapshot, key, detail) as Promise<AuxiliarySnapshotResponse & { value?: T }>,
   onSnapshotRequest: (callback) => {
-    const listener = (_event: unknown, requestId: string, key: string) => callback(requestId, key);
+    const listener = (_event: unknown, requestId: string, key: string, detail?: unknown) => callback(requestId, key, detail);
     ipcRenderer.on(AUXILIARY_CHANNELS.snapshotRequest, listener);
     return () => ipcRenderer.removeListener(AUXILIARY_CHANNELS.snapshotRequest, listener);
   },

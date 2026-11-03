@@ -94,8 +94,8 @@ export interface AuxiliaryBridge {
   openPage: (pageId: string) => Promise<boolean>;
   openSettings: (section: AuxiliarySettingsSection) => Promise<boolean>;
   applyAISetup: (config: AuxiliaryAISetupConfig) => Promise<boolean>;
-  requestSnapshot: <T = unknown>(key: string) => Promise<AuxiliarySnapshotResponse & { value?: T }>;
-  onSnapshotRequest: (cb: (requestId: string, key: string) => void) => () => void;
+  requestSnapshot: <T = unknown>(key: string, detail?: unknown) => Promise<AuxiliarySnapshotResponse & { value?: T }>;
+  onSnapshotRequest: (cb: (requestId: string, key: string, detail?: unknown) => void) => () => void;
   replySnapshot: (requestId: string, payload: unknown, ok?: boolean) => void;
   onCommand: (cb: (command: AuxiliaryMainCommand) => void) => () => void;
 }
