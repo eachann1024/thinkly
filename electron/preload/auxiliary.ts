@@ -33,6 +33,8 @@ export const auxiliary: AuxiliaryBridge = {
   }),
   openSettings: (section) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "open-settings", section }),
   applyAISetup: (config) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "apply-ai-setup", config }),
+  applyImageExportSettings: (settings) =>
+    ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "apply-image-export-settings", settings }),
   requestSnapshot: <T = unknown>(key: string, detail?: unknown) =>
     ipcRenderer.invoke(AUXILIARY_CHANNELS.snapshot, key, detail) as Promise<AuxiliarySnapshotResponse & { value?: T }>,
   onSnapshotRequest: (callback) => {

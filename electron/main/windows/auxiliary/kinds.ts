@@ -17,6 +17,7 @@ zh-Hans:
   notebook-edit: "编辑笔记本"
   confirm: "确认"
   selection-quote: "选区引用"
+  image-export: "生成图片"
 en:
   reflection: "Reflection"
   recovery-drafts: "Recovery drafts"
@@ -26,6 +27,7 @@ en:
   notebook-edit: "Edit notebook"
   confirm: "Confirm"
   selection-quote: "Selection quote"
+  image-export: "Generate image"
 ja:
   reflection: "振り返り"
   recovery-drafts: "復元データ"
@@ -35,6 +37,7 @@ ja:
   notebook-edit: "ノートブックを編集"
   confirm: "確認"
   selection-quote: "選択範囲の引用"
+  image-export: "画像を生成"
 `);
 
 export type AuxiliaryKindConfig = {
@@ -56,6 +59,7 @@ const KINDS: Record<AuxiliaryKind, AuxiliaryKindConfig> = {
   "notebook-edit": { kind: "notebook-edit", width: 560, height: 680, minWidth: 560, minHeight: 680, resizable: false, modal: true },
   confirm: { kind: "confirm", width: 460, height: 400, minWidth: 460, minHeight: 240, resizable: false, modal: true },
   "selection-quote": { kind: "selection-quote", width: 480, height: 420, minWidth: 360, minHeight: 280, resizable: true, modal: true },
+  "image-export": { kind: "image-export", width: 1280, height: 800, minWidth: 900, minHeight: 600, resizable: true, modal: false },
 };
 
 export function auxiliaryKindConfig(kind: AuxiliaryKind): AuxiliaryKindConfig {
