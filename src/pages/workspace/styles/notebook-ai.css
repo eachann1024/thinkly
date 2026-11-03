@@ -2,6 +2,8 @@
 
 @import "./notebook-ai/shell.css";
 @import "./notebook-ai/composer.css";
+@import "./notebook-ai/composer-controls.css";
+@import "./notebook-ai/composer-chips.css";
 @import "./notebook-ai/messages.css";
 @import "./notebook-ai/message-tables-and-actions.css";
 @import "./notebook-ai/work-card.css";
