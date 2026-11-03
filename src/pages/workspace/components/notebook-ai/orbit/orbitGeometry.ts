@@ -18,9 +18,10 @@ export type OrbitPath = {
   dots: OrbitComet[];
 };
 
-/** One ring band of the background lattice, drawn as a masked CSS dot pattern so it fills any panel size. */
+/** One ring band of the background lattice: a masked CSS dot pattern clipped to the band's own bounding square. */
 export type OrbitRing = {
   delay: number;
+  radius: number;
   mask: string;
 };
 
@@ -37,15 +38,15 @@ const HOLE = 170;
 const BAND = 45;
 const fade = (distance: number) => round(Math.max(0.3, 1 - (distance - HOLE) / 520));
 
+/** The static field past the last band (see .ai-orbit-field) starts at HOLE + 0.7 * 520 = 534px. */
 function buildRings(): OrbitRing[] {
   return Array.from({ length: 8 }, (_, index) => {
     const r0 = HOLE + index * BAND;
-    const last = index === 7;
-    const r1 = last ? HOLE + 0.7 * 520 : r0 + BAND;
-    const outer = last ? `rgba(0,0,0,0.3) ${r1}px` : `rgba(0,0,0,${fade(r1)}) ${r1}px, transparent ${r1}px`;
+    const r1 = index === 7 ? HOLE + 0.7 * 520 : r0 + BAND;
     return {
       delay: round(index * 0.35),
-      mask: `radial-gradient(circle at center, transparent ${r0}px, rgba(0,0,0,${fade(r0)}) ${r0}px, ${outer})`,
+      radius: Math.ceil(r1),
+      mask: `radial-gradient(circle at center, transparent ${r0}px, rgba(0,0,0,${fade(r0)}) ${r0}px, rgba(0,0,0,${fade(r1)}) ${r1}px, transparent ${r1}px)`,
     };
   });
 }
