@@ -11,6 +11,7 @@ import { BootstrapScreen } from "./bootstrap/BootstrapScreen";
 import { initializeApplicationState, type BootstrapMode } from "./bootstrap/initializeApplicationState";
 import { scheduleBackgroundWarmup, warmLaunchScreen } from "./bootstrap/backgroundWarmup";
 import { mountLaunchOverlay, type LaunchOverlayController } from "./bootstrap/launchGate";
+import { prepareLaunchAppearance } from "./bootstrap/launchPreferences";
 
 installRuntimePolyfills();
 installIteratorPolyfills();
@@ -42,6 +43,7 @@ export const bootstrap = async (
     },
     true,
   );
+  if (!lean) prepareLaunchAppearance();
   const root = createRoot(rootElement);
   const launch: LaunchOverlayController | null = lean ? null : mountLaunchOverlay();
   if (launch) launch.whenStrokeEnds(warmLaunchScreen);

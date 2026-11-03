@@ -1,9 +1,15 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { startPointerDrag } from "@/lib/interaction/pointerDrag";
 
-export const SIDEBAR_MIN_WIDTH = 160;
+import {
+  SIDEBAR_MIN_WIDTH,
+  SIDEBAR_MAX_WIDTH,
+  resolveSidebarWidth,
+  clampSidebarResizeWidth,
+} from "@/lib/sidebarLayout";
+export { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH, resolveSidebarWidth, clampSidebarResizeWidth } from "@/lib/sidebarLayout";
+
 const SIDEBAR_DEFAULT_WIDTH = SIDEBAR_MIN_WIDTH;
-export const SIDEBAR_MAX_WIDTH = 480;
 
 let sidebarResizeDragActive = false;
 
@@ -11,27 +17,8 @@ export function isSidebarResizeDrag() {
   return sidebarResizeDragActive;
 }
 
-export function resolveSidebarWidth(
-  saved: string | null,
-  defaultWidth = SIDEBAR_DEFAULT_WIDTH,
-  minWidth = SIDEBAR_MIN_WIDTH,
-) {
-  const value = saved?.trim() ? Number(saved) : NaN;
-  return Number.isFinite(value) && value > 0
-    ? Math.max(minWidth, Math.min(SIDEBAR_MAX_WIDTH, value))
-    : defaultWidth;
-}
-
 export function resolveSidebarOverlayWidth(width: number, viewportWidth: number) {
   return Math.min(width, Math.max(0, viewportWidth - 56));
-}
-
-export function clampSidebarResizeWidth(
-  width: number,
-  maxWidth = SIDEBAR_MAX_WIDTH,
-  minWidth = SIDEBAR_MIN_WIDTH,
-) {
-  return Math.max(Math.min(minWidth, maxWidth), Math.min(maxWidth, width));
 }
 
 export function resolveSidebarKeyboardWidth(
