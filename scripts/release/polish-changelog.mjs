@@ -36,7 +36,7 @@ function stripFence(text) {
 // 通过校验返回 Markdown 行数组；模型判断没有用户可感知改动时返回 []；不合格时抛错并说明原因。
 export function validatePolishedMarkdown(raw) {
   const text = stripFence(raw);
-  if (text === "无") return [];
+  if (!text || /^[（(]?无[)）]?[。.]?$/.test(text)) return [];
   const out = [];
   let section = -1;
   let count = 0;
@@ -113,7 +113,7 @@ async function requestPolish({ baseUrl, apiKey, model, version, lines, fetchImpl
   assert.ok(response.ok, `网关返回 HTTP ${response.status}`);
   const data = await response.json();
   const content = data?.choices?.[0]?.message?.content;
-  assert.ok(typeof content === "string" && content.trim(), "模型没有返回内容");
+  assert.ok(typeof content === "string", "模型没有返回内容");
   return { content, servedModel: data.model || model };
 }
 

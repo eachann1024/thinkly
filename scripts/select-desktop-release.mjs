@@ -43,9 +43,20 @@ if (onMain) {
       autoBump = true;
       const changelog = readFileSync(resolve(ROOT, "CHANGELOG.md"), "utf8");
       const notes = await chooseReleaseBullets({ version, auto, changelog });
-      plan = { version, autoBump: true, subjects: auto.subjects, ...notes };
-      applyReleasePlan(ROOT, plan);
-      console.log(`自动升版本 ${packageVersion} → ${version}（自 ${previous.tag_name} 起有 ${auto.subjects.length} 条面向用户提交）`);
+      if (notes.skip) {
+        version = packageVersion;
+        autoBump = false;
+        build = false;
+        publish = false;
+        releaseTag = (sameVersion ?? previous).tag_name;
+        const line = `跳过自动发版：${notes.reason}（自 ${previous.tag_name} 起 ${auto.subjects.length} 条提交）。需要强发请手动运行 workflow 并勾选 force。`;
+        console.log(line);
+        if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${line}\n`);
+      } else {
+        plan = { version, autoBump: true, subjects: auto.subjects, ...notes };
+        applyReleasePlan(ROOT, plan);
+        console.log(`自动升版本 ${packageVersion} → ${version}（自 ${previous.tag_name} 起有 ${auto.subjects.length} 条面向用户提交）`);
+      }
     } else {
       build = false;
       publish = false;
