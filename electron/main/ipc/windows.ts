@@ -14,6 +14,7 @@ import {
   type CreateWorkspaceWindowOpts,
 } from "../windows";
 import { revealSavedMarkdownInWorkspace } from "../openMarkdownFiles";
+import { positionTrafficLights } from "../windows/configuration";
 import { senderWindow } from "./common";
 
 export function registerWindowsIpc(): void {
@@ -49,8 +50,8 @@ export function registerWindowsIpc(): void {
       const win = senderWindow(event);
       if (!win || win.isDestroyed()) return;
       const context = lookupWindowContext(win);
-      if (context?.kind !== "workspace") return;
-      setMainWindowTitleBarHeight(win, height);
+      if (context?.kind === "workspace") setMainWindowTitleBarHeight(win, height);
+      else positionTrafficLights(win, height);
     },
   );
 
@@ -85,10 +86,15 @@ export function registerWindowsIpc(): void {
   );
 
   ipcMain.handle("desktop:closeWindow", async (event, windowId?: string) => {
-    closeWorkspaceWindow(
-      typeof windowId === "string" && windowId.trim() ? windowId : undefined,
-      senderWindow(event),
-    );
+    const sender = senderWindow(event);
+    const id = typeof windowId === "string" && windowId.trim() ? windowId : undefined;
+    // Workspace, search, and quick note stay on their own close path.
+    // Standalone windows are not in that registry, so the caption button closes them.
+    if (!id && sender && !sender.isDestroyed() && !lookupWindowContext(sender)) {
+      sender.close();
+      return;
+    }
+    closeWorkspaceWindow(id, sender);
   });
 
   ipcMain.handle("desktop:minimizeWindow", async (event) => {

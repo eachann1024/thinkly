@@ -3,6 +3,10 @@ import { NOTIFICATION_ACTION_CHANNEL, NotificationMailbox, parseNotificationActi
 import { lookupWindowContext, showOrCreateMainWindow } from "./windows";
 import { raiseWindow } from "./windows/activation";
 
+export function deliverWorkspaceNotification(action: NotificationAction, preferred?: BrowserWindow | null): boolean {
+  return navigate(action, preferred);
+}
+
 const mailbox = new NotificationMailbox();
 const ready = new WeakSet<WebContents>();
 const tracked = new WeakSet<WebContents>();

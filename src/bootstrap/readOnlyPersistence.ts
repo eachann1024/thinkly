@@ -8,7 +8,7 @@ type PersistApi<S> = {
   rehydrate: () => Promise<void> | void;
 };
 
-function makeReadOnly<S>(persist: PersistApi<S>): void {
+export function makeStoreReadOnly<S>(persist: PersistApi<S>): void {
   const storage = persist.getOptions().storage;
   if (!storage) return;
   persist.setOptions({
@@ -21,8 +21,8 @@ function makeReadOnly<S>(persist: PersistApi<S>): void {
 }
 
 export function installReadOnlyPersistence(): void {
-  makeReadOnly(useSettings.persist as unknown as PersistApi<unknown>);
-  makeReadOnly(useNotebooks.persist as unknown as PersistApi<unknown>);
+  makeStoreReadOnly(useSettings.persist as unknown as PersistApi<unknown>);
+  makeStoreReadOnly(useNotebooks.persist as unknown as PersistApi<unknown>);
 }
 
 export async function refreshReadOnlyPersistence(): Promise<void> {

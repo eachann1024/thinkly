@@ -53,7 +53,7 @@ export function rendererDevUrl(): string | null {
 }
 
 export function rendererFile(
-  name: "index.html" | "quicknote.html" | "search.html",
+  name: "index.html" | "quicknote.html" | "search.html" | "window.html" | "asset-maintenance.html",
 ): string {
   return path.join(__dirname, "../renderer", name);
 }
@@ -98,6 +98,12 @@ export function trafficLightPosition(): { x: number; y: number } {
 export function applyTrafficLightPosition(win: BrowserWindow): void {
   if (process.platform !== "darwin" || win.isDestroyed()) return;
   win.setWindowButtonPosition(trafficLightPosition());
+}
+
+export function positionTrafficLights(win: BrowserWindow, height: number): void {
+  if (process.platform !== "darwin" || win.isDestroyed()) return;
+  if (!Number.isFinite(height) || height < 24 || height > 96) return;
+  win.setWindowButtonPosition(trafficLightPositionForTitleBar(height));
 }
 
 export function setMainWindowTitleBarHeight(

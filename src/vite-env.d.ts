@@ -63,6 +63,7 @@ declare global {
     cancelMermaidPreview: (requestId: string) => void;
     renderMermaidPreview: (request: import("./lib/preview-renderer/contract").MermaidPreviewRequest) => Promise<string>;
     appearance: import("./lib/appearance-contract").AppearanceBridge;
+    auxiliary: import("./lib/auxiliary-window/contract").AuxiliaryBridge;
     gitSync: import("./lib/git-sync-contract").GitSyncBridge;
     assetMaintenance: import("./lib/asset-maintenance-contract").AssetMaintenanceBridge;
     web: {
