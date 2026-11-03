@@ -6,16 +6,14 @@ import { canonicalLocalPath } from "../../src/lib/canonicalLocalPath";
 import { physicalLocalPath } from "./physicalLocalPath";
 
 const ROOTS_FILE = "vault-roots.json";
+const GRANTED_FILE = "granted-folders.json";
 
 const vaultRoots = new Set<string>();
+const grantedFolders = new Set<string>();
 const sessionAllowed = new Set<string>();
 
 export function normalizePath(p: string): string {
   return canonicalLocalPath(path.resolve(p));
-}
-
-function rootsFilePath(): string {
-  return path.join(app.getPath("userData"), ROOTS_FILE);
 }
 
 export function attachmentsRoot(): string {
@@ -31,25 +29,46 @@ export function downloadsRoot(): string {
 }
 
 export function loadVaultRoots(): void {
-  vaultRoots.clear();
-  try {
-    const raw = readFileSync(rootsFilePath(), "utf8");
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      for (const entry of parsed) {
-        if (typeof entry === "string" && entry.trim()) {
-          vaultRoots.add(normalizePath(entry));
-        }
-      }
-    }
-  } catch {
-  }
+  readPathList(ROOTS_FILE, vaultRoots);
+  readPathList(GRANTED_FILE, grantedFolders);
   mkdirSync(attachmentsRoot(), { recursive: true });
 }
 
-function persistVaultRoots(): void {
+function readPathList(file: string, target: Set<string>): void {
+  target.clear();
+  try {
+    const parsed = JSON.parse(readFileSync(path.join(app.getPath("userData"), file), "utf8"));
+    if (!Array.isArray(parsed)) return;
+    for (const entry of parsed) {
+      if (typeof entry === "string" && entry.trim()) target.add(normalizePath(entry));
+    }
+  } catch {
+  }
+}
+
+function writePathList(file: string, source: Set<string>): void {
   mkdirSync(app.getPath("userData"), { recursive: true });
-  writeFileSync(rootsFilePath(), JSON.stringify([...vaultRoots], null, 2));
+  writeFileSync(path.join(app.getPath("userData"), file), JSON.stringify([...source], null, 2));
+}
+
+function persistVaultRoots(): void {
+  writePathList(ROOTS_FILE, vaultRoots);
+}
+
+/** Folders the user granted through the access prompt; kept across restarts. */
+export function addGrantedFolder(p: string): string {
+  const resolved = normalizePath(p);
+  if (grantedFolders.has(resolved)) return resolved;
+  for (const existing of [...grantedFolders]) {
+    if (isUnder(resolved, existing)) grantedFolders.delete(existing);
+  }
+  grantedFolders.add(resolved);
+  writePathList(GRANTED_FILE, grantedFolders);
+  return resolved;
+}
+
+export function listVaultRoots(): string[] {
+  return [...vaultRoots];
 }
 
 export function addVaultRoot(p: string): string {
@@ -101,7 +120,7 @@ function isUnder(root: string, target: string, caseInsensitive = process.platfor
 }
 
 function allowedRoots(): string[] {
-  return [userDataRoot(), downloadsRoot(), ...vaultRoots, ...sessionAllowed];
+  return [userDataRoot(), downloadsRoot(), ...vaultRoots, ...grantedFolders, ...sessionAllowed];
 }
 
 function physicalAllowedRoots(roots: string[]): string[] {

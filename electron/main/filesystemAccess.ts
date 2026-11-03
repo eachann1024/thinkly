@@ -1,6 +1,7 @@
 import { dialog, type BrowserWindow, type OpenDialogOptions } from "electron";
+import { existsSync } from "node:fs";
 import path from "node:path";
-import { addSessionAllowed, assertAllowed, normalizeLocalOpenPath } from "./allowlist";
+import { addGrantedFolder, assertAllowed, listVaultRoots, normalizeLocalOpenPath } from "./allowlist";
 import { withQueuedWindowDialog } from "./dialogSession";
 import { t } from "./i18n/nativeServices";
 
@@ -23,6 +24,32 @@ function containsPath(directory: string, target: string) {
   return relative === "" || (!relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative));
 }
 
+function commonAncestor(a: string, b: string) {
+  const left = a.split(path.sep);
+  const right = b.split(path.sep);
+  const insensitive = process.platform === "win32" || process.platform === "darwin";
+  let index = 0;
+  while (index < left.length && index < right.length &&
+    (insensitive ? left[index]!.toLowerCase() === right[index]!.toLowerCase() : left[index] === right[index])) index += 1;
+  return left.slice(0, index).join(path.sep) || path.sep;
+}
+
+/** Open the prompt at the closest folder shared with an added notebook, e.g. the parent of the file list. */
+function suggestedFolder(target: string, fallback: string) {
+  let best: string | null = null;
+  for (const root of listVaultRoots()) {
+    const shared = commonAncestor(root, target);
+    if (shared !== path.sep && shared !== path.parse(target).root && (!best || shared.length > best.length)) best = shared;
+  }
+  let folder = best ?? fallback;
+  while (!existsSync(folder) && path.dirname(folder) !== folder) folder = path.dirname(folder);
+  return folder;
+}
+
+function missingTarget(target: string) {
+  return Object.assign(new Error(`ENOENT: no such file or directory, '${target}'`), { code: "ENOENT", path: target });
+}
+
 async function requestAccess(owner: BrowserWindow | null, target: string, directory: boolean,
   revision: number, probe: () => Promise<unknown>, accessRequestId?: string) {
   const folder = directory ? target : path.dirname(target);
@@ -41,14 +68,14 @@ async function requestAccess(owner: BrowserWindow | null, target: string, direct
       title: t("requestFileAccess"),
       message: t("requestFileAccessMessage", { path: target }),
       buttonLabel: t("grantFileAccess"),
-      defaultPath: folder,
+      defaultPath: suggestedFolder(target, folder),
       properties: ["openDirectory"],
     };
     const result = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options);
     if (result.canceled || !result.filePaths.length) throw new Error(t("fileAccessCancelled"));
     const selected = normalizeLocalOpenPath(result.filePaths[0]!);
     if (!selected || !containsPath(selected, target)) throw new Error(t("fileAccessWrongFolder"));
-    addSessionAllowed(selected);
+    addGrantedFolder(selected);
     failedRequests.delete(key);
     accessRevision += 1;
   }));
@@ -77,6 +104,8 @@ export async function withFilesystemAccess<T>(
   try { return await execute(); }
   catch (error) {
     if (!permissionDenied(error)) throw error;
+    // Asking for access to a path that does not exist only produces a pointless prompt.
+    if (!existsSync(target)) throw missingTarget(target);
     try {
       await requestAccess(owner, target, directory, revision, execute, accessRequestId);
       return await execute();
