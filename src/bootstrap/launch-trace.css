@@ -11,9 +11,20 @@
   --goose-launch-navigation-width: calc(4 * var(--goose-icon-button-height, 2rem) + 0.75rem);
   position: fixed;
   inset: 0;
+  z-index: 70000;
   overflow: hidden;
   pointer-events: none;
   background: var(--goose-shell-surface);
+}
+
+.goose-launch-host {
+  position: fixed;
+  inset: 0;
+  z-index: 70000;
+  pointer-events: none;
+  background: var(--goose-shell-surface);
+  /* Keeps the fixed trace inside this layer so the exit fade covers it. */
+  transform: translate(0);
 }
 
 .dark .goose-launch-root {
@@ -236,4 +247,29 @@
 @media (prefers-reduced-motion: reduce) {
   .goose-launch-root *, .goose-launch-root *::after { animation: none; }
   .goose-launch-trace, .goose-launch-divider { display: none; }
+}
+
+/* Bars leave first, then the shell fades and the workspace shows through. */
+.goose-launch-host[data-exiting] .goose-launch-bar,
+.goose-launch-host[data-exiting] .goose-launch-icon,
+.goose-launch-host[data-exiting] .goose-launch-caret,
+.goose-launch-host[data-exiting] .goose-launch-selected {
+  animation: goose-launch-out 120ms ease-out both;
+}
+
+.goose-launch-host[data-exiting] {
+  animation: goose-launch-out 120ms ease-out 120ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goose-launch-host[data-exiting] .goose-launch-bar,
+  .goose-launch-host[data-exiting] .goose-launch-icon,
+  .goose-launch-host[data-exiting] .goose-launch-caret,
+  .goose-launch-host[data-exiting] .goose-launch-selected {
+    animation: none;
+  }
+
+  .goose-launch-host[data-exiting] {
+    animation: goose-launch-out 120ms ease-out both;
+  }
 }

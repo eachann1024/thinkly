@@ -1,4 +1,5 @@
-import type { CSSProperties } from "react";
+import { useLayoutEffect, type CSSProperties } from "react";
+import { noteLaunchTraceMounted } from "./launchClock";
 import { isElectronRuntime } from "@/lib/electron/runtime";
 import { WORKSPACE_SIDEBAR_DEFAULT_WIDTH } from "@/lib/sidebarLayout";
 import "./launch-trace.css";
@@ -21,6 +22,9 @@ const delayed = (delay: number, width?: string): CSSProperties => ({
 }) as CSSProperties;
 
 export function LaunchTrace() {
+  useLayoutEffect(() => {
+    noteLaunchTraceMounted();
+  }, []);
   // 工作区的平台 class 在挂载后才设置，启动骨架沿用相同的平台判断。
   const platform = isElectronRuntime() && /Win/i.test(navigator.platform)
     ? "windows"
