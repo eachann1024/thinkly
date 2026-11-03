@@ -1,0 +1,12 @@
+.image-export-window {
+  --goose-control-height-compact: 30px;
+  --goose-control-height-small: 30px;
+  --goose-control-font-size: 13px;
+  --goose-field-radius: 6px;
+  background: hsl(var(--goose-shell-bg));
+}
+
+.image-export-window .goose-field {
+  padding: 0 8px;
+  font-size: 13px;
+}
