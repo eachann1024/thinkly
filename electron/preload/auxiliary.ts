@@ -28,6 +28,7 @@ export const auxiliary: AuxiliaryBridge = {
   close: () => ipcRenderer.invoke(AUXILIARY_CHANNELS.close),
   openPage: (pageId) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "open-page", pageId }),
   openSettings: (section) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "open-settings", section }),
+  applyAISetup: (config) => ipcRenderer.invoke(AUXILIARY_CHANNELS.relay, { type: "apply-ai-setup", config }),
   requestSnapshot: <T = unknown>(key: string) =>
     ipcRenderer.invoke(AUXILIARY_CHANNELS.snapshot, key) as Promise<AuxiliarySnapshotResponse & { value?: T }>,
   onSnapshotRequest: (callback) => {

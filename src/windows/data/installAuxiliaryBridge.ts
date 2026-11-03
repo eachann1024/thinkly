@@ -3,6 +3,7 @@ import { useNotebooks } from "@/stores/useNotebooks";
 import { usePages } from "@/stores/usePages";
 import { useReflection } from "@/stores/useReflection";
 import { useSettings } from "@/stores/useSettings";
+import { applyAuxiliaryAISetup } from "./applyAuxiliaryAISetup";
 import { hasMainSnapshot, readRegisteredSnapshot, registerMainSnapshot } from "./mainSnapshot";
 
 let installed = false;
@@ -52,6 +53,10 @@ export function installAuxiliaryMainBridge(): void {
     }
   });
   bridge.onCommand((command) => {
+    if (command.type === "apply-ai-setup") {
+      applyAuxiliaryAISetup(command.config);
+      return;
+    }
     if (command.type !== "open-page" || !command.pageId) return;
     window.dispatchEvent(new CustomEvent("goose-note:request-close-settings"));
     openPageFromSidebar(command.pageId, "permanent");

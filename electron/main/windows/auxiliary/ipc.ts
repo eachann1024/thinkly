@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain } from "electron";
 import { randomUUID } from "node:crypto";
 import {
   AUXILIARY_CHANNELS,
+  type AuxiliaryAISetupConfig,
   type AuxiliaryMainCommand,
   type AuxiliaryRelayMessage,
   type AuxiliarySnapshotResponse,
@@ -90,6 +91,11 @@ export function registerAuxiliaryIpc(): void {
     }
     if (relay.type === "open-settings") {
       return deliverWorkspaceNotification({ type: "settings", tab: parseAuxiliarySection(relay.section) });
+    }
+    if (relay.type === "apply-ai-setup") {
+      const config = jsonValue(relay.config);
+      if (!config || typeof config !== "object" || Array.isArray(config)) return false;
+      return sendCommand({ type: "apply-ai-setup", config: config as AuxiliaryAISetupConfig });
     }
     return false;
   });
