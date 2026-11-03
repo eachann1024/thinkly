@@ -5,17 +5,22 @@ import { ENTER_DOCUMENT_BODY_EVENT, saveDocumentTitle, isPlainDocumentNavigation
 import { createDocumentTitleHistoryPlugin } from "./documentTitleHistory";
 import { markUserInteraction } from "@/lib/editor-interaction-signal";
 import {
-  canReturnToDocumentTitle,
   enterFirstBodyParagraph,
   focusFirstBodyBlock,
   mergeFirstBodyParagraph,
   mergedFirstBodyTitle,
   shouldBackspaceToDocumentTitle,
+  shouldReturnToDocumentTitle,
 } from "./documentTitleNavigation";
+import { duplicateFileTitleForPage, syncDuplicateFileTitle } from "../extensions/duplicateFileTitleExtension";
 import type { EditorRuntime } from "./useEditorSession";
 
 export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boolean) {
-  const { editor, activePageId, pageRef, editorContainerRef, userInteractedRef, contentModeRef } = runtime;
+  const { editor, activePageId, page, pageRef, editorContainerRef, userInteractedRef, contentModeRef } = runtime;
+  useEffect(() => {
+    if (editor.headless) return;
+    syncDuplicateFileTitle(editor.prosemirrorView, duplicateFileTitleForPage(pageRef.current));
+  }, [editor, page?.id, page?.localFilePath, pageRef]);
   useEffect(() => {
     const container = editorContainerRef.current;
     const scope = container?.closest(".page-layout-document");
@@ -79,7 +84,8 @@ export function useDocumentTitleNavigation(runtime: EditorRuntime, editable: boo
       if (!(target instanceof Node) || !editor.domElement?.contains(target)) return;
       if (target instanceof Element && target.closest("input, textarea, select, [contenteditable='false']")) return;
       if (editor.getExtension(SuggestionMenu)?.shown()) return;
-      if (!(backspace ? shouldBackspaceToDocumentTitle(editor) : canReturnToDocumentTitle(editor))) return;
+      const upward = event.key === "ArrowUp" ? "ArrowUp" : "ArrowLeft";
+      if (!(backspace ? shouldBackspaceToDocumentTitle(editor) : shouldReturnToDocumentTitle(editor, upward))) return;
       event.preventDefault();
       event.stopPropagation();
       const end = title.value.length;
