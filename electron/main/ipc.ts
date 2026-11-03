@@ -12,6 +12,7 @@ import { registerWatchIpc } from "./ipc/watch";
 import { registerIntegrationIpc } from "./ipc/integration";
 import { registerUpdatesIpc } from "./ipc/updates";
 import { registerClipboardIpc } from "./ipc/clipboard";
+import { registerAuxiliaryIpc } from "./windows/auxiliary/ipc";
 import { registerWindowsIpc } from "./ipc/windows";
 import { registerHotkeysIpc } from "./ipc/hotkeys";
 import { registerSearchWindowIpc } from "./ipc/searchWindow";
@@ -35,6 +36,7 @@ export function registerIpcHandlers(): void {
   registerUpdatesIpc();
   registerClipboardIpc();
   registerWindowsIpc();
+  registerAuxiliaryIpc();
   registerHotkeysIpc();
   registerSearchWindowIpc();
   registerWebIpc();

@@ -4,6 +4,7 @@ import {
   isPrimaryModW,
 } from "../closeTabAccelerator";
 import { markQuicknoteActivateSuppressed } from "./visibility";
+import { findAuxiliaryWindow } from "./auxiliary/session";
 import { getAssetMaintenanceWindow } from "./maintenance";
 import { lookupWindowContext } from "./registry";
 
@@ -11,7 +12,7 @@ export function requestCloseActiveTab(
   win: BrowserWindow | null | undefined,
 ): void {
   if (!win || win.isDestroyed()) return;
-  if (win === getAssetMaintenanceWindow()) {
+  if (findAuxiliaryWindow(win) || win === getAssetMaintenanceWindow()) {
     win.close();
     return;
   }

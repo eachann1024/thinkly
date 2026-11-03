@@ -57,6 +57,8 @@ export async function initializeApplicationState(
     const { installAssetMaintenanceSnapshotResponder } =
       await import("@/lib/asset-maintenance-snapshot");
     installAssetMaintenanceSnapshotResponder();
+    const { installAuxiliaryMainBridge } = await import("@/windows/data/installAuxiliaryBridge");
+    installAuxiliaryMainBridge();
     const { installGitSyncResponder } =
       await import("@/lib/git-sync-responder");
     installGitSyncResponder();
