@@ -7,22 +7,32 @@
 .notebook-ai-overview-clock time { color: var(--goose-text-primary); font: 600 26px/1.15 ui-monospace, "SF Mono", Menlo, monospace; font-variant-numeric: tabular-nums; }
 .notebook-ai-overview-clock span { color: var(--goose-text-warning); font-size: 12px; }
 
-/* Every segment shares one height; the live one only animates its fill, so nothing sticks out. */
-.notebook-ai-overview-bar { display: flex; height: 10px; gap: 2px; overflow: hidden; border-radius: 5px; }
-.notebook-ai-overview-bar > span { min-width: 3px; flex-basis: 0; background: var(--stage); transition: flex-grow .9s linear; }
+/* Every segment shares one height; the live one only animates its fill, so nothing sticks out.
+   contain: strict makes the bar a relayout boundary: the flex-grow tween only lays out these spans, not the panel. */
+.notebook-ai-overview-bar { display: flex; height: 10px; gap: 2px; overflow: hidden; border-radius: 5px; contain: strict; }
+.notebook-ai-overview-bar > span { position: relative; overflow: hidden; min-width: 3px; flex-basis: 0; background: var(--stage); transition: flex-grow .9s linear; }
 .notebook-ai-overview [data-stage="read"] { --stage: var(--goose-accent-solid); }
 .notebook-ai-overview [data-stage="write"] { --stage: var(--goose-text-warning); }
 .notebook-ai-overview [data-stage="visual"] { --stage: var(--goose-text-success); }
 .notebook-ai-overview [data-stage="think"] { --stage: var(--goose-editor-highlight-purple-text); }
 .notebook-ai-overview [data-stage="compose"] { --stage: var(--goose-text-primary); }
 .notebook-ai-overview [data-stage="wait"], .notebook-ai-overview [data-stage="response"] { --stage: hsl(var(--muted-foreground) / .55); }
-.notebook-ai-overview-bar > [data-live],
-.notebook-ai-overview-legend [data-current] dt::before {
+/* The stripes slide on their own layer with transform, so the crawl never repaints the bar. */
+.notebook-ai-overview-bar > [data-live]::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 -16px;
   background-image: repeating-linear-gradient(135deg, hsl(var(--background) / .45) 0 4px, transparent 4px 8px);
   background-size: 16px 100%;
   animation: notebook-ai-overview-crawl 1s linear infinite;
+  will-change: transform;
 }
-@keyframes notebook-ai-overview-crawl { from { background-position: 0 0; } to { background-position: 16px 0; } }
+@keyframes notebook-ai-overview-crawl { from { transform: translateX(0); } to { transform: translateX(16px); } }
+.notebook-ai-overview-legend [data-current] dt::before {
+  background-image: repeating-linear-gradient(135deg, hsl(var(--background) / .45) 0 4px, transparent 4px 8px);
+  animation: notebook-ai-overview-pulse 1.2s ease-in-out infinite;
+}
+@keyframes notebook-ai-overview-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
 
 .notebook-ai-overview-legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin: 0; }
 .notebook-ai-overview-legend > div { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
@@ -40,5 +50,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .notebook-ai-overview-bar > span { transition: none; }
-  .notebook-ai-overview-bar > [data-live], .notebook-ai-overview-legend [data-current] dt::before { animation: none; }
+  .notebook-ai-overview-bar > [data-live]::after, .notebook-ai-overview-legend [data-current] dt::before { animation: none; }
 }

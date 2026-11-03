@@ -126,6 +126,28 @@
  font-family: var(--font-default);
  font-size: 0.95rem;
  line-height: 1.5;
+ cursor: pointer;
+ transition:
+  border-color var(--goose-control-motion-duration) ease,
+  color var(--goose-control-motion-duration) ease,
+  transform var(--goose-control-motion-duration) ease;
+}
+
+.notebook-ai-empty-suggestion:hover,
+.notebook-ai-empty-suggestion:focus-visible {
+ border-color: var(--goose-accent-solid);
+ background: var(--goose-input-surface);
+ color: var(--goose-text-primary);
+ transform: translateY(-1px);
+}
+
+.notebook-ai-empty-suggestion:active {
+ transform: scale(0.98);
+}
+
+.notebook-ai-empty-suggestion:hover .notebook-ai-empty-suggestion-index,
+.notebook-ai-empty-suggestion:focus-visible .notebook-ai-empty-suggestion-index {
+ color: var(--goose-accent-solid);
 }
 
 .notebook-ai-empty-suggestion-index {
@@ -142,6 +164,7 @@
  font-size: 11px;
  font-weight: var(--font-weight-medium);
  line-height: 1;
+ transition: color var(--goose-control-motion-duration) ease;
 }
 
 
@@ -162,6 +185,12 @@
 @media (prefers-reduced-motion: reduce) {
  .notebook-ai-conversation-title {
   animation: none;
+ }
+
+ .notebook-ai-empty-suggestion,
+ .notebook-ai-empty-suggestion:hover,
+ .notebook-ai-empty-suggestion:active {
+  transform: none;
  }
 }
 
