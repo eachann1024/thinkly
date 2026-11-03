@@ -15,7 +15,13 @@ a{color:#779de8}a:hover{color:#9db8ef}
 @keyframes lit{0%,100%{opacity:.2}50%{opacity:1}}
 @keyframes rise{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(420px)}}
-.cr-col{width:3px;height:24px;transform-origin:bottom;animation:eq 1.2s ease-in-out infinite;background:radial-gradient(circle,#779de8 1.2px,transparent 1.6px) 0 0/3px 4px repeat-y;will-change:transform}
+@keyframes trail{0%{opacity:1;transform:scale(2)}8%{opacity:.9;transform:scale(1.5)}30%,100%{opacity:.25;transform:scale(1)}}
+@keyframes breathe{0%,100%{transform:scale(.9)}50%{transform:scale(1.1)}}
+.cr-mark{position:relative;width:32px;height:32px;flex:none}
+.cr-star{position:absolute;inset:0;transform-origin:16px 16px;animation:breathe 1.6s ease-in-out infinite;will-change:transform}
+.cr-sd{position:absolute;border-radius:50%;background:#779de8}
+.cr-o{position:absolute;width:2px;height:2px}
+.cr-o i{display:block;width:2px;height:2px;border-radius:50%;background:#9db8ef;animation:trail 1.4s linear infinite;will-change:transform,opacity}
 .cr-cell{width:6px;height:6px;border-radius:2px;background:#2c2c2c}
 .cr-on{background:#779de8}
 .cr-now{background:#779de8;animation:lit 1s ease-in-out infinite}
@@ -40,9 +46,12 @@ a{color:#779de8}a:hover{color:#9db8ef}
 <div style="align-self:flex-end;max-width:80%;background:#242424;border-radius:12px;padding:8px 12px;font-size:14px;line-height:20px">把这两条命令解释清楚，整理成清单</div>
 
 <div style="border:1px solid #2a2a2a;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;background:#1b1b1b">
-<div style="display:flex;align-items:flex-end;gap:12px">
-<div aria-hidden="true" style="display:flex;align-items:flex-end;gap:2px;height:24px">
-<sc-for list="{{cols}}" as="c" hint-placeholder-count="14"><span class="cr-col" style="{{c.style}}"></span></sc-for>
+<div style="display:flex;align-items:center;gap:12px">
+<div class="cr-mark" aria-hidden="true">
+<sc-for list="{{orbit}}" as="d" hint-placeholder-count="20"><span class="cr-o" style="{{d.style}}"><i style="{{d.inner}}"></i></span></sc-for>
+<div class="cr-star">
+<sc-for list="{{star}}" as="d" hint-placeholder-count="13"><span class="cr-sd" style="{{d.style}}"></span></sc-for>
+</div>
 </div>
 <div style="display:flex;flex-direction:column">
 <span style="font-size:13px;line-height:20px">生成回答</span>
@@ -83,11 +92,24 @@ a{color:#779de8}a:hover{color:#9db8ef}
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":420,"height":780}}'>
 class Component extends DCLogic {
 renderVals() {
-const cols = [];
-for (let i = 0; i < 14; i++) cols.push({ style: 'animation-delay:-' + ((i * 0.37) % 1.2).toFixed(2) + 's;animation-duration:' + (0.9 + (i % 4) * 0.15).toFixed(2) + 's' });
+const star = [], R = 8;
+for (let y = -R; y <= R; y += 2) {
+for (let x = -R; x <= R; x += 2) {
+const v = Math.sqrt(Math.abs(x) / R) + Math.sqrt(Math.abs(y) / R);
+if (v > 1) continue;
+const s = v < 0.35 ? 2.4 : 1.6;
+star.push({ style: 'left:' + (16 + x - s / 2) + 'px;top:' + (16 + y - s / 2) + 'px;width:' + s + 'px;height:' + s + 'px;opacity:' + (1 - v * 0.5).toFixed(2) + (v < 0.35 ? ';background:#c9d8f7' : '') });
+}
+}
+const orbit = [], n = 20, rad = -24 * Math.PI / 180;
+for (let i = 0; i < n; i++) {
+const th = i / n * Math.PI * 2, ex = 15 * Math.cos(th), ey = 6 * Math.sin(th);
+const x = 16 + ex * Math.cos(rad) - ey * Math.sin(rad), y = 16 + ex * Math.sin(rad) + ey * Math.cos(rad);
+orbit.push({ style: 'left:' + (x - 1).toFixed(1) + 'px;top:' + (y - 1).toFixed(1) + 'px;opacity:' + (Math.sin(th) > 0 ? 0.95 : 0.4), inner: 'animation-delay:-' + (1.4 * (1 - i / n)).toFixed(2) + 's' });
+}
 const cells = [];
 for (let i = 0; i < 40; i++) cells.push({ cls: i < 26 ? 'cr-cell cr-on' : i === 26 ? 'cr-cell cr-now' : 'cr-cell' });
-return { cols, cells };
+return { star, orbit, cells };
 }
 }
 </script>
