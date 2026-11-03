@@ -167,6 +167,7 @@ export interface PagesState {
     title?: string;
     content?: JSONContent;
     filePath?: string;
+    settings?: import("@/lib/note-metadata/contract").NoteSettings;
   }) => Promise<string | null>;
   createLocalFolderRecord: (options: {
     workspaceId: string;

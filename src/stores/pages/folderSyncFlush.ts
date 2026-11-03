@@ -11,16 +11,29 @@ ja:
   recoveryIncomplete: "ローカルページの復元ログの確認が完了していません：{{id}}"
 `);
 import type { PagesState } from "./types";
-import { acknowledgeRecoveryEntry } from "@/lib/storage/recoveryJournal";
+import { acknowledgeRecoveryEntry, getRecoveryEntry } from "@/lib/storage/recoveryJournal";
+import { getLocalRecoveryContentSignature } from "@/lib/storage/localRecoverySignature";
+import { recoverySettingsMatch } from "@/lib/storage/localRecoverySettings";
 import { getLocalSavePageState, localSavePageIds, transitionLocalSave } from "./folderSyncRegistry";
 import { clearLocalSaveTimers, cloneJSONContent, localSaveDebounceTimers, localSaveMaxWaitTimers, localSaveWriteChains } from "./folderSyncResources";
 
 let nextAttemptId = 0;
 export const flushPendingLocalSaveByPageIdInternal = (pageId: string, getState: () => PagesState) => {
   clearLocalSaveTimers(pageId);
-  if (getLocalSavePageState(pageId).permission.status === "confirmation-required") return Promise.resolve();
   const chain = localSaveWriteChains.get(pageId) ?? Promise.resolve();
   const next = chain.catch(() => {}).then(async () => {
+    const restored = getLocalSavePageState(pageId);
+    if (restored.permission.status === "confirmation-required") {
+      const entry = getRecoveryEntry("local-file", pageId);
+      const page = getState().pages[pageId];
+      const signature = page && getLocalRecoveryContentSignature(page.content);
+      if (!entry || !page || signature == null || signature !== getLocalRecoveryContentSignature(entry.content) ||
+          !recoverySettingsMatch(page, entry.settings)) {
+        throw new Error(extraText("recoveryIncomplete", { id: pageId }));
+      }
+      // 兼容旧会话留下的恢复队列，继续普通保存，仍执行磁盘冲突校验。
+      transitionLocalSave(pageId, { type: "queue", content: cloneJSONContent(page.content), revision: entry.revision });
+    }
     while (getLocalSavePageState(pageId).pending.status === "queued") {
       const attemptId = ++nextAttemptId;
       const started = transitionLocalSave(pageId, { type: "write-started", attemptId });
@@ -29,8 +42,13 @@ export const flushPendingLocalSaveByPageIdInternal = (pageId: string, getState: 
       try {
         const saved = await getState().saveLocalPageContent(pageId, cloneJSONContent(attempt.content));
         if (!saved) throw new Error(extraText("saveIncomplete", { id: pageId }));
-        const confirmationRequired = getLocalSavePageState(pageId).permission.status === "confirmation-required";
-        const acknowledged = !confirmationRequired && attempt.revision !== null && acknowledgeRecoveryEntry("local-file", pageId, attempt.revision);
+        const entry = getRecoveryEntry("local-file", pageId);
+        const page = getState().pages[pageId];
+        const signature = getLocalRecoveryContentSignature(attempt.content);
+        const acknowledged = attempt.revision !== null && entry?.revision === attempt.revision &&
+          page && !page.editorDraft && page.localFilePath && !getState().dirtyLocalPageIds[pageId] && signature !== null &&
+          signature === getLocalRecoveryContentSignature(entry.content) && recoverySettingsMatch(page, entry.settings) &&
+          acknowledgeRecoveryEntry("local-file", pageId, attempt.revision);
         transitionLocalSave(pageId, { type: "write-succeeded", attemptId, acknowledgedRevision: acknowledged ? attempt.revision : null });
       } catch (error) {
         transitionLocalSave(pageId, { type: "write-failed", attemptId });
@@ -39,8 +57,16 @@ export const flushPendingLocalSaveByPageIdInternal = (pageId: string, getState: 
     }
     const current = getLocalSavePageState(pageId);
     if (current.permission.status === "confirmation-required" || current.pending.status !== "empty" || current.recovery.status === "none") return;
+    if (getState().dirtyLocalPageIds[pageId]) return;
     const revision = current.recovery.revision;
-    if (!acknowledgeRecoveryEntry("local-file", pageId, revision)) throw new Error(extraText("recoveryIncomplete", { id: pageId }));
+    const entry = getRecoveryEntry("local-file", pageId);
+    const page = getState().pages[pageId];
+    const signature = page && getLocalRecoveryContentSignature(page.content);
+    if (entry && (entry.revision !== revision || !page || page.editorDraft || !page.localFilePath || signature == null ||
+        signature !== getLocalRecoveryContentSignature(entry.content) || !recoverySettingsMatch(page, entry.settings) ||
+        !acknowledgeRecoveryEntry("local-file", pageId, revision))) {
+      throw new Error(extraText("recoveryIncomplete", { id: pageId }));
+    }
     transitionLocalSave(pageId, { type: "acknowledged", revision });
   });
   const finalized = next.finally(() => {

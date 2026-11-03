@@ -52,7 +52,10 @@ export function registerFilesystemIpc(undoRoot: string): void {
     async (_event, p: string, data: string, exclusive?: boolean) => {
       const target = assertAllowed(p);
       ensureParentDir(target);
-      await withSelfWriteMark([target], () => writeNotebookText(target, data, exclusive));
+      await withSelfWriteMark([target], () => writeNotebookText(target, data, exclusive, () => {
+        assertAllowed(target);
+        assertGitSyncWritable(target);
+      }));
     },
   );
 

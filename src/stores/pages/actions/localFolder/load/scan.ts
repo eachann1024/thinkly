@@ -257,7 +257,7 @@ export const loadLocalFolderPagesOnce = async (
 
     appendLocalFolderOrderEntries(notebookId, localPages);
 
-    recoverScannedLocalPages(set, get, notebookId);
+    await recoverScannedLocalPages(set, get, notebookId);
     useNotebooks.getState().dispatchLocalFolderLoadEvent(notebookId, {
       type: "succeeded", requestId, fingerprint,
       finishedAt: Date.now(),

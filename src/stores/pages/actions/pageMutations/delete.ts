@@ -15,10 +15,9 @@ import {
   isMissingFileError,
   rememberDeleteFailure,
 } from "@/lib/delete-failure";
-import {
-  acquireLocalPageFileOperation,
-  discardPendingLocalSave,
-} from "../../folderSync";
+import { discardPendingLocalSave, getPendingLocalSaveContent } from "../../folderSync";
+import { prepareLocalDeletion } from "./prepareLocalDeletion";
+import { prepareRecoveredLocalDraft } from "../recoverLocalDraft";
 
 function syncSidebarSelectionAfterDelete(
   workspaceId: string,
@@ -72,8 +71,13 @@ export const deletePageAction = async (
       }
     };
 
-    discardPendingLocalSave(id);
-    const releaseFileOperation = await acquireLocalPageFileOperation(id);
+    let releaseFileOperation: () => void;
+    try {
+      releaseFileOperation = await prepareLocalDeletion(get, id);
+    } catch (error) {
+      rememberDeleteFailure(error);
+      return false;
+    }
     try {
       const current = get().pages[id];
       if (!current) return true;
@@ -137,10 +141,25 @@ export const deletePageAction = async (
         }
       }
 
-      await retireNoteMetadata(window.gooseFs, notebook.localPath!, [...removedIds].map(pid => snapshotPages[pid]).filter(Boolean));
+      // 文件已进入回收站后，附属元数据清理失败不能吞掉撤销凭据。
+      if (token) options?.onLocalTrash?.(token);
+      try {
+        await retireNoteMetadata(window.gooseFs, notebook.localPath!, [...removedIds].map(pid => snapshotPages[pid]).filter(Boolean));
+      } catch (error) {
+        console.error("[local-folder] trash metadata cleanup failed", error);
+      }
+      // 回收站操作期间的新编辑不在备份内，保留为新文件草稿继续保存。
+      const retainedPages = [...removedIds].flatMap((pid) => {
+        const latest = get().pages[pid];
+        return latest && (get().dirtyLocalPageIds[pid] || getPendingLocalSaveContent(pid) !== undefined)
+          ? [prepareRecoveredLocalDraft(latest, get().pages, removedIds)] : [];
+      });
+      for (const retained of retainedPages) removedIds.delete(retained.id);
+      for (const pid of removedIds) discardPendingLocalSave(pid);
       runWithPresence(() => set((state) => {
         const newPages = { ...state.pages };
         removedIds.forEach((pid) => delete newPages[pid]);
+        retainedPages.forEach((retained) => { newPages[retained.id] = retained; });
 
         let nextActivePageId = state.activePageId;
         if (removedIds.has(state.activePageId || "")) {
@@ -170,8 +189,10 @@ export const deletePageAction = async (
       );
 
       removePersistedPageSnapshots(snapshotPages, removedIds);
+      for (const retained of retainedPages) {
+        get().updatePage(retained.id, { content: retained.content }, { recordActivity: false });
+      }
 
-      if (token) options?.onLocalTrash?.(token);
       return true;
     } finally {
       releaseFileOperation();

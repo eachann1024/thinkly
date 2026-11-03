@@ -2,18 +2,10 @@
 import "../types";
 declare module "../types" {
   interface MessageCatalog {
-    "src/pages/workspace/hooks/useFileDrop.ts#localMessages:1": { "connectALocalFolderFirst": {  }; "couldnTImportThisFile": {  }; "couldnTLoadTheImporterTryAgain": {  }; "dropAPlainTextFileInMd": {  }; "filesImported": { "count": string | number }; "filesSkipped": { "count": string | number }; "folderOpened": {  }; "importFailed": {  }; "openLocalFolderSettings": {  }; "openOrConnectALocalFolderIn": {  }; "textFileImported": {  }; "theFileCouldnTBeReadAs": {  }; "theFileMayBeDamagedOrUse": {  }; "thisFileFormatIsnTSupportedYet": {  } };
-    "src/pages/workspace/layout/renderWorkspaceShell.tsx#localMessages:1": { "dropToCheckFile": {  }; "dropToImportIntoTheCurrentFolder": {  }; "dropToImportTextFile": {  }; "dropToOpenFolder": {  }; "opensAsALocalFolderNotebook": {  }; "supportsMdMarkdownAndTxt": {  } };
-    "src/pages/workspace/layout/surfaces/GuardedNotebookAiPanel.tsx#localMessages:1": { "retry": {  }; "theAiPanelCouldnTBeDisplayed": {  } };
-    "src/search.tsx#block1:1": { "title": {  } };
-    "src/stores/localFolderOrder.ts#block1:1": { "saveOrderDetail": {  }; "saveOrderFailed": {  } };
-    "src/stores/pages/actions/create/duplicate.ts#block1:1": { "invalidFrontmatterCopy": {  } };
-    "src/stores/pages/actions/create/recovery.ts#block1:1": { "draftDescription": {  }; "draftPreserved": {  } };
-    "src/stores/pages/actions/create/validateEditorDraftTarget.ts#block1:1": { "draftFolderChanged": {  }; "draftFolderMissing": {  }; "draftFolderUnavailable": {  }; "draftNotebookUnavailable": {  } };
     "src/stores/pages/actions/hydrate.ts#block1:1": { "recovered": { "count": number } };
     "src/stores/pages/actions/hydrate.ts#block2:2": { "newerStored": {  }; "recoveredEditor": {  }; "recoveryKept": {  } };
-    "src/stores/pages/actions/localFolder/load/recovery.ts#block1:1": { "recovered": { "count": number } };
-    "src/stores/pages/actions/localFolder/load/recovery.ts#block2:2": { "externalConflict": {  }; "recoveredLocal": {  }; "recoverySeparate": {  } };
+    "src/stores/pages/actions/localFolder/load/recovery.ts#block1:1": { "failed": {  }; "retained": {  } };
+    "src/stores/pages/actions/localFolder/load/recoveryCopy.ts#block1:1": { "copyTitle": { "revision": string | number; "title": string | number } };
     "src/stores/pages/actions/localFolder/load/scan.ts#block1:1": { "readFolderFailed": {  } };
     "src/stores/pages/actions/localFolder/move.ts#block1:1": { "moveFailed": { "reason": string | number }; "nameExists": { "name": string | number } };
     "src/stores/pages/actions/localFolder/move.ts#block2:2": { "fsUnavailable": {  }; "moveFailed": {  }; "moveIntoSelf": {  }; "notebookMissing": {  }; "pageUnavailable": {  }; "readStoppedMove": {  }; "resourceMoved": {  }; "resourceRolledBack": {  }; "targetFolderMissing": {  }; "writeResourceFailed": {  } };
@@ -41,6 +33,17 @@ declare module "../types" {
     "src/stores/tabs/specialActions.ts#block1:1": { "blankTabFailed": {  } };
     "src/stores/useEditorSplit.ts#block1:1": { "paneMissing": {  } };
     "src/stores/useQuickNote.ts#block1:1": { "quicknoteDraftSeparate": {  }; "quicknoteNewer": {  }; "quicknoteRecovered": {  }; "quicknoteRecoveredDetail": {  } };
+    "src/window.tsx#block1:1": { "unavailable": {  } };
+    "src/windows/views/ConfirmWindow.tsx#block1:1": { "cancel": {  }; "esc": {  }; "phraseHint": {  }; "windowTitle": {  } };
+    "src/windows/views/FullscreenPreviewWindow.tsx#messages:1": { "preview": {  }; "unavailable": {  } };
     "src/windows/views/ImageExportWindow.tsx#messages:1": { "title": {  }; "unavailable": {  } };
+    "src/windows/views/NotebookEditWindow.tsx#block1:1": { "askDelete": { "name": string | number }; "askRemove": { "name": string | number }; "back": {  }; "cancel": {  }; "changeIcon": {  }; "confirmDelete": {  }; "confirmRemove": {  }; "dangerHint": {  }; "dangerTitle": {  }; "delete": {  }; "deleteBody": {  }; "deleteTitle": {  }; "editTitle": {  }; "excludeBody": {  }; "excludeTitle": {  }; "intro": {  }; "nameLabel": {  }; "namePlaceholder": {  }; "pageCount": { "count": string | number }; "remove": {  }; "removeBody": {  }; "removeTitle": {  }; "save": {  } };
+    "src/windows/views/PlaceholderWindow.tsx#block1:1": { "ai-setup": {  }; "app-update": {  }; "confirm": {  }; "fullscreen-preview": {  }; "image-export": {  }; "notebook-edit": {  }; "pending": {  }; "recovery-drafts": {  }; "reflection": {  }; "selection-quote": {  } };
+    "src/windows/views/ReflectionWindow.tsx#block1:1": { "title": {  } };
+    "src/windows/views/SelectionQuoteWindow.tsx#block1:1": { "openSource": {  }; "unavailable": {  }; "windowTitle": {  } };
+    "src/windows/views/ai-setup/messages.ts#localMessages:1": { "intro": {  }; "later": {  }; "openSettings": {  }; "save": {  }; "title": {  }; "unavailable": {  } };
+    "src/windows/views/app-update/AppUpdateBody.tsx#block1:1": { "currentVersion": { "version": string | number }; "downloadComplete": {  }; "downloaded": { "percent": string | number }; "downloading": {  }; "keepDownloading": {  }; "noNotes": {  }; "progress": {  }; "releaseNotes": { "version": string | number }; "restartHint": {  }; "restartUpdate": {  }; "restarting": {  }; "showInstaller": {  }; "updateNow": {  } };
+    "src/windows/views/preview/PreviewZoomControls.tsx#messages:1": { "fit": {  }; "zoomIn": {  }; "zoomOut": {  } };
+    "src/windows/views/recovery/RecoveryDraftsBody.tsx#messages:1": { "emptyBody": {  }; "emptyList": {  }; "expired": {  }; "export": {  }; "exportFailed": {  }; "exportStarted": {  }; "list": {  }; "noContent": {  }; "open": {  }; "openSlot": {  }; "pending": { "count": string | number }; "refresh": {  }; "revision": { "value1": string | number; "value2": string | number }; "sourceInternal": {  }; "sourceLocal": {  }; "sourceQuicknote": { "value1": string | number }; "stale": {  }; "targetUnavailable": {  }; "title": {  }; "unavailable": {  } };
   }
 }

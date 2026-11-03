@@ -199,12 +199,10 @@ async function runSafePageWrite(
       clearPendingLocalSaveContent(pageId, pending);
       clearLocalSaveTimers(pageId);
     }
+    // 回滚也是一次需要持久化的编辑，不能留下“内存旧稿、日志新稿”。
     usePages
       .getState()
-      .updatePage(pageId, { content: beforeContent }, { silent: true });
-    usePages.setState((state) => ({
-      dirtyLocalPageIds: { ...state.dirtyLocalPageIds, [pageId]: false },
-    }));
+      .updatePage(pageId, { content: beforeContent }, { recordActivity: false });
   }
 
   return {
