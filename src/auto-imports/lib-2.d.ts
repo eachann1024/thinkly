@@ -32,12 +32,15 @@ declare global {
   const computeSidebarEscapeExpandedIds: typeof import('../lib/sidebarListCollapse').computeSidebarEscapeExpandedIds
   const computeWorkspaceViewportCollapse: typeof import('../lib/workspaceViewport').computeWorkspaceViewportCollapse
   const consumePendingAssociatedMarkdownFiles: typeof import('../lib/openAssociatedMarkdown').consumePendingAssociatedMarkdownFiles
+  const decodeUnsupportedMarkdownForDisk: typeof import('../lib/markdown-raw-guard').decodeUnsupportedMarkdownForDisk
   const deletePageWithUndo: typeof import('../lib/page-delete-actions').deletePageWithUndo
   const deleteWebdavBackup: typeof import('../lib/webdavSync').deleteWebdavBackup
   const documentTextColors: typeof import('../lib/textColors').documentTextColors
   const downloadWebdavBackup: typeof import('../lib/webdavSync').downloadWebdavBackup
   const effectiveSingleTabMode: typeof import('../lib/tabMode').effectiveSingleTabMode
   const encodeUnsupportedMarkdownForEditor: typeof import('../lib/markdown-raw-guard').encodeUnsupportedMarkdownForEditor
+  const ensureFilenameAsTitle: typeof import('../lib/local-title-binding').ensureFilenameAsTitle
+  const extractFirstHeadingText: typeof import('../lib/local-title-binding').extractFirstHeadingText
   const extractFrontmatter: typeof import('../lib/markdown-raw-guard').extractFrontmatter
   const findContainingLocalFolderNotebook: typeof import('../lib/openAssociatedMarkdown').findContainingLocalFolderNotebook
   const formatDualShortcut: typeof import('../lib/onboardingContent').formatDualShortcut
@@ -120,6 +123,7 @@ declare global {
   const restoreLastNoteIfNeeded: typeof import('../lib/workspaceStartup').restoreLastNoteIfNeeded
   const restorePageWithToast: typeof import('../lib/page-delete-actions').restorePageWithToast
   const sameSidebarExpandedIds: typeof import('../lib/sidebarListCollapse').sameSidebarExpandedIds
+  const sanitizeFilenameSegment: typeof import('../lib/local-title-binding').sanitizeFilenameSegment
   const serializeWikiLinkMarkdown: typeof import('../lib/wikiLink').serializeWikiLinkMarkdown
   const setDbStorageItem: typeof import('../lib/storage').setDbStorageItem
   const settingsToastAction: typeof import('../lib/settings-navigation').settingsToastAction
@@ -127,6 +131,7 @@ declare global {
   const shouldCollapseSidebarListOnEscape: typeof import('../lib/sidebarListCollapse').shouldCollapseSidebarListOnEscape
   const shouldPreserveStartupSelection: typeof import('../lib/workspaceStartup').shouldPreserveStartupSelection
   const shouldSuppressSidebarSelect: typeof import('../lib/sidebarPageNavigation').shouldSuppressSidebarSelect
+  const splitFilePath: typeof import('../lib/local-title-binding').splitFilePath
   const stripWikiMarkdownExtension: typeof import('../lib/wikiLink').stripWikiMarkdownExtension
   const subscribePageTitleFocus: typeof import('../lib/page-title-focus').subscribePageTitleFocus
   const testWebdavConnection: typeof import('../lib/webdavSync').testWebdavConnection

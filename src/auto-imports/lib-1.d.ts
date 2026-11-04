@@ -25,8 +25,10 @@ declare global {
   const GOOSE_LOCKED_KEY: typeof import('../lib/local-frontmatter').GOOSE_LOCKED_KEY
   const GOOSE_PINNED_KEY: typeof import('../lib/local-frontmatter').GOOSE_PINNED_KEY
   const GitSyncPreparation: typeof import('../lib/git-sync-preparation').GitSyncPreparation
+  const IMAGE_EXPORT_DEFAULT_WIDTH: typeof import('../lib/imageExport/index').IMAGE_EXPORT_DEFAULT_WIDTH
   const IMAGE_EXPORT_LIVE_PREVIEW_MIN_WIDTH: typeof import('../lib/imageExport/index').IMAGE_EXPORT_LIVE_PREVIEW_MIN_WIDTH
   const IMAGE_EXPORT_OPTIONS_CORNER_MIN_WIDTH: typeof import('../lib/imageExport/index').IMAGE_EXPORT_OPTIONS_CORNER_MIN_WIDTH
+  const IMAGE_EXPORT_WIDTHS: typeof import('../lib/imageExport/index').IMAGE_EXPORT_WIDTHS
   const INTERNAL_ASSET_REF_PREFIXES: typeof import('../lib/internalAssetRef').INTERNAL_ASSET_REF_PREFIXES
   const LEGACY_RELEASES_REPO: typeof import('../lib/appUpdateRelease').LEGACY_RELEASES_REPO
   const LOCAL_FOLDER_EDITOR_CANDIDATES: typeof import('../lib/local-folder-open-apps').LOCAL_FOLDER_EDITOR_CANDIDATES
@@ -41,6 +43,7 @@ declare global {
   const OPEN_DIALOG_SELECTOR: typeof import('../lib/escape-close').OPEN_DIALOG_SELECTOR
   const OPEN_ESCAPE_LAYER_SELECTOR: typeof import('../lib/escape-close').OPEN_ESCAPE_LAYER_SELECTOR
   const OPEN_TOAST_SELECTOR: typeof import('../lib/escape-close').OPEN_TOAST_SELECTOR
+  const ORIGINAL_THEME: typeof import('../lib/imageExport/index').ORIGINAL_THEME
   const PUBLIC_GITHUB_UPDATE_URL: typeof import('../lib/appUpdateRelease').PUBLIC_GITHUB_UPDATE_URL
   const PUBLIC_RELEASES_API_URL: typeof import('../lib/appUpdateRelease').PUBLIC_RELEASES_API_URL
   const PUBLIC_RELEASES_LATEST_URL: typeof import('../lib/appUpdateRelease').PUBLIC_RELEASES_LATEST_URL
@@ -62,6 +65,7 @@ declare global {
   const buildLocalFolderPickerItems: typeof import('../lib/local-folder-target').buildLocalFolderPickerItems
   const buildLocalPageId: typeof import('../lib/local-folder-scanner').buildLocalPageId
   const buildNotebookCardTheme: typeof import('../lib/imageExport/index').buildNotebookCardTheme
+  const buildOriginalCardTheme: typeof import('../lib/imageExport/index').buildOriginalCardTheme
   const buildSinglePageExport: typeof import('../lib/export/index').buildSinglePageExport
   const canClearInstallStage: typeof import('../lib/appUpdateRelease').canClearInstallStage
   const canonicalLocalPath: typeof import('../lib/canonicalLocalPath').canonicalLocalPath
@@ -84,14 +88,13 @@ declare global {
   const copyLocalFolderPagePath: typeof import('../lib/local-folder-file-actions').copyLocalFolderPagePath
   const currentLocalNotebookRoot: typeof import('../lib/currentLocalPagePath').currentLocalNotebookRoot
   const currentLocalPagePath: typeof import('../lib/currentLocalPagePath').currentLocalPagePath
-  const decodeUnsupportedMarkdownForDisk: typeof import('../lib/markdown-raw-guard').decodeUnsupportedMarkdownForDisk
   const deleteLocalMdSnapshot: typeof import('../lib/local-md-snapshot').deleteLocalMdSnapshot
   const describeDiskWriteError: typeof import('../lib/diskWriteError').describeDiskWriteError
   const ensureEditorFontAvailable: typeof import('../lib/fontLoader').ensureEditorFontAvailable
-  const ensureFilenameAsTitle: typeof import('../lib/local-title-binding').ensureFilenameAsTitle
   const ensurePersistentRemoteFont: typeof import('../lib/fontLoader').ensurePersistentRemoteFont
   const exportNotebooks: typeof import('../lib/export/index').exportNotebooks
   const exportPageToImage: typeof import('../lib/imageExport/index').exportPageToImage
+  const exportSafePixelRatio: typeof import('../lib/imageExport/index').exportSafePixelRatio
   const exportSelectionToImage: typeof import('../lib/imageExport/index').exportSelectionToImage
   const exportToHTML: typeof import('../lib/export/index').exportToHTML
   const exportToImage: typeof import('../lib/imageExport/index').exportToImage
@@ -100,7 +103,6 @@ declare global {
   const exportToPDF: typeof import('../lib/export/index').exportToPDF
   const exportToWord: typeof import('../lib/docxExport/index').exportToWord
   const extractAssetReferencesFromMarkdown: typeof import('../lib/local-folder-asset-maintenance').extractAssetReferencesFromMarkdown
-  const extractFirstHeadingText: typeof import('../lib/local-title-binding').extractFirstHeadingText
   const fetchCustomAIModels: typeof import('../lib/ai-provider/index').fetchCustomAIModels
   const fileStorage: typeof import('../lib/fileStorage').fileStorage
   const formatAttachmentSize: typeof import('../lib/fileStorage').formatAttachmentSize
@@ -218,7 +220,6 @@ declare global {
   const runAIText: typeof import('../lib/ai-provider/index').runAIText
   const runAITextStream: typeof import('../lib/ai-provider/index').runAITextStream
   const sanitizeFileName: typeof import('../lib/fileStorage').sanitizeFileName
-  const sanitizeFilenameSegment: typeof import('../lib/local-title-binding').sanitizeFilenameSegment
   const saveBlobAndReveal: typeof import('../lib/export/index').saveBlobAndReveal
   const scanLocalFolderPages: typeof import('../lib/local-folder-scanner').scanLocalFolderPages
   const scanUnreferencedLocalAssets: typeof import('../lib/local-folder-asset-maintenance').scanUnreferencedLocalAssets
@@ -228,7 +229,6 @@ declare global {
   const shouldIgnoreLocalRelativePath: typeof import('../lib/local-folder-scanner').shouldIgnoreLocalRelativePath
   const shouldShowImageExportLivePreview: typeof import('../lib/imageExport/index').shouldShowImageExportLivePreview
   const shouldShowImageExportOptionsCorner: typeof import('../lib/imageExport/index').shouldShowImageExportOptionsCorner
-  const splitFilePath: typeof import('../lib/local-title-binding').splitFilePath
   const stripSystemVolumesDataPrefix: typeof import('../lib/canonicalLocalPath').stripSystemVolumesDataPrefix
   const syncAccentColorCssVars: typeof import('../lib/accentColor').syncAccentColorCssVars
   const toCssFontFamily: typeof import('../lib/fontLoader').toCssFontFamily
@@ -274,7 +274,7 @@ declare global {
   export type { GitSyncPreparation, GitSyncPreparationRequest } from '../lib/git-sync-preparation'
   import('../lib/git-sync-preparation')
   // @ts-ignore
-  export type { CardTheme, CardThemeId, NotebookCardThemeContext, WatermarkConfig } from '../lib/imageExport/index'
+  export type { CardTheme, CardThemeId, ImageExportWidth, NotebookCardThemeContext, WatermarkConfig } from '../lib/imageExport/index'
   import('../lib/imageExport/index')
   // @ts-ignore
   export type { AssetMaintenanceFs, RestoreMissingLocalAssetsResult, UnreferencedLocalAsset } from '../lib/local-folder-asset-maintenance'
