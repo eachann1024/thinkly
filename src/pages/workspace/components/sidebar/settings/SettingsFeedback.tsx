@@ -16,7 +16,7 @@ zh-Hans:
   offline_5d12: "反馈服务没开"
   tooManyImages_0e77: "图片最多 1 张"
   imageTooBig_2b63: "图片不能超过 20MB"
-  videoTooBig_91c4: "视频不能超过 200MB"
+  videoTooBig_91c4: "视频不能超过 95MB"
   removeFile_c0a8: "移除{{name}}"
 en:
   body_2c1e: "Message"
@@ -32,7 +32,7 @@ en:
   offline_5d12: "Feedback service is not running"
   tooManyImages_0e77: "Up to 1 image"
   imageTooBig_2b63: "Each image must be 20MB or smaller"
-  videoTooBig_91c4: "Video must be 200MB or smaller"
+  videoTooBig_91c4: "Video must be 95MB or smaller"
   removeFile_c0a8: "Remove {{name}}"
 ja:
   body_2c1e: "本文"
@@ -48,7 +48,7 @@ ja:
   offline_5d12: "フィードバックサービスが起動していません"
   tooManyImages_0e77: "画像は 1 枚まで"
   imageTooBig_2b63: "画像は 20MB まで"
-  videoTooBig_91c4: "動画は 200MB まで"
+  videoTooBig_91c4: "動画は 95MB まで"
   removeFile_c0a8: "{{name}} を削除"
 `;
 const uiText = createTranslator(localMessages);
@@ -64,7 +64,7 @@ import { cn } from "@/lib/utils";
 
 const endpoint = "https://feedback-api.cooool.top/api/feedback";
 const imageLimit = 20 * 1024 * 1024;
-const videoLimit = 200 * 1024 * 1024;
+const videoLimit = 95 * 1024 * 1024;
 
 export function SettingsFeedback() {
   useLocale();
