@@ -165,3 +165,13 @@ comments.json
 *.wav
 *.mp3
 *.m4a
+
+# Added by maotou cleanup
+tmp/
+.cache/
+*.tmp
+*.dump
+*.har
+debug*
+*.debug
+*.trace
