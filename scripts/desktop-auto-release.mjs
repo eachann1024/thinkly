@@ -107,14 +107,15 @@ function git(root, args) {
 
 export function listCommitsSince(root, sinceSha, untilSha = "HEAD") {
   const log = git(root, [
-    "log", "--no-merges", "--reverse",
-    "--format=%H%x00%an%x00%s%x00%(trailers:key=Release-Note,valueonly,separator=%x20)", `${sinceSha}..${untilSha}`,
+    "log", "--no-merges", "--reverse", "--name-only",
+    "--format=%x1e%H%x00%an%x00%s%x00%(trailers:key=Release-Note,valueonly,separator=%x20)", `${sinceSha}..${untilSha}`,
   ]);
   if (!log) return [];
-  return log.split("\n").filter(Boolean).map((line) => {
-    const [sha, author, subject, releaseNote = ""] = line.split("\x00");
-    const paths = git(root, ["diff-tree", "--no-commit-id", "--name-only", "-r", sha])
-      .split("\n").filter(Boolean);
+  return log.split("\x1e").filter(Boolean).map((record) => {
+    const lines = record.split("\n");
+    const header = lines[0] ?? "";
+    const [sha, author, subject, releaseNote = ""] = header.split("\x00");
+    const paths = lines.slice(1).map((line) => line.trim()).filter(Boolean);
     return { sha, author, subject, releaseNote: releaseNote.trim(), paths };
   });
 }

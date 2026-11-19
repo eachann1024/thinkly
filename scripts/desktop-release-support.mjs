@@ -28,8 +28,20 @@ export function compareVersions(left, right) {
 }
 
 export function getReleases() {
-  return gh(["api", "--paginate", `repos/${REPO}/releases?per_page=100`, "--jq", ".[]"])
-    .split("\n").filter(Boolean).map((line) => JSON.parse(line));
+  // GitHub returns releases newest-first; fetching the latest 100 avoids paginating hundreds of historical releases.
+  return JSON.parse(gh(["api", `repos/${REPO}/releases?per_page=100`]));
+}
+
+export function findReleaseByTag(tag) {
+  try {
+    return JSON.parse(gh(["api", `repos/${REPO}/releases/tags/${encodeURIComponent(tag)}`]));
+  } catch (error) {
+    if (!String(error.stderr).includes("HTTP 404")) throw error;
+  }
+  const found = JSON.parse(gh(["api", `repos/${REPO}/releases?per_page=50`]))
+    .filter((release) => release.tag_name === tag);
+  assert.ok(found.length <= 1, `Multiple releases use tag ${tag}`);
+  return found[0];
 }
 
 export function assertPublishVersion(version, tag, releases) {
@@ -74,6 +86,14 @@ export function verifyReleaseSource(release, tag, sha) {
 }
 
 export function readRepoFile(ref, path) {
+  try {
+    const localHead = execFileSync("git", ["rev-parse", "HEAD"], { cwd: ROOT, encoding: "utf8" }).trim();
+    if (ref === localHead) {
+      return execFileSync("git", ["show", `${ref}:${path}`], { cwd: ROOT, encoding: "utf8", maxBuffer: 20 * 1024 * 1024 });
+    }
+  } catch {
+    // Fall back to GitHub Contents API if ref is not present locally.
+  }
   const encoded = path.split("/").map(encodeURIComponent).join("/");
   const data = JSON.parse(gh(["api", `repos/${REPO}/contents/${encoded}?ref=${encodeURIComponent(ref)}`]));
   assert.equal(data.encoding, "base64", `expected base64 content for ${path}`);

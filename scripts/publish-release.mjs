@@ -13,7 +13,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ensureChangelogSection, setPackageJsonVersion } from "./desktop-auto-release.mjs";
-import { assertPublishVersion, getReleases, gh, publishMetadata, readRepoFile, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
+import { assertPublishVersion, findReleaseByTag, getReleases, gh, publishMetadata, readRepoFile, verifyBuildRecords, verifyReleaseSource } from "./desktop-release-support.mjs";
 import { publishedDownloadMetadata, publishedPayloads, releaseAssets } from "./desktop-download-metadata.mjs";
 import { markedReleaseNotes, versionReleaseNotes } from "./desktop-release-notes.mjs";
 export { createUpdateFeed, createCask, releaseInstallers, releaseAssets } from "./desktop-download-metadata.mjs";
@@ -33,7 +33,7 @@ export function pickRelease(lines, tag) {
 }
 
 function findRelease(tag) {
-  return pickRelease(gh(["api", "--paginate", `repos/${REPO}/releases?per_page=100`, "--jq", ".[]"]), tag);
+  return findReleaseByTag(tag);
 }
 
 async function main() {
