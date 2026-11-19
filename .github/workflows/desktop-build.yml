@@ -140,7 +140,7 @@ jobs:
           path: node_modules
           key: bun-nm-win-${{ runner.arch }}-bun1.3.14-${{ hashFiles('bun.lock') }}
       - name: Cache Bun packages
-        if: matrix.platform != 'win' || steps.win-nm.outputs.cache-hit != 'true'
+        if: matrix.platform != 'win'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: ~/.bun/install/cache
