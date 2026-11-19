@@ -28,8 +28,14 @@ export function compareVersions(left, right) {
 }
 
 export function getReleases() {
-  // GitHub returns releases newest-first; fetching the latest 100 avoids paginating hundreds of historical releases.
-  return JSON.parse(gh(["api", `repos/${REPO}/releases?per_page=100`]));
+  const all = [];
+  for (let page = 1; ; page += 1) {
+    const batch = JSON.parse(gh(["api", `repos/${REPO}/releases?per_page=100&page=${page}`]));
+    if (!Array.isArray(batch) || batch.length === 0) break;
+    all.push(...batch);
+    if (batch.length < 100) break;
+  }
+  return all;
 }
 
 export function findReleaseByTag(tag) {

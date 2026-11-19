@@ -131,16 +131,16 @@ jobs:
         if: matrix.platform == 'win'
         shell: pwsh
         run: |
-          Add-MpPreference -ExclusionPath $env:GITHUB_WORKSPACE, "$env:USERPROFILE\.bun", "$env:LOCALAPPDATA\electron", "$env:LOCALAPPDATA\electron-builder", $env:RUNNER_TEMP -ErrorAction SilentlyContinue
+          Add-MpPreference -ExclusionPath "$env:USERPROFILE\.bun", "$env:LOCALAPPDATA\electron", "$env:LOCALAPPDATA\electron-builder" -ErrorAction SilentlyContinue
       - name: Cache Windows node_modules
         id: win-nm
-        if: matrix.platform == 'win'
+        if: matrix.platform == 'win' && needs.prepare.outputs.publish != 'true'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: node_modules
-          key: bun-nm-win-${{ runner.arch }}-bun1.3.14-${{ hashFiles('bun.lock') }}
+          key: bun-nm-win-${{ runner.arch }}-bun1.3.14-${{ hashFiles('package.json', 'bun.lock') }}
       - name: Cache Bun packages
-        if: matrix.platform != 'win'
+        if: matrix.platform == 'linux'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: ~/.bun/install/cache
@@ -166,9 +166,11 @@ jobs:
       - name: Apply effective release version before packaging
         run: node scripts/apply-desktop-release-plan.mjs
       - name: Install dependencies
-        if: matrix.platform != 'win' || steps.win-nm.outputs.cache-hit != 'true'
+        if: matrix.platform != 'win' || needs.prepare.outputs.publish == 'true' || steps.win-nm.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
       - name: Compile renderer, main, preload, and prepare pack
+        env:
+          CSC_LINK: ${{ needs.prepare.outputs.publish == 'true' && secrets.MAC_CSC_LINK || '' }}
         run: node scripts/run-task.mjs build
       - name: Decide Windows signing
         id: signing
