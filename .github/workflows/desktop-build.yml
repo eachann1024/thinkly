@@ -170,7 +170,7 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Compile renderer, main, preload, and prepare pack
         env:
-          CSC_LINK: ${{ needs.prepare.outputs.publish == 'true' && secrets.MAC_CSC_LINK || '' }}
+          CSC_LINK: ${{ matrix.platform == 'mac' && needs.prepare.outputs.publish == 'true' && secrets.MAC_CSC_LINK || '' }}
         run: node scripts/run-task.mjs build
       - name: Decide Windows signing
         id: signing

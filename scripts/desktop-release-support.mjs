@@ -44,7 +44,7 @@ export function findReleaseByTag(tag) {
   } catch (error) {
     if (!String(error.stderr).includes("HTTP 404")) throw error;
   }
-  const found = JSON.parse(gh(["api", `repos/${REPO}/releases?per_page=50`]))
+  const found = getReleases()
     .filter((release) => release.tag_name === tag);
   assert.ok(found.length <= 1, `Multiple releases use tag ${tag}`);
   return found[0];
