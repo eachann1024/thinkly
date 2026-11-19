@@ -23,34 +23,35 @@ if (!sourcemap) {
   }
 }
 
-await esbuild.build({
-  absWorkingDir: root,
-  entryPoints: [resolve(root, "electron/main/index.ts")],
-  bundle: true,
-  plugins: [createI18nEsbuildPlugin()],
-  platform: "node",
-  target: "node22",
-  format: "esm",
-  banner: {
-    js: 'import { createRequire as __electronCreateRequire } from "node:module"; const require = __electronCreateRequire(import.meta.url);',
-  },
-  outfile: resolve(root, "dist-electron/main/index.js"),
-  external: ["electron"],
-  sourcemap,
-  logLevel: process.env.GOOSE_DEBUG === "1" ? "info" : "silent",
-});
-
-await esbuild.build({
-  absWorkingDir: root,
-  entryPoints: { index: resolve(root, "electron/preload/index.ts"), previewWorker: resolve(root, "electron/preload/previewWorker.ts") },
-  bundle: true,
-  plugins: [createI18nEsbuildPlugin()],
-  platform: "node",
-  target: "node22",
-  format: "cjs",
-  outdir: resolve(root, "dist-electron/preload"),
-  outExtension: { ".js": ".cjs" },
-  external: ["electron"],
-  sourcemap,
-  logLevel: process.env.GOOSE_DEBUG === "1" ? "info" : "silent",
-});
+await Promise.all([
+  esbuild.build({
+    absWorkingDir: root,
+    entryPoints: [resolve(root, "electron/main/index.ts")],
+    bundle: true,
+    plugins: [createI18nEsbuildPlugin()],
+    platform: "node",
+    target: "node22",
+    format: "esm",
+    banner: {
+      js: 'import { createRequire as __electronCreateRequire } from "node:module"; const require = __electronCreateRequire(import.meta.url);',
+    },
+    outfile: resolve(root, "dist-electron/main/index.js"),
+    external: ["electron"],
+    sourcemap,
+    logLevel: process.env.GOOSE_DEBUG === "1" ? "info" : "silent",
+  }),
+  esbuild.build({
+    absWorkingDir: root,
+    entryPoints: { index: resolve(root, "electron/preload/index.ts"), previewWorker: resolve(root, "electron/preload/previewWorker.ts") },
+    bundle: true,
+    plugins: [createI18nEsbuildPlugin()],
+    platform: "node",
+    target: "node22",
+    format: "cjs",
+    outdir: resolve(root, "dist-electron/preload"),
+    outExtension: { ".js": ".cjs" },
+    external: ["electron"],
+    sourcemap,
+    logLevel: process.env.GOOSE_DEBUG === "1" ? "info" : "silent",
+  }),
+]);

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { spawnQuiet } from "./spawn-quiet.mjs";
 
@@ -7,11 +7,10 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const [task, ...args] = process.argv.slice(2);
 const generateColors = ["scripts/generate-text-colors.mjs"];
 const vite = "node_modules/vite/bin/vite.js";
+// Each item is either a single command (array of strings) or a parallel batch (array of commands).
 const build = [
-  generateColors,
-  ["src/lib/vite-stubs/assert-present.mjs"],
-  [vite, "build", ...args],
-  ["scripts/compile-electron.mjs"],
+  [generateColors, ["src/lib/vite-stubs/assert-present.mjs"]],
+  [[vite, "build", ...args], ["scripts/compile-electron.mjs"]],
   ["scripts/prepare-electron-pack.mjs"],
 ];
 
@@ -37,16 +36,52 @@ if (!Object.hasOwn(tasks, task)) {
 
 const env = { ...process.env };
 const quiet = task !== "dev" && process.env.GOOSE_DEBUG !== "1";
-const run = quiet ? spawnQuiet : spawnSync;
 
-for (const command of tasks[task]) {
-  const result = run(process.execPath, command, {
+function runAsync(command) {
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, command, {
+      cwd: root,
+      env,
+      stdio: quiet ? ["inherit", "pipe", "pipe"] : "inherit",
+    });
+    const out = [];
+    const err = [];
+    if (quiet) {
+      child.stdout?.on("data", (chunk) => out.push(chunk));
+      child.stderr?.on("data", (chunk) => err.push(chunk));
+    }
+    child.on("error", (error) => {
+      if (!quiet) console.error(`[${task}] ${command[0]}: ${error.message}`);
+      else console.error(error.message);
+      resolve(1);
+    });
+    child.on("close", (code) => {
+      const status = code ?? 1;
+      if (quiet && status !== 0) {
+        if (out.length) process.stderr.write(Buffer.concat(out));
+        if (err.length) process.stderr.write(Buffer.concat(err));
+      }
+      resolve(status);
+    });
+  });
+}
+
+const runSync = quiet ? spawnQuiet : spawnSync;
+
+for (const step of tasks[task]) {
+  if (Array.isArray(step[0])) {
+    const statuses = await Promise.all(step.map((command) => runAsync(command)));
+    const failed = statuses.find((status) => status !== 0);
+    if (failed !== undefined) process.exit(failed);
+    continue;
+  }
+  const result = runSync(process.execPath, step, {
     cwd: root,
     env,
     ...(quiet ? {} : { stdio: "inherit" }),
   });
   if (!quiet && result.error) {
-    console.error(`[${task}] ${command[0]}: ${result.error.message}`);
+    console.error(`[${task}] ${step[0]}: ${result.error.message}`);
   }
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
