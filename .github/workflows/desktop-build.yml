@@ -187,11 +187,11 @@ jobs:
       - name: Build installers and checksums
         if: steps.signing.outputs.enabled != 'true'
         env:
-          CSC_LINK: ${{ needs.prepare.outputs.publish == 'true' && secrets.MAC_CSC_LINK || '' }}
-          CSC_KEY_PASSWORD: ${{ needs.prepare.outputs.publish == 'true' && secrets.MAC_CSC_KEY_PASSWORD || '' }}
-          APPLE_ID: ${{ needs.prepare.outputs.publish == 'true' && secrets.APPLE_ID || '' }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ needs.prepare.outputs.publish == 'true' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
-          APPLE_TEAM_ID: ${{ needs.prepare.outputs.publish == 'true' && secrets.APPLE_TEAM_ID || '' }}
+          CSC_LINK: ${{ matrix.platform == 'mac' && needs.prepare.outputs.publish == 'true' && secrets.MAC_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ matrix.platform == 'mac' && needs.prepare.outputs.publish == 'true' && secrets.MAC_CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ matrix.platform == 'mac' && needs.prepare.outputs.publish == 'true' && secrets.APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ matrix.platform == 'mac' && needs.prepare.outputs.publish == 'true' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ matrix.platform == 'mac' && needs.prepare.outputs.publish == 'true' && secrets.APPLE_TEAM_ID || '' }}
         run: node scripts/build-ci-installers.mjs ${{ matrix.platform }} ${{ matrix.arch }}
       - name: Build unpacked Windows app for signing
         if: steps.signing.outputs.enabled == 'true'
