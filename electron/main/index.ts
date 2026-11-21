@@ -11,6 +11,7 @@ import { registerHotkeys, unregisterAllHotkeys } from "./hotkeys";
 import { closeAllWatchers, registerIpcHandlers } from "./ipc";
 import { startAutomaticUpdates } from "./appUpdate";
 import { acknowledgeMacInstall } from "./updates/install";
+import { migrateToBlock } from "./blockMigration";
 import {
   enqueueMarkdownPathsFromArgv,
   flushQueuedMarkdownOpenPaths,
@@ -96,6 +97,10 @@ function startApp(): void {
 
   app.whenReady().then(async () => {
     await acknowledgeMacInstall();
+    if (await migrateToBlock()) {
+      app.exit(0);
+      return;
+    }
     markStartup("language-init-start");
     await initializeLanguage();
     setLanguageSnapshot(getLanguageSnapshot());
