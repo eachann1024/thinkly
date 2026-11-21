@@ -77,6 +77,23 @@ function stripPackJunk(dir) {
 
 stripPackJunk(pack);
 
+const blockPayload = process.env.BLOCK_MIGRATION_PAYLOAD ? resolve(process.env.BLOCK_MIGRATION_PAYLOAD) : "";
+if (blockPayload) {
+  const target = resolve(pack, "block-migration");
+  mkdirSync(target, { recursive: true });
+  const payloads = readdirSync(blockPayload).filter((name) => /^block-(macos-(arm64|x64)\.dmg|windows-x64-setup\.exe)$/.test(name));
+  if (!payloads.length) throw new Error(`No Block installers found in ${blockPayload}`);
+  for (const name of payloads) cpSync(resolve(blockPayload, name), resolve(target, name));
+  writeFileSync(resolve(target, "blank.html"), "<!doctype html><meta charset=\"utf-8\"><title></title>\n");
+}
+const blockResources = (pattern) => blockPayload ? `
+  extraResources:
+    - from: block-migration
+      to: block-migration
+      filter:
+        - blank.html
+        - "${pattern}"` : "";
+
 for (const file of ["LICENSE", "THIRD-PARTY-NOTICES.txt"]) {
   cpSync(resolve(root, file), resolve(pack, file));
 }
@@ -139,6 +156,7 @@ files:
   - "!dmg-assets/**"
   - "!mac-adhoc-sign.cjs"
   - "!set-file-icon.swift"
+  - "!block-migration/**"
 fileAssociations:
   - ext: md
     name: Markdown
@@ -172,7 +190,7 @@ mac:
       arch:
         - arm64
   # 只改压缩包文件名。.app 仍由 productName 决定。CI 只打 Apple 芯片 arm64。
-  artifactName: Thinkly-\${version}-\${arch}-mac.\${ext}
+  artifactName: Thinkly-\${version}-\${arch}-mac.\${ext}${blockResources("*.dmg")}
 dmg:
   artifactName: Thinkly-\${version}-\${arch}.\${ext}
   title: Thinkly
@@ -202,6 +220,7 @@ win:
     - target: nsis
       arch:
         - x64
+${blockResources("*.exe").replace(/^\n/, "")}
 nsis:
   include: installer.nsh
   oneClick: false
